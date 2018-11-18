@@ -105,26 +105,8 @@ void re_escape(char s[], char t[])
 
 int main()
 {
-	char c;
-	char ch[1000];
-	char s[1000] = { '\0' };
-	char m[1000] = { '\0' };
-	int i = 0;
-	printf("«Î ‰»Î“ª∂Œ”¢Œƒ\n");
-	while ((c = getchar()) != EOF)
-	{
-		ch[i] = c;
-		i++;
-	}
-	ch[i] = '\0';
+	int a[7] = { 1, 2, 3, 4 };
+	printf("%d", strlen(a));
 
-	re_escape(ch, m);
-	printf("Last:\n");
-
-	for (i = 0; m[i] != '\0'; i++)
-	{
-		putchar(m[i]);
-
-	}
 	return 0;
 }
