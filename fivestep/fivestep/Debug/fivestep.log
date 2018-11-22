@@ -1,1 +1,31 @@
-﻿  fivestep.vcxproj -> E:\coding\C_homework\fivestep\Debug\fivestep.exe
+﻿  minimax.c
+e:\coding\c_homework\fivestep\fivestep\minimax.c(13): warning C4028: 形参 8 与声明不同
+e:\coding\c_homework\fivestep\fivestep\minimax.c(31): warning C4013: “system”未定义；假设外部返回 int
+e:\coding\c_homework\fivestep\fivestep\minimax.c(148): warning C4013: “abs”未定义；假设外部返回 int
+e:\coding\c_homework\fivestep\fivestep\minimax.c(148): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\fivestep\fivestep\minimax.c(149): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\fivestep\fivestep\minimax.c(622): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\fivestep\fivestep\minimax.c(623): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\fivestep\fivestep\minimax.c(986): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\fivestep\fivestep\minimax.c(987): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\fivestep\fivestep\minimax.c(419): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(338): note: 参见“strncpy”的声明
+e:\coding\c_homework\fivestep\fivestep\minimax.c(420): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(338): note: 参见“strncpy”的声明
+e:\coding\c_homework\fivestep\fivestep\minimax.c(463): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(338): note: 参见“strncpy”的声明
+e:\coding\c_homework\fivestep\fivestep\minimax.c(494): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(338): note: 参见“strncpy”的声明
+e:\coding\c_homework\fivestep\fivestep\minimax.c(502): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(338): note: 参见“strncpy”的声明
+e:\coding\c_homework\fivestep\fivestep\minimax.c(839): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(338): note: 参见“strncpy”的声明
+e:\coding\c_homework\fivestep\fivestep\minimax.c(840): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(338): note: 参见“strncpy”的声明
+e:\coding\c_homework\fivestep\fivestep\minimax.c(882): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(338): note: 参见“strncpy”的声明
+e:\coding\c_homework\fivestep\fivestep\minimax.c(910): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(338): note: 参见“strncpy”的声明
+e:\coding\c_homework\fivestep\fivestep\minimax.c(917): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(338): note: 参见“strncpy”的声明
+  fivestep.vcxproj -> E:\coding\C_homework\fivestep\Debug\fivestep.exe

@@ -7,7 +7,7 @@
 //此为去掉哈希的版本，用来对比哈希的那个版本是否正常
 long int Minimax2(char board[][17][3], int step_count,
 	bool my_turn, bool ai_first,
-	int floor, int coordinate[], long int best_score_of_upper[], int priority[][26][2], bool not_in_the_same_branch[],
+	int floor, int coordinate[], long int best_score_of_upper[], int priority[][30][2], bool not_in_the_same_branch[],
 	unsigned long long hashValue, unsigned long long ZobristTable[15][15][2], unsigned long long hashing_value2[depth_of_hashing][3],
 	int fatal_priority[][32][2], long int fatal_best_score_of_upper[], bool fatal_not_in_the_same_branch[])
 {
@@ -26,7 +26,7 @@ long int Minimax2(char board[][17][3], int step_count,
 	//下面是在建立ai先手、回合数与“是否是我方回合”的关系
 
 	//下面这个条件语句是用来打断点进行单步调试用的，正常工作的时候要注释掉
-	if (coordinate[0] == 4 && coordinate[1] == 13 && floor == FLOOR)
+	if (coordinate[0] == 7 && coordinate[1] == 9 && floor == FLOOR)
 	{
 		system("pause");
 	}
@@ -74,12 +74,12 @@ long int Minimax2(char board[][17][3], int step_count,
 
 
 			//下面这个双层的for循环是在测试的时候输出的，正式使用的时候可以关掉
-
+			/*
 			if (coordinate[0] == 4 && coordinate[1] == 13)
 			{
 				for (int test_raw = 0; test_raw < 10; test_raw++)
 				{
-					for (int test_raw2 = 0; test_raw2 < 26; test_raw2++)
+					for (int test_raw2 = 0; test_raw2 < 30; test_raw2++)
 					{
 
 						printf("%d,", priority[test_raw][test_raw2][0]);
@@ -89,7 +89,7 @@ long int Minimax2(char board[][17][3], int step_count,
 					printf("\n");
 				}
 			}
-
+			*/
 
 
 
@@ -166,8 +166,8 @@ long int Minimax2(char board[][17][3], int step_count,
 											best_score = temp_score;
 											best_raw = raw;
 											best_column = column;
-											//best_coordinate[0] = raw;
-												//best_coordinate[1] = column;
+											best_coordinate[0] = raw;
+											best_coordinate[1] = column;
 										}
 										/*
 										if ((best_score < best_score_of_upper[floor]) && not_in_the_same_branch[floor])//剪枝
@@ -297,8 +297,8 @@ long int Minimax2(char board[][17][3], int step_count,
 											best_score = temp_score;
 											best_raw = raw;
 											best_column = column;
-											//best_coordinate[0] = raw;
-												//best_coordinate[1] = column;
+											best_coordinate[0] = raw;
+											best_coordinate[1] = column;
 										}
 										/*
 										if ((best_score > best_score_of_upper[floor]) && not_in_the_same_branch[floor])//剪枝
@@ -399,7 +399,7 @@ long int Minimax2(char board[][17][3], int step_count,
 
 
 				bool initialized = false;//false表示best_score还没有被赋值过
-				for (int a = 0; a < 26; a++)
+				for (int a = 0; a < 30; a++)
 				{
 
 					not_in_the_same_branch[floor - 1] = true;//判断是否在同一分支中，以免误剪枝
@@ -536,7 +536,7 @@ long int Minimax2(char board[][17][3], int step_count,
 			{
 				for (int test_raw = 0; test_raw < 10; test_raw++)
 				{
-					for (int test_raw2 = 0; test_raw2 < 26; test_raw2++)
+					for (int test_raw2 = 0; test_raw2 < 30; test_raw2++)
 					{
 
 						printf("%d,", priority[test_raw][test_raw2][0]);
@@ -820,7 +820,7 @@ long int Minimax2(char board[][17][3], int step_count,
 
 
 				bool initialized = false;//false表示best_score还没有被赋值过
-				for (int a = 0; a < 26; a++)
+				for (int a = 0; a < 30; a++)
 				{
 					not_in_the_same_branch[floor - 1] = true;
 					int raw = priority[FLOOR - floor][a][0];

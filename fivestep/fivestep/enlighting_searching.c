@@ -7,7 +7,7 @@
 
 //启发式搜索，按照优先级顺序，对分支进行排序，提高剪枝速度
 //见https://github.com/lihongxun945/gobang/blob/master/src/ai/board.js
-bool before_evaluation(char board[][17][3], int priority[][26][2], int floor,
+bool before_evaluation(char board[][17][3], int priority[][30][2], int floor,
 	int step_count, bool my_turn)
 //step_count及其后面的几个形参是用来给evaluation的
 {
@@ -206,7 +206,7 @@ bool before_evaluation(char board[][17][3], int priority[][26][2], int floor,
 						find_opponent_CapFour3 = true;
 					}
 				}
-				else if (my_value >= Gapped_Three)
+				else if (my_value >= Gapped_Three)//跳活三和活三放一块了
 				{
 					if (!find_three1)//如果第一个活三的位置是空的
 					{//第21，22，23属于三个活三的坐标，也就是20,21,22号位
@@ -293,7 +293,7 @@ bool before_evaluation(char board[][17][3], int priority[][26][2], int floor,
 
 
 
-int before_evaluation_ver2(char board[][17][3], int priority[][26][2], int floor,
+int before_evaluation_ver2(char board[][17][3], int priority[][30][2], int floor,
 	int step_count, bool my_turn)
 	//step_count及其后面的几个形参是用来给evaluation的
 {
@@ -329,7 +329,10 @@ int before_evaluation_ver2(char board[][17][3], int priority[][26][2], int floor
 	bool find_opponent_three1 = false;
 	bool find_opponent_three2 = false;
 	bool find_opponent_three3 = false;
-	
+	bool find_Capped_three1 = false;
+	bool find_Capped_three2 = false;
+	bool find_opponent_Capped_three1 = false;
+	bool find_opponent_Capped_three2 = false;
 	
 	int status = 0;//发现我方连五直接返回
 	//0表示当前棋局正常
@@ -546,6 +549,37 @@ int before_evaluation_ver2(char board[][17][3], int priority[][26][2], int floor
 					}
 				}
 
+				else if (my_value >= Capped_Three)
+				{
+					if (!find_Capped_three1)
+					{
+						priority[FLOOR - floor][26][0] = my_raw;
+						priority[FLOOR - floor][26][1] = my_column;
+						find_Capped_three1 = true;
+					}
+					else if (!find_Capped_three2)
+					{
+						priority[FLOOR - floor][27][0] = my_raw;
+						priority[FLOOR - floor][27][1] = my_column;
+						find_Capped_three2 = true;
+					}
+				}
+				else if (opponent_value >= Capped_Three)
+				{
+					if (!find_opponent_Capped_three1)
+					{
+						priority[FLOOR - floor][28][0] = my_raw;
+						priority[FLOOR - floor][28][1] = my_column;
+						find_opponent_Capped_three1 = true;
+					}
+					else if (!find_opponent_Capped_three2)
+					{
+						priority[FLOOR - floor][29][0] = my_raw;
+						priority[FLOOR - floor][29][1] = my_column;
+						find_opponent_Capped_three2 = true;
+					}
+				}
+
 			}
 
 			if (find_five
@@ -573,7 +607,11 @@ int before_evaluation_ver2(char board[][17][3], int priority[][26][2], int floor
 				&& find_opponent_three3
 				&& find_three1
 				&& find_three2
-				&& find_three3)
+				&& find_three3
+				&& find_Capped_three1
+				&& find_Capped_three2
+				&& find_opponent_Capped_three1
+				&& find_opponent_Capped_three2)
 			{
 				//printf("进入了status = %d的情况\n", status);
 				//system("pause");
