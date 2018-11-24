@@ -1,4 +1,4 @@
-#define FLOOR 5
+#define FLOOR 1
 #define FLOOR_VCX 3
 //每次更改FLOOR，需要将board.c中的priority, best_score_of_upper, not_in_the_same_branch这三个数组的大小改一下
 #define Consecutive_Five 10000000//连五
@@ -18,6 +18,13 @@
 5. ●_●_●
 6. ○_●●●_○
 */
+//下面将不同眠三区分一下
+#define Capped_Two_one 9000//○●●_●_的眠三
+#define Capped_One_Two 9500//○●_●●_
+#define Gapped_Two_one 7000//●●__●
+#define Gapped_One_One_One 6000//●_●_●
+#define Capped_Capped_Three 5000//
+
 #define Open_two 1000//连二
 #define depth_of_hashing 100000
 void DrawBoard(char board[][17][3], int i, long int value, int mode_choice, int coordinate[], int step_count);
@@ -26,7 +33,7 @@ bool judgement(char board[][17][3], int step_count);
 long int evaluation(char board[][17][3], int step_count, bool my_turn, int raw, int column);
 void get_coordinate(int coordinate[], char board[][17][3], int step_count);
 void chess_play_ver2(char board[][17][3], int step_count, int coordinate[]);
-long int Minimax2(char board[][17][3], int step_count, bool my_turn, bool ai_first, int floor, int coordinate[], long int best_score_of_upper[], int priority[][26][2], bool not_in_the_same_branch[], unsigned long long hashValue, unsigned long long ZobristTable[15][15][2], unsigned long long hashing_value2[depth_of_hashing][3], int fatal_priority[][32][2], long int fatal_best_score_of_upper[], bool fatal_not_in_the_same_branch[]);
+long int Minimax2(char board[][17][3], int step_count, bool my_turn, bool ai_first, int floor, int coordinate[], long int best_score_of_upper[], int priority[][30][2], bool not_in_the_same_branch[], unsigned long long hashValue, unsigned long long ZobristTable[15][15][2], unsigned long long hashing_value2[depth_of_hashing][3], int fatal_priority[][32][2], long int fatal_best_score_of_upper[], bool fatal_not_in_the_same_branch[]);
 void auto_play(char board[][17][3], char chess[], char opponent_chess[], int coordinate[]);
 bool verify_coordinate(char board[][17][3], int raw, int column, char chess, char opponent_chess);
 bool before_evaluation(char board[][17][3], int priority[][30][2], int floor, int step_count, bool my_turn);
@@ -43,3 +50,5 @@ unsigned long long computeHash(char board2[15][17][3], unsigned long long Zobris
 long int Searching_Hashing(unsigned long long hashing_value2[][3], unsigned long long ZobristTable[15][15][2], int step_count, unsigned long long hashValue, bool my_turn, long temp_score, bool write);
 void init_genrand64(unsigned long long seed);
 int before_evaluation_ver2(char board[][17][3], int priority[][30][2], int floor, int step_count, bool my_turn);
+void quick_sort(int temp_priority[][3], int l, int r);
+int before_evaluation_ver3(char board[][17][3], int priority_ver2[][2], int floor, int step_count, bool my_turn, char **chess_pointer);
