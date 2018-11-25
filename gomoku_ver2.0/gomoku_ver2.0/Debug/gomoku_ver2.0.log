@@ -1,0 +1,11 @@
+﻿  minimax.c
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(109): warning C4013: “abs”未定义；假设外部返回 int
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(109): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(110): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(317): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(318): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(496): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(497): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(536): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(537): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+  gomoku_ver2.0.vcxproj -> E:\coding\C_homework\gomoku_ver2.0\Debug\gomoku_ver2.0.exe

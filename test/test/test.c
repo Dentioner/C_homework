@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<string.h>
 
 void re_escape(char s[], char t[])
 {//将s中的转义字符隐藏起来
@@ -103,10 +104,34 @@ void re_escape(char s[], char t[])
 	p[index] = '\0';
 }
 
+void myprintf(int array[], int length)
+{
+	int index = 0;
+	for (index = 0; index < length; index++)
+	{
+		printf("%d,", array[index]);
+	}
+	printf("\n");
+}
+
+
 int main()
 {
-	int a[7] = { 1, 2, 3, 4 };
-	printf("%d", strlen(a));
+	int a[10][2] = { {1,2},{3,4},{5,6},{7,8} };
+	int b[4][2];
+	memcpy(b, a, sizeof(b));
+	a[2][1] = 1551;
 
+	for (int i = 0; i < 10; i++)
+	{
+		myprintf(a[i], 2);
+	}
+	for (int i = 0; i < 4; i++)
+	{
+		myprintf(b[i], 2);
+	}
+
+
+	printf("%d", sizeof(a));
 	return 0;
 }

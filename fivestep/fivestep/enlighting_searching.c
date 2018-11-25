@@ -793,3 +793,116 @@ void quick_sort(int temp_priority[][3], int l, int r)//¶Ô¶şÎ¬Êı×é½øĞĞ½µĞòµÄ¿ìËÙÅ
 		quick_sort(temp_priority, i + 1, r);
 	}
 }
+
+
+int before_evaluation_ver4(char board[][17][3], int priority_ver2[][2], int floor,
+	int step_count, bool my_turn)
+{
+	//char * temp = *chess_pointer;
+	long int temp_priority[255][3] = { 0 };//ÏÈ½«255¸öµãµÄÆÀ·ÖÈ«²¿´æÏÂÀ´
+	int my_raw = 0;
+	int my_column = 0;
+	char black[2] = "¡ğ";
+	char white[2] = "¡ñ";
+	int index = 0;
+	int i = 0;
+	long int my_value = 0;
+	long int opponent_value = 0;
+	long int temp_value = 0;
+
+	int status = 0;
+	//0±íÊ¾µ±Ç°Æå¾ÖÕı³£
+	//1±íÊ¾µ±Ç°Æå¾Ö·¢ÏÖÁ¬Îå£¬²»·ÖµĞÎÒ
+
+	for (my_raw = 0; my_raw < 15; my_raw++)
+	{
+		for (my_column = 1; my_column < 16; my_column++)
+		{
+			if ((strncmp(board[my_raw][my_column], black, 2) != 0)
+				&& (strncmp(board[my_raw][my_column], white, 2) != 0))
+			{
+				/*
+				if (temp != *chess_pointer)
+				{
+					printf(" ");
+				}
+				*/
+				my_value = evaluation(board, step_count, my_turn, my_raw, my_column);
+				my_value = labs(my_value);
+				opponent_value = evaluation(board, step_count + 1, !my_turn, my_raw, my_column);
+				opponent_value = labs(opponent_value);
+				temp_value = my_value * 1.5 + opponent_value * 0.75;
+				if (temp_value != 0)
+				{
+					if (my_value >= Consecutive_Five)//·¢ÏÖÎÒ·½Á¬Îå£¬·µ»Ø
+					{
+						status = 1;
+						return status;
+					}
+					else if (opponent_value >= Consecutive_Five)//·¢ÏÖ¶Ô·½Á¬Îå£¬·µ»Ø
+					{
+						status = 1;
+						return status;
+					}
+					else//·ñÔò¼ÌĞøÂ¼ÈëÊı¾İ
+					{
+
+
+						temp_priority[index][0] = temp_value;
+						temp_priority[index][1] = my_raw;
+						temp_priority[index][2] = my_column;
+						index++;
+					}
+				}
+			}
+		}
+	}
+
+	//²âÊÔ£¬´òÓ¡tempÊı×é
+	/*
+	for (int ceshi = 0; ceshi < 255; ceshi++)
+	{
+		printf("ÆÀ·Ö£º%d£¬×ø±ê£º(%d, %d)\n", temp_priority[ceshi][0], temp_priority[ceshi][1], temp_priority[ceshi][2]);
+	}
+	system("pause");
+	*/
+
+	quick_sort(temp_priority, 0, index - 1);//indexµÄÖµÊÇµÚÒ»¸ö0ÔªËØµÄÎ»ÖÃ
+	//²âÊÔ£¬´òÓ¡tempÊı×é
+	/*
+	for (int ceshi = 0; ceshi < 255; ceshi++)
+	{
+		printf("ÆÀ·Ö£º%d£¬×ø±ê£º(%d, %d)\n", temp_priority[ceshi][0], temp_priority[ceshi][1], temp_priority[ceshi][2]);
+	}
+	system("pause");
+	*/
+
+
+	for (i = 0; (i < index) && (i < 10); i++)//½«tempµÄÇ°Ê®´óµÄ×ø±ê¸³Öµ¸øÍâÃæµÄprioriy_ver2
+	{
+		priority_ver2[i][0] = temp_priority[i][1];
+		priority_ver2[i][1] = temp_priority[i][2];
+		/*
+		if (temp != *chess_pointer)
+		{
+			printf(" ");
+		}
+		*/
+	}
+
+	//²âÊÔ£¬´òÓ¡priorityÊı×é
+	/*
+	for (int ceshi = 0; ceshi < 10; ceshi++)
+	{
+		printf("×ø±ê£º(%d, %d)\n", priority_ver2[ceshi][0], priority_ver2[ceshi][1]);
+	}
+	system("pause");
+	*/
+	/*
+	if (temp != *chess_pointer)
+	{
+		printf(" ");
+	}
+	*/
+	return status;
+}
