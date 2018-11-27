@@ -169,6 +169,10 @@ int indexOf(int chess)
 	{
 		return 0;
 	}
+	else
+	{
+		return 2;
+	}
 }
 
 void initTable()

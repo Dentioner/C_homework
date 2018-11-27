@@ -1,4 +1,4 @@
-#define FLOOR 5
+#define FLOOR 1
 #define FLOOR2 6//新加
 #define FLOOR_VCX 3
 //每次更改FLOOR，需要将board.c中的priority, best_score_of_upper, not_in_the_same_branch这三个数组的大小改一下
@@ -46,3 +46,6 @@ long int Minimax2(int step_count, bool my_turn, bool ai_first, int floor);
 int before_evaluation_ver3(int priority_ver2[][2], int floor, int step_count, bool my_turn);
 void quick_sort(int temp_priority[][3], int l, int r);
 long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor);
+long int deepest(int step_count, bool my_turn);
+void shallowest(int step_count, bool my_turn);
+void init_best_score_of_upper();

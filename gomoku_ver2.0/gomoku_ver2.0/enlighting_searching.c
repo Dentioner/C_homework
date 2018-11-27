@@ -44,7 +44,7 @@ int before_evaluation_ver3(int priority_ver2[][2], int floor, int step_count, bo
 				my_value = labs(my_value);
 				opponent_value = evaluation(step_count + 1, !my_turn, my_raw, my_column);
 				opponent_value = labs(opponent_value);
-				temp_value = my_value * 1.5 + opponent_value * 0.75;
+				temp_value = my_value * 1.1 + opponent_value * 0.9;
 				if (temp_value != 0)
 				{
 					if (my_value >= Consecutive_Five)//发现我方连五，返回

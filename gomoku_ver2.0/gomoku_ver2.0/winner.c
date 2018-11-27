@@ -30,7 +30,8 @@ bool judgement(int step_count)
 				&& (board[i][j + 1] == chess)
 				&& (board[i][j + 2] == chess)
 				&& (board[i][j + 3] == chess)
-				&& (board[i][j + 4] == chess))
+				&& (board[i][j + 4] == chess)
+				&& (j + 4 <= 14))
 			{
 				continue_playing = false;
 			}
@@ -39,7 +40,8 @@ bool judgement(int step_count)
 				&& (board[i + 1][j] == chess)
 				&& (board[i + 2][j] == chess)
 				&& (board[i + 3][j] == chess)
-				&& (board[i + 4][j] == chess))
+				&& (board[i + 4][j] == chess)
+				&& (i + 4 <= 14))
 			{
 				continue_playing = false;
 			}
@@ -48,7 +50,8 @@ bool judgement(int step_count)
 				&& (board[i + 1][j + 1] == chess)
 				&& (board[i + 2][j + 2] == chess)
 				&& (board[i + 3][j + 3] == chess)
-				&& (board[i + 4][j + 4] == chess))
+				&& (board[i + 4][j + 4] == chess)
+				&& (i + 4 <= 14) && (j + 4 <= 14))
 			{
 				continue_playing = false;
 			}
@@ -58,7 +61,8 @@ bool judgement(int step_count)
 				&& (board[i + 1][j - 1] == chess)
 				&& (board[i + 2][j - 2] == chess)
 				&& (board[i + 3][j - 3] == chess)
-				&& (board[i + 4][j - 4] == chess))
+				&& (board[i + 4][j - 4] == chess)
+				&& (i + 4 <= 14) && (j - 4 >= 0))
 			{
 				continue_playing = false;
 			}

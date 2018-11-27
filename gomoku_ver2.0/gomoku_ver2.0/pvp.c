@@ -36,7 +36,7 @@ void pvp(long int value)
 	DrawBoard(value, 1, -1);
 	while (continue_playing)
 	{
-		get_coordinate(coordinate, board, step_count);
+		get_coordinate(step_count);
 		roaming = board[coordinate[0]][coordinate[1]];
 		chess_play_ver2(step_count);
 

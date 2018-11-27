@@ -17,6 +17,8 @@ extern unsigned long long hashing_value2[depth_of_hashing][3];
 
 long int best_score_of_upper[11] = { -infinity , infinity , -infinity, infinity , -infinity, infinity, -infinity , infinity , -infinity, infinity, -infinity };//给minimax里面的剪枝用的
 //注意上下这两个数组的编号问题。floor是从11往0递归的，因此要保持最后一个元素不变。
+long int best_score_of_upper_ver2[12] = { infinity ,-infinity , infinity , -infinity, infinity , -infinity, infinity, -infinity , infinity , -infinity, infinity, -infinity };//给minimax里面的剪枝用的
+
 bool not_in_the_same_branch[11] = { true, true, true, true, true, true, true, true, true, true, true };
 long int value_for_board = 0;//新加
 
@@ -26,7 +28,8 @@ void pve(long int value)
 	//PVE
 
 	int ai_choice = 0;
-	int floor = FLOOR;//搜索层数
+	//int floor = FLOOR;//搜索层数
+	int floor = FLOOR2;
 	int chess;
 	int opponent_chess;
 	int step_count = 0; //游戏下了几个子的计数
@@ -80,7 +83,13 @@ void pve(long int value)
 			double end_time, cost_time;
 			if (step_count > 2)
 			{
-				value = Minimax2(step_count, my_turn, ai_first, floor);
+				if (coordinate[0] == 6 && coordinate[1] == 11 && floor == FLOOR2)//测试
+				{
+					printf("\n");
+				}
+				//value = Minimax2(step_count, my_turn, ai_first, floor);
+				init_best_score_of_upper();
+				value = Minimax3(step_count, my_turn, ai_first, floor);
 				if ((coordinate[0] == 0) && (coordinate[1] == 1))
 				{
 					auto_play(chess, opponent_chess);
@@ -301,4 +310,21 @@ void auto_play(int chess, int opponent_chess)
 		}
 	}
 
+}
+
+void init_best_score_of_upper()
+{
+	//best_score_of_upper_ver2[12] = { infinity ,-infinity , infinity , -infinity, infinity , -infinity, infinity, -infinity , infinity , -infinity, infinity, -infinity };//给minimax里面的剪枝用的
+	int i = 0;
+	for (i = 0; i < 12; i++)
+	{
+		if (i % 2 == 0)
+		{
+			best_score_of_upper_ver2[i] = infinity;
+		}
+		else
+		{
+			best_score_of_upper_ver2[i] = -infinity;
+		}
+	}
 }
