@@ -609,7 +609,7 @@ long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
 	//下面是在建立ai先手、回合数与“是否是我方回合”的关系
 
 	//下面这个条件语句是用来打断点进行单步调试用的，正常工作的时候要注释掉
-	if (coordinate[0] == 6 && coordinate[1] == 11 && floor == FLOOR2)
+	if (coordinate[0] == 11 && coordinate[1] == 10 && floor == FLOOR2)
 	{
 		printf("\n");
 	}
