@@ -4,11 +4,13 @@
 //每次更改FLOOR，需要将board.c中的priority, best_score_of_upper, not_in_the_same_branch这三个数组的大小改一下
 #define Consecutive_Five 10000000//连五
 #define Open_Four 1000000//活四
+#define Double_Chess 800000//双活三、双冲四、冲四活三等禁手棋
 #define Open_Three 100000//活三
 #define Gapped_Two_Two 100050//下面三种都是冲四，这种是两个2子之间缺了一个子  ●●？●●
 #define Capped_Four 100050//这种冲四是一头被堵住的冲四   ○●●●●和●●●●○
 #define Gapped_Four 100050//这种冲四是一个活三与一个单独的子之间空了一格  ●?●●●
 #define Gapped_Three 99950//这种是跳活三，是即将形成活四的三  ●？●●
+#define Double_Gapped_Three 100020//这种是双跳活三_●_●●_●_，分值应该比活三高一点，比冲四低一点
 #define Capped_Three 10000//眠三, 最多只能形成冲四  ○●●●
 //需要连二的打分吗？ 大概1000分
 /*眠三一共有这几种形态：

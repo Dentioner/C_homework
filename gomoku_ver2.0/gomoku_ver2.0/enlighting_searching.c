@@ -8,6 +8,8 @@ extern int board[15][15];
 extern int w;//白棋
 extern int b;//黑棋
 extern int coordinate[2];
+extern bool show_me_the_array;//测试用
+
 //启发式搜索，按照优先级顺序，对分支进行排序，提高剪枝速度
 //见https://github.com/lihongxun945/gobang/blob/master/src/ai/board.js
 int before_evaluation_ver3(int priority_ver2[][2], int floor, int step_count, bool my_turn)
@@ -25,7 +27,7 @@ int before_evaluation_ver3(int priority_ver2[][2], int floor, int step_count, bo
 
 	int status = 0;
 	//0表示当前棋局正常
-	//1表示当前棋局发现连五，不分敌我
+	//1表示当前棋局发现我方连五，不包括对方连五
 
 	for (my_raw = 0; my_raw < 15; my_raw++)
 	{
@@ -52,11 +54,13 @@ int before_evaluation_ver3(int priority_ver2[][2], int floor, int step_count, bo
 						status = 1;
 						return status;
 					}
+					/*
 					else if (opponent_value >= Consecutive_Five)//发现对方连五，返回
 					{
 						status = 1;
 						return status;
 					}
+					*/
 					else//否则继续录入数据
 					{
 
@@ -82,16 +86,17 @@ int before_evaluation_ver3(int priority_ver2[][2], int floor, int step_count, bo
 
 	quick_sort(temp_priority, 0, index - 1);//index的值是第一个0元素的位置
 	//测试，打印temp数组
-	/*
-	if (coordinate[0] == 11 && coordinate[1] == 10)
+	
+	if (show_me_the_array)
 	{
-		for (int ceshi = 0; ceshi < 255; ceshi++)
+		
+		for (int ceshi = 0; ceshi < 10; ceshi++)
 		{
 			printf("评分：%d，坐标：(%d, %d)\n", temp_priority[ceshi][0], temp_priority[ceshi][1], temp_priority[ceshi][2]);
 		}
-		system("pause");
+		//system("pause");
 	}
-	*/
+	
 
 	for (i = 0; (i < index) && (i < 10); i++)//将temp的前十大的坐标赋值给外面的prioriy_ver2
 	{

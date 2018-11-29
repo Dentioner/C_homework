@@ -18,7 +18,7 @@ extern long int best_score_of_upper[11];
 extern bool not_in_the_same_branch[11];
 extern long int value_for_board;//新加
 extern long int best_score_of_upper_ver2[12];
-
+bool show_me_the_array =  false;//测试用的布尔值
 
 long int Minimax2(int step_count, bool my_turn, bool ai_first, int floor)
 {
@@ -597,7 +597,7 @@ long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
 	int chess;
 	int opponent_chess;
 	//bool final_hit = false;
-	int status = 0;
+	int status = 0; 
 	//0表示当前棋局正常
 	//1表示当前棋局发现我方连五
 	//2表示当前棋局没有发现我方连五，但是发现对方连五
@@ -609,9 +609,10 @@ long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
 	//下面是在建立ai先手、回合数与“是否是我方回合”的关系
 
 	//下面这个条件语句是用来打断点进行单步调试用的，正常工作的时候要注释掉
-	if (coordinate[0] == 11 && coordinate[1] == 10 && floor == FLOOR2)
+	if (coordinate[0] == 8 && coordinate[1] == 3 && floor == FLOOR2)
 	{
 		printf("\n");
+		show_me_the_array = true;
 	}
 
 
@@ -807,13 +808,15 @@ long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
 			status = before_evaluation_ver3(priority_ver2, floor, step_count, my_turn);
 			//final_hit = before_evaluation(board, priority, floor, step_count, my_turn);
 
-
+			
 			if (status != 0)//my_turn为假的时候不可能是最外层，因此少了一个if语句
 			{
-				best_score = deepest(step_count, my_turn);
+				//best_score = deepest(step_count, my_turn);
+				return -infinity;
 			}
+			/*
 			else
-			{
+			{*/
 
 
 				bool initialized = false;//false表示best_score还没有被赋值过
@@ -924,12 +927,12 @@ long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
 
 				}
 
-			}
+			//}
 		}
 
 	}
 	//最底层↓
-	else
+	else 
 	{
 		best_score = deepest(step_count, my_turn);
 	}
@@ -1001,7 +1004,7 @@ long int deepest(int step_count, bool my_turn)//最底层搜索单独提取出来了
 			}
 		}
 	}
-	
+	 
 	
 
 	return board_score;

@@ -16,7 +16,8 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 	//先确认这把是白子下还是黑子下
 	int chess;
 	int opponent_chess;
-
+	//int state = 0;//状态计数器，用于查找双活三双冲四之类的
+	bool state[4] = { false, false, false, false };//状态记录，分为4个方向，分别是水平，竖直，右上左下，左上右下
 
 	long int value = 0;
 	if (step_count % 2)//如果step数不能整除2的话，就是白子
@@ -479,12 +480,14 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw][column + 4] == chess))
 		{
 			value += Gapped_Four;
+			state[0] = true;
 		}
 		else if ((board[raw][column + 4] != chess)
 			&& (board[raw][column + 4] != opponent_chess)
 			&& (column + 4 <= 14))
 		{
 			value += Open_Three;
+			state[0] = true;
 		}
 	}
 
@@ -501,12 +504,14 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw][column + 3] == chess))
 		{
 			value += Gapped_Four;
+			state[0] = true;
 		}
 		else if ((board[raw][column + 3] != chess)
 			&& (board[raw][column + 3] != opponent_chess)
 			&& (column + 3 <= 14))
 		{
 			value += Open_Three;
+			state[0] = true;
 		}
 	}
 
@@ -523,12 +528,14 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw][column + 2] == chess))
 		{
 			value += Gapped_Four;
+			state[0] = true;
 		}
 		else if ((board[raw][column + 2] != chess)
 			&& (board[raw][column + 2] != opponent_chess)
 			&& (column + 2 <= 14))
 		{
 			value += Open_Three;
+			state[0] = true;
 		}
 	}
 
@@ -543,6 +550,7 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column - 5 >= 0))
 	{
 		value += Gapped_Four;
+		state[0] = true;
 	}
 
 	//竖直方向
@@ -559,12 +567,32 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw + 4][column] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[2] || state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 		}
 		else if ((board[raw + 4][column] != chess)
 			&& (board[raw + 4][column] != opponent_chess)
 			&& (raw + 4 <= 14))
 		{
 			value += Open_Three;
+			if (state[0] || state[2] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 		}
 	}
 
@@ -581,12 +609,32 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw + 3][column] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[2] || state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 		}
 		else if ((board[raw + 3][column] != chess)
 			&& (board[raw + 3][column] != opponent_chess)
 			&& (raw + 3 <= 14))
 		{
 			value += Open_Three;
+			if (state[0] || state[2] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 		}
 	}
 
@@ -604,12 +652,32 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw + 2][column] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[2] || state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 		}
 		else if ((board[raw + 2][column] != chess)
 			&& (board[raw + 2][column] != opponent_chess)
 			&& (raw + 2 <= 14))
 		{
 			value += Open_Three;
+			if (state[0] || state[2] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 		}
 	}
 
@@ -624,6 +692,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 5 >= 0))
 	{
 		value += Gapped_Four;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Gapped_Four;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 	//右上左下的情况
@@ -640,12 +718,32 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw - 4][column + 4] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[1] || state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 		}
 		else if ((board[raw - 4][column + 4] != chess)
 			&& (board[raw - 4][column + 4] != opponent_chess)
 			&& (raw - 4 >= 0) && (column + 4 <= 14))
 		{
 			value += Open_Three;
+			if (state[0] || state[1] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 		}
 	}
 
@@ -662,12 +760,32 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw - 3][column + 3] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[1] || state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 		}
 		else if ((board[raw - 3][column + 3] != chess)
 			&& (board[raw - 3][column + 3] != opponent_chess)
 			&& (raw - 3 >= 0) && (column + 3 <= 14))
 		{
 			value += Open_Three;
+			if (state[0] || state[1] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 		}
 	}
 
@@ -685,12 +803,32 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw - 2][column + 2] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[1] || state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 		}
 		else if ((board[raw - 2][column + 2] != chess)
 			&& (board[raw - 2][column + 2] != opponent_chess)
 			&& (raw - 2 >= 0) && (column + 2 <= 14))
 		{
 			value += Open_Three;
+			if (state[0] || state[1] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 		}
 	}
 
@@ -705,6 +843,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 5 <= 14) && (column - 5 >= 0))
 	{
 		value += Gapped_Four;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Gapped_Four;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	//左上右下方向
@@ -721,12 +869,32 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw + 4][column + 4] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[1] || state[2])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 		}
 		else if ((board[raw + 4][column + 4] != chess)
 			&& (board[raw + 4][column + 4] != opponent_chess)
 			&& (raw + 4 <= 14) && (column + 4 <= 14))
 		{
 			value += Open_Three;
+			if (state[0] || state[1] || state[2])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 		}
 	}
 
@@ -743,12 +911,32 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw + 3][column + 3] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[1] || state[2])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 		}
 		else if ((board[raw + 3][column + 3] != chess)
 			&& (board[raw + 3][column + 3] != opponent_chess)
 			&& (raw + 3 <= 14) && (column + 3 <= 14))
 		{
 			value += Open_Three;
+			if (state[0] || state[1] || state[2])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 		}
 	}
 
@@ -766,12 +954,32 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw + 2][column + 2] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[1] || state[2])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 		}
 		else if ((board[raw + 2][column + 2] != chess)
 			&& (board[raw + 2][column + 2] != opponent_chess)
 			&& (raw + 2 <= 14) && (column + 2 <= 14))
 		{
 			value += Open_Three;
+			if (state[0] || state[1] || state[2])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 		}
 	}
 
@@ -786,6 +994,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 5 >= 0) && (column - 5 >= 0))
 	{
 		value += Gapped_Four;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Gapped_Four;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 	//活三和冲四中的一种一起判断
@@ -808,18 +1026,45 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw][column - 4] == chess))
 		{
 			value += Gapped_Four;
+			if (state[1] || state[2] || state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[0] = true;
+			}
+			else
+			{
+				state[0] = true;
+			}
 		}
 		else if ((board[raw][column - 4] != chess)
 			&& (board[raw][column - 4] != opponent_chess)
 			&& (column - 4 >= 0))
 		{
 			value += Open_Three;
+			if (state[1] || state[2] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[0] = true;
+			}
+			else
+			{
+				state[0] = true;
+			}
 
 			if ((board[raw][column + 2] != chess)
 				&& (board[raw][column + 2] != opponent_chess)
 				&& (column + 2 <= 14))
 			{
 				value -= Open_Three;
+				if (state[1] || state[2] || state[3])
+				{
+					value += Open_Three;
+					value -= Double_Chess;
+					state[0] = true;
+				}
+				
 			}
 		}
 	}
@@ -838,17 +1083,44 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw][column - 3] == chess))
 		{
 			value += Gapped_Four;
+			if (state[1] || state[2] || state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[0] = true;
+			}
+			else
+			{
+				state[0] = true;
+			}
 		}
 		else if ((board[raw][column - 3] != chess)
 			&& (board[raw][column - 3] != opponent_chess)
 			&& (column - 3 >= 0))
 		{
 			value += Open_Three;
+			if (state[1] || state[2] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[0] = true;
+			}
+			else
+			{
+				state[0] = true;
+			}
 			if ((board[raw][column + 3] != chess)
 				&& (board[raw][column + 3] != opponent_chess)
 				&& (column + 3 <= 14))
 			{
 				value -= Open_Three;
+				if (state[1] || state[2] || state[3])
+				{
+					value += Open_Three;
+					value -= Double_Chess;
+					state[0] = true;
+				}
+				
 			}
 		}
 	}
@@ -867,17 +1139,44 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw][column - 2] == chess))
 		{
 			value += Gapped_Four;
+			if (state[1] || state[2] || state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[0] = true;
+			}
+			else
+			{
+				state[0] = true;
+			}
 		}
 		else if ((board[raw][column - 2] != chess)
 			&& (board[raw][column - 2] != opponent_chess)
 			&& (column - 2 >= 0))
 		{
 			value += Open_Three;
+			if (state[1] || state[2] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[0] = true;
+			}
+			else
+			{
+				state[0] = true;
+			}
 			if ((board[raw][column + 4] != chess)
 				&& (board[raw][column + 4] != opponent_chess)
 				&& (column + 4 <= 14))
 			{
 				value -= Open_Three;
+				if (state[1] || state[2] || state[3])
+				{
+					value += Open_Three;
+					value -= Double_Chess;
+					state[0] = true;
+				}
+				
 			}
 		}
 	}
@@ -894,6 +1193,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 5 <= 14))
 	{
 		value += Gapped_Four;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Gapped_Four;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 
 	//竖直方向
@@ -911,17 +1220,43 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw - 4][column] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0]||state[2]||state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 		}
 		else if ((board[raw - 4][column] != chess)
 			&& (board[raw - 4][column] != opponent_chess)
 			&& (raw - 4 >= 0))
 		{
 			value += Open_Three;
+			if (state[0] || state[2] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 			if ((board[raw + 2][column] != chess)
 				&& (board[raw + 2][column] != opponent_chess)
 				&& (raw + 2 <= 14))
 			{
 				value -= Open_Three;
+				if (state[0] || state[2] || state[3])
+				{
+					value += Open_Three;
+					value -= Double_Chess;
+					state[1] = true;
+				}
 			}
 		}
 	}
@@ -940,17 +1275,43 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw - 3][column] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[2] || state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 		}
 		else if ((board[raw - 3][column] != chess)
 			&& (board[raw - 3][column] != opponent_chess)
 			&& (raw - 3 >= 0))
 		{
 			value += Open_Three;
+			if (state[0] || state[2] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 			if ((board[raw + 3][column] != chess)
 				&& (board[raw + 3][column] != opponent_chess)
 				&& (raw + 3 <= 14))
 			{
 				value -= Open_Three;
+				if (state[0] || state[2] || state[3])
+				{
+					value += Open_Three;
+					value -= Double_Chess;
+					state[1] = true;
+				}
 			}
 		}
 	}
@@ -969,17 +1330,43 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw - 2][column] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[2] || state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 		}
 		else if ((board[raw - 2][column] != chess)
 			&& (board[raw - 2][column] != opponent_chess)
 			&& (raw - 2 >= 0))
 		{
 			value += Open_Three;
+			if (state[0] || state[2] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 			if ((board[raw + 4][column] != chess)
 				&& (board[raw + 4][column] != opponent_chess)
 				&& (raw + 4 <= 14))
 			{
 				value -= Open_Three;
+				if (state[0] || state[2] || state[3])
+				{
+					value += Open_Three;
+					value -= Double_Chess;
+					state[1] = true;
+				}
 			}
 		}
 	}
@@ -996,6 +1383,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 5 <= 14))
 	{
 		value += Gapped_Four;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Gapped_Four;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 
@@ -1015,17 +1412,43 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw + 4][column - 4] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[1] || state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 		}
 		else if ((board[raw + 4][column - 4] != chess)
 			&& (board[raw + 4][column - 4] != opponent_chess)
 			&& (raw + 4 <= 14) && (column - 4 >= 0))
 		{
 			value += Open_Three;
+			if (state[0] || state[1] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 			if ((board[raw - 2][column + 2] != chess)
 				&& (board[raw - 2][column + 2] != opponent_chess)
 				&& (raw - 2 >= 0) && (column + 2 <= 14))
 			{
 				value -= Open_Three;
+				if (state[0] || state[1] || state[3])
+				{
+					value += Open_Three;
+					value -= Double_Chess;
+					state[2] = true;
+				}
 			}
 		}
 	}
@@ -1045,17 +1468,43 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw + 3][column - 3] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[1] || state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 		}
 		else if ((board[raw + 3][column - 3] != chess)
 			&& (board[raw + 3][column - 3] != opponent_chess)
 			&& (raw + 3 <= 14) && (column - 3 >= 0))
 		{
 			value += Open_Three;
+			if (state[0] || state[1] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 			if ((board[raw - 3][column + 3] != chess)
 				&& (board[raw - 3][column + 3] != opponent_chess)
 				&& (raw - 3 >= 0) && (column + 3 <= 14))
 			{
 				value -= Open_Three;
+				if (state[0] || state[1] || state[3])
+				{
+					value += Open_Three;
+					value -= Double_Chess;
+					state[2] = true;
+				}
 			}
 		}
 	}
@@ -1074,17 +1523,43 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw + 2][column - 2] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[1] || state[3])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 		}
 		else if ((board[raw + 2][column - 2] != chess)
 			&& (board[raw + 2][column - 2] != opponent_chess)
 			&& (raw + 2 <= 14) && (column - 2 >= 0))
 		{
 			value += Open_Three;
+			if (state[0] || state[1] || state[3])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 			if ((board[raw - 4][column + 4] != chess)
 				&& (board[raw - 4][column + 4] != opponent_chess)
 				&& (raw - 4 >= 0) && (column + 4 <= 14))
 			{
 				value -= Open_Three;
+				if (state[0] || state[1] || state[3])
+				{
+					value += Open_Three;
+					value -= Double_Chess;
+					state[2] = true;
+				}
 			}
 		}
 	}
@@ -1101,6 +1576,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 5 >= 0) && (column + 5 <= 14))
 	{
 		value += Gapped_Four;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Gapped_Four;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	//左上右下方向
@@ -1118,17 +1603,43 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw - 4][column - 4] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[1] || state[2])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 		}
 		else if ((board[raw - 4][column - 4] != chess)
 			&& (board[raw - 4][column - 4] != opponent_chess)
 			&& (raw - 4 >= 0) && (column - 4 >= 0))
 		{
 			value += Open_Three;
+			if (state[0] || state[1] || state[2])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 			if ((board[raw + 2][column + 2] != chess)
 				&& (board[raw + 2][column + 2] != opponent_chess)
 				&& (raw + 2 <= 14) && (column + 2 <= 14))
 			{
 				value -= Open_Three;
+				if (state[0] || state[1] || state[2])
+				{
+					value += Open_Three;
+					value -= Double_Chess;
+					state[3] = true;
+				}
 			}
 		}
 	}
@@ -1147,17 +1658,43 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw - 3][column - 3] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[1] || state[2])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 		}
 		else if ((board[raw - 3][column - 3] != chess)
 			&& (board[raw - 3][column - 3] != opponent_chess)
 			&& (raw - 3 >= 0)&(column - 3 >= 0))
 		{
 			value += Open_Three;
+			if (state[0] || state[1] || state[2])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 			if ((board[raw + 3][column + 3] != chess)
 				&& (board[raw + 3][column + 3] != opponent_chess)
 				&& (raw + 3 <= 14) && (column + 3 <= 14))
 			{
 				value -= Open_Three;
+				if (state[0] || state[1] || state[2])
+				{
+					value += Open_Three;
+					value -= Double_Chess;
+					state[3] = true;
+				}
 			}
 		}
 	}
@@ -1177,17 +1714,43 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		if ((board[raw - 2][column - 2] == chess))
 		{
 			value += Gapped_Four;
+			if (state[0] || state[1] || state[2])
+			{
+				value -= Gapped_Four;
+				value += Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 		}
 		else if ((board[raw - 2][column - 2] != chess)
 			&& (board[raw - 2][column - 2] != opponent_chess)
 			&& (raw - 2 >= 0)&(column - 2 >= 0))
 		{
 			value += Open_Three;
+			if (state[0] || state[1] || state[2])
+			{
+				value -= Open_Three;
+				value += Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 			if ((board[raw + 4][column + 4] != chess)
 				&& (board[raw + 4][column + 4] != opponent_chess)
 				&& (raw + 4 <= 14) && (column + 4 <= 14))
 			{
 				value -= Open_Three;
+				if (state[0] || state[1] || state[2])
+				{
+					value += Open_Three;
+					value -= Double_Chess;
+					state[3] = true;
+				}
 			}
 		}
 	}
@@ -1204,6 +1767,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 5 <= 14) && (column + 5 <= 14))
 	{
 		value += Gapped_Four;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Gapped_Four;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 
@@ -1219,6 +1792,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 4 <= 14))
 	{
 		value += Gapped_Two_Two;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 
 	//●?_●●
@@ -1230,6 +1813,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 3 <= 14) && (column - 1 >= 0)) 
 	{
 		value += Gapped_Two_Two;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 
 	//●●_?●
@@ -1241,6 +1834,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 1 <= 14) && (column - 3 >= 0))
 	{
 		value += Gapped_Two_Two;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 
 	//●●_●?
@@ -1252,6 +1855,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column - 4 >= 0))
 	{
 		value += Gapped_Two_Two;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 
 	//竖直方向
@@ -1264,6 +1877,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 4 <= 14))
 	{
 		value += Gapped_Two_Two;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 	//●?_●●
@@ -1275,6 +1898,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 3 <= 14) && (raw - 1 >= 0))
 	{
 		value += Gapped_Two_Two;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 	//●●_?●
@@ -1286,6 +1919,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 1 <= 14) && (raw - 3 >= 0))
 	{
 		value += Gapped_Two_Two;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 	//●●_●?
@@ -1297,6 +1940,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 4 >= 0))
 	{
 		value += Gapped_Two_Two;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 	//右上左下方向
@@ -1309,6 +1962,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 4 >= 0) && (column + 4 <= 14))
 	{
 		value += Gapped_Two_Two;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	//●?_●●
@@ -1321,6 +1984,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 3 <= 14) && (column - 1 >= 0))
 	{
 		value += Gapped_Two_Two;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	//●●_?●
@@ -1333,6 +2006,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 1 <= 14) && (column - 3 >= 0))
 	{
 		value += Gapped_Two_Two;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	//●●_●?
@@ -1345,6 +2028,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column - 4 >= 0))
 	{
 		value += Gapped_Two_Two;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	//左上右下方向
@@ -1358,6 +2051,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 4 <= 14))
 	{
 		value += Gapped_Two_Two;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 	//●?_●●
@@ -1370,6 +2073,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 3 <= 14) && (column - 1 >= 0))
 	{
 		value += Gapped_Two_Two;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 	//●●_?●
@@ -1382,6 +2095,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 1 <= 14) && (column - 3 >= 0))
 	{
 		value += Gapped_Two_Two;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 	//●●_●?
@@ -1394,6 +2117,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column - 4 >= 0))
 	{
 		value += Gapped_Two_Two;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Gapped_Two_Two;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 
@@ -1409,6 +2142,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 4 <= 14))
 	{
 		value += Capped_Four;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 
 	// ○●?●●_
@@ -1422,6 +2165,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column - 1 >= 0))
 	{
 		value += Capped_Four;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 	// ○●●?●_
 	if ((board[raw][column - 1] == chess)
@@ -1434,6 +2187,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column - 2 >= 0))
 	{
 		value += Capped_Four;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 	// ○●●●?_
 	if ((board[raw][column - 1] == chess)
@@ -1446,6 +2209,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column - 3 >= 0))
 	{
 		value += Capped_Four;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 	//竖直方向
 		// ○?●●●_
@@ -1458,6 +2231,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 4 <= 14))
 	{
 		value += Capped_Four;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 	// ○●?●●_
@@ -1472,6 +2255,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 1 >= 0))
 	{
 		value += Capped_Four;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 	// ○●●?●_
 	if ((board[raw - 1][column] == chess)
@@ -1484,6 +2277,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 2 >= 0))
 	{
 		value += Capped_Four;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 	// ○●●●?_
 	if ((board[raw - 1][column] == chess)
@@ -1496,6 +2299,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 3 >= 0))
 	{
 		value += Capped_Four;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 	//右上左下方向
@@ -1509,6 +2322,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 4 >= 0) && (column + 4 <= 14))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	// ○●?●●_
@@ -1522,6 +2345,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 1 <= 14) && (column - 1 >= 0))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	// ○●●?●_
@@ -1535,6 +2368,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 2 <= 14) && (column - 2 >= 0))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	// ○●●●?_
@@ -1548,6 +2391,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 3 <= 14) && (column - 3 >= 0))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	//左上右下方向
@@ -1561,6 +2414,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 4 <= 14) && (column + 4 <= 14))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 	// ○●?●●_
@@ -1574,6 +2437,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 1 >= 0) && (column - 1 >= 0))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 	// ○●●?●_
@@ -1587,6 +2460,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 2 >= 0) && (column - 2 >= 0))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 	// ○●●●?_
@@ -1600,6 +2483,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 3 >= 0) && (column - 3 >= 0))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 	//冲四的另外一种方向_●●●●○
@@ -1614,6 +2507,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column - 4 >= 0))
 	{
 		value += Capped_Four;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 	// _●●?●○
 	if ((board[raw][column + 1] == chess)
@@ -1626,6 +2529,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 1 <= 14))
 	{
 		value += Capped_Four;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 
 	// _●?●●○
@@ -1639,6 +2552,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 2 <= 14))
 	{
 		value += Capped_Four;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
  
 	// _?●●●○
@@ -1652,6 +2575,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 3 <= 14))
 	{
 		value += Capped_Four;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 
 	//竖直方向
@@ -1665,6 +2598,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 4 >= 0))
 	{
 		value += Capped_Four;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 	// _●●?●○
@@ -1678,6 +2621,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 1 <= 14))
 	{
 		value += Capped_Four;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 	// _●?●●○
@@ -1691,6 +2644,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 2 <= 14))
 	{
 		value += Capped_Four;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 	// _?●●●○
@@ -1704,6 +2667,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 3 <= 14))
 	{
 		value += Capped_Four;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 	//右上左下方向
@@ -1717,6 +2690,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 4 <= 14) && (column - 4 >= 0))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	// _●●?●○
@@ -1730,6 +2713,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 1 >= 0) && (column + 1 <= 14))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	// _●?●●○
@@ -1743,6 +2736,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 2 >= 0) && (column + 2 <= 14))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	// _?●●●○
@@ -1756,6 +2759,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 3 >= 0) && (column + 3 <= 14))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	//左上右下方向
@@ -1769,6 +2782,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 4 >= 0) && (column - 4 >= 0))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 	// _●●?●○
@@ -1782,6 +2805,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 1 <= 14) && (column + 1 <= 14))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 
@@ -1796,6 +2829,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 2 <= 14) && (column + 2 <= 14))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 	// _?●●●○
@@ -1809,11 +2852,21 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 3 <= 14) && (column + 3 <= 14))
 	{
 		value += Capped_Four;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Capped_Four;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 
 	//检查跳活三Gapped_Three  _●_●●_与_●●_●_
-
+		//要排除_●_●●_●_这种情况
 		//水平方向
 		//先检查_●_●●_
 			//_?_●●_
@@ -1871,6 +2924,14 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column - 4 >= 0) && (column + 1 <= 14))
 	{
 		value += Gapped_Three;
+		//排除_●_●●_?_
+		if ((board[raw][column - 5] == chess)
+			&& (board[raw][column - 6] != chess)
+			&& (board[raw][column - 6] != opponent_chess)
+			&& (column - 6 >= 0))
+		{
+			value -= Gapped_Three;
+		}
 	}
 
 	//_●?_●_
@@ -1885,6 +2946,15 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 3 <= 14) && (column - 2 >= 0))
 	{
 		value += Gapped_Three;
+		//排除_●_●?_●_
+		if ((board[raw][column - 3] == chess)
+			&& (board[raw][column - 4] != chess)
+			&& (board[raw][column - 4] != opponent_chess)
+			&& (column - 4 >= 0))
+		{
+			value -= Gapped_Three;
+		}
+
 	}
 
 	//_?●_●_
@@ -1899,6 +2969,14 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 4 <= 14) && (column - 1 >= 0))
 	{
 		value += Gapped_Three;
+		//排除_●_?●_●_
+		if ((board[raw][column - 2] == chess)
+			&& (board[raw][column - 3] != chess)
+			&& (board[raw][column - 3] != opponent_chess)
+			&& (column - 3 >= 0))
+		{
+			value -= Gapped_Three;
+		}
 	}
 
 
@@ -1959,6 +3037,14 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 4 >= 0) && (raw + 1 <= 14))
 	{
 		value += Gapped_Three;
+		//排除_●_●●_?_
+		if ((board[raw - 5][column] == chess)
+			&& (board[raw - 6][column] != chess)
+			&& (board[raw - 6][column] != opponent_chess)
+			&& (raw - 6 >= 0))
+		{
+			value -= Gapped_Three;
+		}
 	}
 
 	//_●?_●_
@@ -1973,6 +3059,14 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 3 <= 14) && (raw - 2 >= 0))
 	{
 		value += Gapped_Three;
+		//排除_●_●?_●_
+		if ((board[raw - 3][column] == chess)
+			&& (board[raw - 4][column] != chess)
+			&& (board[raw - 4][column] != opponent_chess)
+			&& (raw - 4 >= 0))
+		{
+			value -= Gapped_Three;
+		}
 	}
 
 	//_?●_●_
@@ -1987,6 +3081,14 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 4 <= 14) && (raw - 1 >= 0))
 	{
 		value += Gapped_Three;
+		//排除_●_?●_●_
+		if ((board[raw - 2][column] == chess)
+			&& (board[raw - 3][column] != chess)
+			&& (board[raw - 3][column] != opponent_chess)
+			&& (raw - 3 >= 0))
+		{
+			value -= Gapped_Three;
+		}
 	}
 
 	//右上左下方向
@@ -2046,6 +3148,15 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 4 <= 14) && (column - 4 >= 0) && (raw - 1 >= 0) && (column + 1 <= 14))
 	{
 		value += Gapped_Three;
+		//排除_●_●●_?_
+		if ((board[raw + 5][column - 5] == chess)
+			&& (board[raw + 6][column - 6] != chess)
+			&& (board[raw + 6][column - 6] != opponent_chess)
+			&& (column - 6 >= 0)
+			&& (raw + 6 <= 14))
+		{
+			value -= Gapped_Three;
+		}
 	}
 
 	//_●?_●_
@@ -2060,6 +3171,15 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 3 >= 0) && (column + 3 <= 14) && (raw + 2 <= 14) && (column - 2 >= 0))
 	{
 		value += Gapped_Three;
+		//排除_●_●?_●_
+		if ((board[raw + 3][column - 3] == chess)
+			&& (board[raw + 4][column - 4] != chess)
+			&& (board[raw + 4][column - 4] != opponent_chess)
+			&& (column - 4 >= 0)
+			&& (raw + 4 <= 14))
+		{
+			value -= Gapped_Three;
+		}
 	}
 
 	//_?●_●_
@@ -2074,6 +3194,15 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 4 >= 0) && (column + 4 <= 14) && (raw + 1 <= 14) && (column - 1 >= 0))
 	{
 		value += Gapped_Three;
+		//排除_●_?●_●_
+		if ((board[raw + 2][column - 2] == chess)
+			&& (board[raw + 3][column - 3] != chess)
+			&& (board[raw + 3][column - 3] != opponent_chess)
+			&& (column - 3 >= 0)
+			&& (raw + 3 <= 14))
+		{
+			value -= Gapped_Three;
+		}
 	}
 
 	//左上右下方向
@@ -2133,6 +3262,15 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 4 >= 0) && (column - 4 >= 0) && (raw + 1 <= 14) && (column + 1 <= 14))
 	{
 		value += Gapped_Three;
+		//排除_●_●●_?_
+		if ((board[raw - 5][column - 5] == chess)
+			&& (board[raw - 6][column - 6] != chess)
+			&& (board[raw - 6][column - 6] != opponent_chess)
+			&& (column - 6 >= 0)
+			&& (raw - 6 >= 0))
+		{
+			value -= Gapped_Three;
+		}
 	}
 
 	//_●?_●_
@@ -2147,6 +3285,15 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 3 <= 14) && (column + 3 <= 14) && (raw - 2 >= 0) && (column - 2 >= 0))
 	{
 		value += Gapped_Three;
+		//排除_●_●?_●_
+		if ((board[raw - 3][column - 3] == chess)
+			&& (board[raw - 4][column - 4] != chess)
+			&& (board[raw - 4][column - 4] != opponent_chess)
+			&& (column - 4 >= 0)
+			&& (raw - 4 >= 0))
+		{
+			value -= Gapped_Three;
+		}
 	}
 
 	//_?●_●_
@@ -2161,6 +3308,15 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 4 <= 14) && (column + 4 <= 14) && (raw - 1 >= 0) && (column - 1 >= 0))
 	{
 		value += Gapped_Three;
+		//排除_●_?●_●_
+		if ((board[raw - 2][column - 2] == chess)
+			&& (board[raw - 3][column - 3] != chess)
+			&& (board[raw - 3][column - 3] != opponent_chess)
+			&& (column - 3 >= 0)
+			&& (raw - 3 >= 0))
+		{
+			value -= Gapped_Three;
+		}
 	}
 
 	//检查眠三：Capped_Three
