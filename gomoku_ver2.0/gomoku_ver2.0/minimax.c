@@ -609,7 +609,7 @@ long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
 	//下面是在建立ai先手、回合数与“是否是我方回合”的关系
 
 	//下面这个条件语句是用来打断点进行单步调试用的，正常工作的时候要注释掉
-	if (coordinate[0] == 8 && coordinate[1] == 3 && floor == FLOOR2)
+	if (coordinate[0] == 6 && coordinate[1] == 6 && floor == FLOOR2)
 	{
 		printf("\n");
 		show_me_the_array = true;
@@ -665,7 +665,8 @@ long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
 				}
 				else//这种情况是，在某一层（不是最外层）搜到了连五点，那就当做最底层开始搜
 				{
-					best_score = deepest(step_count, my_turn);
+					//best_score = deepest(step_count, my_turn);
+					return infinity;
 				}
 			}
 			else//这种情况是，一般的情况
@@ -789,6 +790,11 @@ long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
 							}
 							if (best_score == infinity)
 							{
+								if (floor == FLOOR2)
+								{
+									coordinate[0] = best_coordinate[0];
+									coordinate[1] = best_coordinate[1];
+								}
 								return best_score;
 							}
 

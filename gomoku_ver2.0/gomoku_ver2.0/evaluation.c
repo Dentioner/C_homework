@@ -2881,6 +2881,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 4 <= 14) && (column - 1 >= 0))
 	{
 		value += Gapped_Three;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 
 	//_¡ñ_?¡ñ_
@@ -2895,6 +2905,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column - 3 >= 0) && (column + 2 <= 14))
 	{
 		value += Gapped_Three;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 
 	//_¡ñ_¡ñ?_
@@ -2909,6 +2929,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column - 4 >= 0) && (column + 1 <= 14))
 	{
 		value += Gapped_Three;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 	}
 
 	//ÔÙ¼ì²é_¡ñ¡ñ_¡ñ_
@@ -2924,6 +2954,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column - 4 >= 0) && (column + 1 <= 14))
 	{
 		value += Gapped_Three;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 		//ÅÅ³ı_¡ñ_¡ñ¡ñ_?_
 		if ((board[raw][column - 5] == chess)
 			&& (board[raw][column - 6] != chess)
@@ -2931,6 +2971,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 			&& (column - 6 >= 0))
 		{
 			value -= Gapped_Three;
+			if (state[1] || state[2] || state[3])
+			{
+				value += Gapped_Three;
+				value -= Double_Chess;
+				state[0] = true;
+			}
+			else
+			{
+				state[0] = true;
+			}
 		}
 	}
 
@@ -2946,6 +2996,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 3 <= 14) && (column - 2 >= 0))
 	{
 		value += Gapped_Three;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 		//ÅÅ³ı_¡ñ_¡ñ?_¡ñ_
 		if ((board[raw][column - 3] == chess)
 			&& (board[raw][column - 4] != chess)
@@ -2953,6 +3013,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 			&& (column - 4 >= 0))
 		{
 			value -= Gapped_Three;
+			if (state[1] || state[2] || state[3])
+			{
+				value += Gapped_Three;
+				value -= Double_Chess;
+				state[0] = true;
+			}
+			else
+			{
+				state[0] = true;
+			}
 		}
 
 	}
@@ -2969,6 +3039,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (column + 4 <= 14) && (column - 1 >= 0))
 	{
 		value += Gapped_Three;
+		if (state[1] || state[2] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[0] = true;
+		}
+		else
+		{
+			state[0] = true;
+		}
 		//ÅÅ³ı_¡ñ_?¡ñ_¡ñ_
 		if ((board[raw][column - 2] == chess)
 			&& (board[raw][column - 3] != chess)
@@ -2976,6 +3056,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 			&& (column - 3 >= 0))
 		{
 			value -= Gapped_Three;
+			if (state[1] || state[2] || state[3])
+			{
+				value += Gapped_Three;
+				value -= Double_Chess;
+				state[0] = true;
+			}
+			else
+			{
+				state[0] = true;
+			}
 		}
 	}
 
@@ -2994,6 +3084,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 4 <= 14) && (raw - 1 >= 0))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 	//_¡ñ_?¡ñ_
@@ -3008,6 +3108,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 3 >= 0) && (raw + 2 <= 14))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 	//_¡ñ_¡ñ?_
@@ -3022,6 +3132,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 4 >= 0) && (raw + 1 <= 14))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 	}
 
 	//ÔÙ¼ì²é_¡ñ¡ñ_¡ñ_
@@ -3037,6 +3157,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 4 >= 0) && (raw + 1 <= 14))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 		//ÅÅ³ı_¡ñ_¡ñ¡ñ_?_
 		if ((board[raw - 5][column] == chess)
 			&& (board[raw - 6][column] != chess)
@@ -3044,6 +3174,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 			&& (raw - 6 >= 0))
 		{
 			value -= Gapped_Three;
+			if (state[0] || state[2] || state[3])
+			{
+				value += Gapped_Three;
+				value -= Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 		}
 	}
 
@@ -3059,6 +3199,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 3 <= 14) && (raw - 2 >= 0))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 		//ÅÅ³ı_¡ñ_¡ñ?_¡ñ_
 		if ((board[raw - 3][column] == chess)
 			&& (board[raw - 4][column] != chess)
@@ -3066,6 +3216,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 			&& (raw - 4 >= 0))
 		{
 			value -= Gapped_Three;
+			if (state[0] || state[2] || state[3])
+			{
+				value += Gapped_Three;
+				value -= Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 		}
 	}
 
@@ -3081,6 +3241,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 4 <= 14) && (raw - 1 >= 0))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[2] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[1] = true;
+		}
+		else
+		{
+			state[1] = true;
+		}
 		//ÅÅ³ı_¡ñ_?¡ñ_¡ñ_
 		if ((board[raw - 2][column] == chess)
 			&& (board[raw - 3][column] != chess)
@@ -3088,6 +3258,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 			&& (raw - 3 >= 0))
 		{
 			value -= Gapped_Three;
+			if (state[0] || state[2] || state[3])
+			{
+				value += Gapped_Three;
+				value -= Double_Chess;
+				state[1] = true;
+			}
+			else
+			{
+				state[1] = true;
+			}
 		}
 	}
 
@@ -3105,6 +3285,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 4 >= 0) && (column + 4 <= 14) && (raw + 1 <= 14) && (column - 1 >= 0))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	//_¡ñ_?¡ñ_
@@ -3119,6 +3309,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 3 <= 14) && (column - 3 >= 0) && (raw - 2 >= 0) && (column + 2 <= 14))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	//_¡ñ_¡ñ?_
@@ -3133,6 +3333,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 4 <= 14) && (column - 4 >= 0) && (raw - 1 >= 0) && (column + 1 <= 14))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 	}
 
 	//ÔÙ¼ì²é_¡ñ¡ñ_¡ñ_
@@ -3148,6 +3358,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 4 <= 14) && (column - 4 >= 0) && (raw - 1 >= 0) && (column + 1 <= 14))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 		//ÅÅ³ı_¡ñ_¡ñ¡ñ_?_
 		if ((board[raw + 5][column - 5] == chess)
 			&& (board[raw + 6][column - 6] != chess)
@@ -3156,6 +3376,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 			&& (raw + 6 <= 14))
 		{
 			value -= Gapped_Three;
+			if (state[0] || state[1] || state[3])
+			{
+				value += Gapped_Three;
+				value -= Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 		}
 	}
 
@@ -3171,6 +3401,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 3 >= 0) && (column + 3 <= 14) && (raw + 2 <= 14) && (column - 2 >= 0))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 		//ÅÅ³ı_¡ñ_¡ñ?_¡ñ_
 		if ((board[raw + 3][column - 3] == chess)
 			&& (board[raw + 4][column - 4] != chess)
@@ -3179,6 +3419,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 			&& (raw + 4 <= 14))
 		{
 			value -= Gapped_Three;
+			if (state[0] || state[1] || state[3])
+			{
+				value += Gapped_Three;
+				value -= Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 		}
 	}
 
@@ -3194,6 +3444,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 4 >= 0) && (column + 4 <= 14) && (raw + 1 <= 14) && (column - 1 >= 0))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[1] || state[3])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[2] = true;
+		}
+		else
+		{
+			state[2] = true;
+		}
 		//ÅÅ³ı_¡ñ_?¡ñ_¡ñ_
 		if ((board[raw + 2][column - 2] == chess)
 			&& (board[raw + 3][column - 3] != chess)
@@ -3202,6 +3462,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 			&& (raw + 3 <= 14))
 		{
 			value -= Gapped_Three;
+			if (state[0] || state[1] || state[3])
+			{
+				value += Gapped_Three;
+				value -= Double_Chess;
+				state[2] = true;
+			}
+			else
+			{
+				state[2] = true;
+			}
 		}
 	}
 
@@ -3219,6 +3489,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 4 <= 14) && (column + 4 <= 14) && (raw - 1 >= 0) && (column - 1 >= 0))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 	//_¡ñ_?¡ñ_
@@ -3233,6 +3513,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 3 >= 0) && (column - 3 >= 0) && (raw + 2 <= 14) && (column + 2 <= 14))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 	//_¡ñ_¡ñ?_
@@ -3247,6 +3537,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 4 >= 0) && (column - 4 >= 0) && (raw + 1 <= 14) && (column + 1 <= 14))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 	}
 
 	//ÔÙ¼ì²é_¡ñ¡ñ_¡ñ_
@@ -3262,6 +3562,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw - 4 >= 0) && (column - 4 >= 0) && (raw + 1 <= 14) && (column + 1 <= 14))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 		//ÅÅ³ı_¡ñ_¡ñ¡ñ_?_
 		if ((board[raw - 5][column - 5] == chess)
 			&& (board[raw - 6][column - 6] != chess)
@@ -3270,6 +3580,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 			&& (raw - 6 >= 0))
 		{
 			value -= Gapped_Three;
+			if (state[0] || state[1] || state[2])
+			{
+				value += Gapped_Three;
+				value -= Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 		}
 	}
 
@@ -3285,6 +3605,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 3 <= 14) && (column + 3 <= 14) && (raw - 2 >= 0) && (column - 2 >= 0))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 		//ÅÅ³ı_¡ñ_¡ñ?_¡ñ_
 		if ((board[raw - 3][column - 3] == chess)
 			&& (board[raw - 4][column - 4] != chess)
@@ -3293,6 +3623,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 			&& (raw - 4 >= 0))
 		{
 			value -= Gapped_Three;
+			if (state[0] || state[1] || state[2])
+			{
+				value += Gapped_Three;
+				value -= Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 		}
 	}
 
@@ -3308,6 +3648,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 		&& (raw + 4 <= 14) && (column + 4 <= 14) && (raw - 1 >= 0) && (column - 1 >= 0))
 	{
 		value += Gapped_Three;
+		if (state[0] || state[1] || state[2])
+		{
+			value -= Gapped_Three;
+			value += Double_Chess;
+			state[3] = true;
+		}
+		else
+		{
+			state[3] = true;
+		}
 		//ÅÅ³ı_¡ñ_?¡ñ_¡ñ_
 		if ((board[raw - 2][column - 2] == chess)
 			&& (board[raw - 3][column - 3] != chess)
@@ -3316,6 +3666,16 @@ long int evaluation(int step_count, bool my_turn, int raw, int column)
 			&& (raw - 3 >= 0))
 		{
 			value -= Gapped_Three;
+			if (state[0] || state[1] || state[2])
+			{
+				value += Gapped_Three;
+				value -= Double_Chess;
+				state[3] = true;
+			}
+			else
+			{
+				state[3] = true;
+			}
 		}
 	}
 
