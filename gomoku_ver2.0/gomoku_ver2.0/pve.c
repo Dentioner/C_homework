@@ -21,7 +21,7 @@ long int best_score_of_upper_ver2[12] = { infinity ,-infinity , infinity , -infi
 
 bool not_in_the_same_branch[11] = { true, true, true, true, true, true, true, true, true, true, true };
 long int value_for_board = 0;//新加
-
+bool ai_first = false;//默认电脑后走
 
 void pve(long int value)
 {
@@ -34,7 +34,7 @@ void pve(long int value)
 	int opponent_chess;
 	int step_count = 0; //游戏下了几个子的计数
 
-	bool ai_first = false;//默认电脑后走
+
 	bool my_turn = true; //这个东西是确认这一步是哪一方下子了
 	bool continue_playing = true; //确认游戏是否继续
 
@@ -89,7 +89,7 @@ void pve(long int value)
 				}
 				//value = Minimax2(step_count, my_turn, ai_first, floor);
 				init_best_score_of_upper();
-				value = Minimax3(step_count, my_turn, ai_first, floor);
+				value = Minimax3(step_count, my_turn,  floor);
 				if ((coordinate[0] == 0) && (coordinate[1] == 1))
 				{
 					auto_play(chess, opponent_chess);
@@ -142,7 +142,7 @@ void pve(long int value)
 			get_coordinate(step_count);
 			//把value和chessplay换过位置了，不知道会怎样
 			roaming = board[coordinate[0]][coordinate[1]];//记录上一步的状态
-			value = evaluation(step_count, my_turn, coordinate[0], coordinate[1]);
+			value = evaluation_ver2(step_count, my_turn, coordinate[0], coordinate[1]);
 			chess_play_ver2(step_count);
 			hashValue ^= ZobristTable[coordinate[0]][coordinate[1]][(step_count % 2)];
 			DrawBoard(value, 2, step_count);

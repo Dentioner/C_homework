@@ -19,6 +19,7 @@ extern bool not_in_the_same_branch[11];
 extern long int value_for_board;//新加
 extern long int best_score_of_upper_ver2[12];
 bool show_me_the_array =  false;//测试用的布尔值
+extern bool ai_first;
 
 long int Minimax2(int step_count, bool my_turn, bool ai_first, int floor)
 {
@@ -82,7 +83,7 @@ long int Minimax2(int step_count, bool my_turn, bool ai_first, int floor)
 			//先将优先的那些点找到并递归
 			//旧的启发式搜索
 			//status = before_evaluation_ver2(board, priority, floor, step_count, my_turn);
-			status = before_evaluation_ver3(priority_ver2, floor, step_count, my_turn);
+			status = before_evaluation_ver4(priority_ver2, floor, step_count, my_turn);
 
 			if (status != 0)
 			{
@@ -108,8 +109,8 @@ long int Minimax2(int step_count, bool my_turn, bool ai_first, int floor)
 						{
 							//temp_score = evaluation(board, step_count, my_turn, raw, column);
 
-							temp_score1 = evaluation(step_count, my_turn, raw, column);
-							temp_score2 = evaluation(step_count + 1, !my_turn, raw, column);
+							temp_score1 = evaluation_ver2(step_count, my_turn, raw, column);
+							temp_score2 = evaluation_ver2(step_count + 1, !my_turn, raw, column);
 
 							temp_score1 = abs(temp_score1) * 1.5;
 							temp_score2 = abs(temp_score2) * 0.75;
@@ -286,7 +287,7 @@ long int Minimax2(int step_count, bool my_turn, bool ai_first, int floor)
 		else
 		{
 			//best_score_of_upper[floor] = 0;
-			status = before_evaluation_ver3(priority_ver2, floor, step_count, my_turn);
+			status = before_evaluation_ver4(priority_ver2, floor, step_count, my_turn);
 			//final_hit = before_evaluation(board, priority, floor, step_count, my_turn);
 
 
@@ -317,8 +318,8 @@ long int Minimax2(int step_count, bool my_turn, bool ai_first, int floor)
 							&& (board[raw][column] != opponent_chess))
 						{
 							//temp_score = evaluation(board, step_count, my_turn, raw, column);
-							temp_score1 = evaluation(step_count, my_turn, raw, column);
-							temp_score2 = evaluation( step_count + 1, !my_turn, raw, column);
+							temp_score1 = evaluation_ver2(step_count, my_turn, raw, column);
+							temp_score2 = evaluation_ver2( step_count + 1, !my_turn, raw, column);
 							temp_score1 = abs(temp_score1) * 1.5;
 							temp_score2 = abs(temp_score2) * 0.75;
 							temp_score = -(temp_score1 + temp_score2);
@@ -495,8 +496,8 @@ long int Minimax2(int step_count, bool my_turn, bool ai_first, int floor)
 					{
 						//temp_score = evaluation(board, step_count, my_turn, raw, column);
 
-						temp_score1 = evaluation(step_count, my_turn, raw, column);
-						temp_score2 = evaluation(step_count + 1, !my_turn, raw, column);
+						temp_score1 = evaluation_ver2(step_count, my_turn, raw, column);
+						temp_score2 = evaluation_ver2(step_count + 1, !my_turn, raw, column);
 
 						temp_score1 = abs(temp_score1) * 1.5;
 						temp_score2 = abs(temp_score2) * 0.75;
@@ -536,8 +537,8 @@ long int Minimax2(int step_count, bool my_turn, bool ai_first, int floor)
 					if ((board[raw][column] != chess)
 						&& (board[raw][column] != opponent_chess))
 					{
-						temp_score1 = evaluation(step_count, my_turn, raw, column);
-						temp_score2 = evaluation(step_count + 1, !my_turn, raw, column);
+						temp_score1 = evaluation_ver2(step_count, my_turn, raw, column);
+						temp_score2 = evaluation_ver2(step_count + 1, !my_turn, raw, column);
 						temp_score1 = abs(temp_score1) * 1.5;
 						temp_score2 = abs(temp_score2) * 0.75;
 						temp_score = -(temp_score1 + temp_score2);
@@ -579,7 +580,7 @@ long int Minimax2(int step_count, bool my_turn, bool ai_first, int floor)
 	{
 		*coordinate = *best_coordinate;
 		*(coordinate + 1) = *(best_coordinate + 1);
-		best_score = evaluation(step_count, my_turn, coordinate[0], coordinate[1]);
+		best_score = evaluation_ver2(step_count, my_turn, coordinate[0], coordinate[1]);
 	}
 
 
@@ -590,7 +591,7 @@ long int Minimax2(int step_count, bool my_turn, bool ai_first, int floor)
 	return best_score;
 }
 
-long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
+long int Minimax3(int step_count, bool my_turn, int floor)
 {
 
 	int temp_blank;//用这个来还原棋盘，相当于悔棋一样的
@@ -609,7 +610,7 @@ long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
 	//下面是在建立ai先手、回合数与“是否是我方回合”的关系
 
 	//下面这个条件语句是用来打断点进行单步调试用的，正常工作的时候要注释掉
-	if (coordinate[0] == 6 && coordinate[1] == 6 && floor == FLOOR2)
+	if (coordinate[0] == 7 && coordinate[1] == 8 && floor == FLOOR2)
 	{
 		printf("\n");
 		show_me_the_array = true;
@@ -653,14 +654,14 @@ long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
 			//先将优先的那些点找到并递归
 			//旧的启发式搜索
 			//status = before_evaluation_ver2(board, priority, floor, step_count, my_turn);
-			status = before_evaluation_ver3(priority_ver2, floor, step_count, my_turn);
+			status = before_evaluation_ver4(priority_ver2, floor, step_count, my_turn);
 
 			if (status != 0)
 			{
 				if (floor == FLOOR2)//这种情况是，如果刚开始搜就发现有连五点，那就只搜这一层就退出
 				{
 					shallowest(step_count, my_turn);
-					best_score = evaluation(step_count, my_turn, coordinate[0], coordinate[1]);
+					best_score = evaluation_ver2(step_count, my_turn, coordinate[0], coordinate[1]);
 					return best_score;
 				}
 				else//这种情况是，在某一层（不是最外层）搜到了连五点，那就当做最底层开始搜
@@ -713,7 +714,7 @@ long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
 
 							if (temp_score == 0)
 							{
-								temp_score = Minimax3(step_count + 1, !my_turn, ai_first, floor - 1);
+								temp_score = Minimax3(step_count + 1, !my_turn, floor - 1);
 							}
 
 							//下面这行是在测试的时候使用的，正式使用的时候关掉
@@ -811,7 +812,7 @@ long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
 		else
 		{
 			//best_score_of_upper[floor] = 0;
-			status = before_evaluation_ver3(priority_ver2, floor, step_count, my_turn);
+			status = before_evaluation_ver4(priority_ver2, floor, step_count, my_turn);
 			//final_hit = before_evaluation(board, priority, floor, step_count, my_turn);
 
 			
@@ -851,7 +852,7 @@ long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
 							//DrawBoard(board, 15, 0, 2, coordinate, step_count);
 							if (temp_score == 0)
 							{
-								temp_score = Minimax3(step_count + 1, !my_turn, ai_first, floor - 1);
+								temp_score = Minimax3(step_count + 1, !my_turn, floor - 1);
 							}
 
 
@@ -948,7 +949,7 @@ long int Minimax3(int step_count, bool my_turn, bool ai_first, int floor)
 	{
 		*coordinate = *best_coordinate;
 		*(coordinate + 1) = *(best_coordinate + 1);
-		best_score = evaluation(step_count, my_turn, coordinate[0], coordinate[1]);
+		best_score = evaluation_ver2(step_count, my_turn, coordinate[0], coordinate[1]);
 	}
 
 
@@ -979,8 +980,8 @@ long int deepest(int step_count, bool my_turn)//最底层搜索单独提取出来了
 			{
 				//temp_score = evaluation(board, step_count, my_turn, raw, column);
 
-				temp_score1 = evaluation(step_count, my_turn, raw, column);
-				temp_score2 = evaluation(step_count + 1, !my_turn, raw, column);
+				temp_score1 = evaluation_ver2(step_count, my_turn, raw, column);
+				temp_score2 = evaluation_ver2(step_count + 1, !my_turn, raw, column);
 				/*
 				temp_score1 = abs(temp_score1) * 1.5;
 				temp_score2 = abs(temp_score2) * 0.75;
@@ -1035,8 +1036,8 @@ void shallowest(int step_count, bool my_turn)//这个函数是用于只检索一层的情况
 			{
 				//temp_score = evaluation(board, step_count, my_turn, raw, column);
 
-				temp_score1 = evaluation(step_count, my_turn, raw, column);
-				temp_score2 = evaluation(step_count + 1, !my_turn, raw, column);
+				temp_score1 = evaluation_ver2(step_count, my_turn, raw, column);
+				temp_score2 = evaluation_ver2(step_count + 1, !my_turn, raw, column);
 
 				temp_score1 = abs(temp_score1) * 1.1;
 				temp_score2 = abs(temp_score2) * 0.9;

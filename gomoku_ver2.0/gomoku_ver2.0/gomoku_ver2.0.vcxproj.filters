@@ -21,9 +21,6 @@
     <ClCompile Include="pvp.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="evaluation.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="winner.c">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -43,6 +40,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="enlighting_searching.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="evaluation_ver2.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

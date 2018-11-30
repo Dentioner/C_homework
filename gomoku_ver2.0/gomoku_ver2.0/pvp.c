@@ -54,7 +54,7 @@ void pvp(long int value)
 		value = Searching_Hashing(step_count, my_turn, 0, false);
 		if (value == 0)
 		{
-			value = evaluation(step_count, my_turn, coordinate[0], coordinate[1]);
+			value = evaluation_ver2(step_count, my_turn, coordinate[0], coordinate[1]);
 			Searching_Hashing(step_count, my_turn, value, true);
 		}
 

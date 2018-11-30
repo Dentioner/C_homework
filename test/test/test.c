@@ -117,21 +117,9 @@ void myprintf(int array[], int length)
 
 int main()
 {
-	int a[10][2] = { {1,2},{3,4},{5,6},{7,8} };
-	int b[4][2];
-	memcpy(b, a, sizeof(b));
-	a[2][1] = 1551;
-
-	for (int i = 0; i < 10; i++)
-	{
-		myprintf(a[i], 2);
-	}
-	for (int i = 0; i < 4; i++)
-	{
-		myprintf(b[i], 2);
-	}
-
-
-	printf("%d", sizeof(a));
+	
+	int a[2][2] = { {1,2},{3,4} };
+	int vector[2] = { 0,1 };
+	printf("%d", a[0 + vector[0]][0 + vector[1]]);
 	return 0;
 }

@@ -1,13 +1,13 @@
 ﻿  minimax.c
-e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(114): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
 e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(115): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
-e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(322): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(116): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
 e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(323): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
-e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(501): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(324): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
 e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(502): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
-e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(541): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(503): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
 e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(542): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
-e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(989): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
-e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(1041): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(543): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(990): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
 e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(1042): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(1043): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
   gomoku_ver2.0.vcxproj -> E:\coding\C_homework\gomoku_ver2.0\Debug\gomoku_ver2.0.exe
