@@ -1,1 +1,28 @@
-﻿  gomoku_ver2.0.vcxproj -> E:\coding\C_homework\gomoku_ver2.0\Debug\gomoku_ver2.0.exe
+﻿  Mersenne_Twister.c
+  enlighting_searching.c
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\enlighting_searching.c(49): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+  evaluation_ver2.c
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\evaluation_ver2.c(96): warning C4013: “system”未定义；假设外部返回 int
+  hashing.c
+  main.c
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\main.c(131): warning C4013: “system”未定义；假设外部返回 int
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\main.c(213): warning C4996: 'scanf': This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\stdio.h(1274): note: 参见“scanf”的声明
+  minimax.c
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(115): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(116): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(323): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(324): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(502): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(503): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(542): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(543): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(990): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(1042): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\minimax.c(1043): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+  pve.c
+e:\coding\c_homework\gomoku_ver2.0\gomoku_ver2.0\pve.c(200): warning C4996: 'scanf': This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\stdio.h(1274): note: 参见“scanf”的声明
+  pvp.c
+  正在生成代码...
+  gomoku_ver2.0.vcxproj -> E:\coding\C_homework\gomoku_ver2.0\Debug\gomoku_ver2.0.exe
