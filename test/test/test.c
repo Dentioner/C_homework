@@ -1,6 +1,9 @@
 #include<stdio.h>
 #include<string.h>
+#include<math.h>
+#include <ctype.h>
 
+#define MAXLINE 100
 void re_escape(char s[], char t[])
 {//将s中的转义字符隐藏起来
 	int index;
@@ -115,11 +118,68 @@ void myprintf(int array[], int length)
 }
 
 
+/* atof: 把字符串转化为相应的double数 */
+double atof(char s[])
+{
+	double val, power;
+	int i, sign;
+
+	for (i = 0; isspace(s[i]); i++) /* 跳过空白符 */
+		;
+
+	sign = (s[i] == '-') ? -1 : 1;
+	if (s[i] == '+' || s[i] == '-')
+		i++;
+
+	for (val = 0.0; isdigit(s[i]); i++)
+		val = 10.0 * val + (s[i] - '0');
+
+	if (s[i] == '.')
+		i++;
+
+	for (power = 1.0; isdigit(s[i]); i++)
+	{
+		val = 10.0 * val + (s[i] - '0');
+		power *= 10;
+	}
+
+	return sign * val / power;
+}
+
+int getline(char s[], int lim)
+{
+	int c, i;
+	i = 0;
+
+	while (lim > 0 && (c = getchar()) != EOF && c != '\n')
+		s[i++] = c;
+
+	if (c == '\n')
+		s[i++] = c;
+
+	s[i] = '\0';
+
+	return i;
+}
+
+//利用atof的atoi
+int atoi(char s[])
+{
+	double atof(char s[]);	//声明
+
+	return (int)atof(s);	//调用
+}
+
+
 int main()
 {
-	
-	int a[2][2] = { {1,2},{3,4} };
-	int vector[2] = { 0,1 };
-	printf("%d", a[0 + vector[0]][0 + vector[1]]);
+	double sum, atof(char[]);  //变量定义和函数声明
+	char line[MAXLINE];
+	int getline(char line[], int max);  //函数声明
+
+	sum = 0;
+	while (getline(line, MAXLINE) > 0)
+		printf("\t%g\n", sum += atof(line));
+
 	return 0;
 }

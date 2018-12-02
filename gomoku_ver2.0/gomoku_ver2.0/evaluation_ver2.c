@@ -1062,7 +1062,8 @@ long int line(bool state[], int vector[], int raw, int column, int step_count)//
 			&& (raw - 6 * dx >= 0) && (raw - 6 * dx <= 14)
 			&& (column - 6 * dy >= 0) && (column - 6 * dy <= 14))
 		{
-			value -= Gapped_Three;
+			value -= 2 * Gapped_Three;
+			value += Double_Gapped_Three;
 			if (state[other_direct1] || state[other_direct2] || state[other_direct3])
 			{
 				value += Gapped_Three;
@@ -1110,7 +1111,8 @@ long int line(bool state[], int vector[], int raw, int column, int step_count)//
 			&& (raw - 4 * dx >= 0) && (raw - 4 * dx <= 14)
 			&& (column - 4 * dy >= 0) && (column - 4 * dy <= 14))
 		{
-			value -= Gapped_Three;
+			value -= 2 * Gapped_Three;
+			value += Double_Gapped_Three;
 			if (state[other_direct1] || state[other_direct2] || state[other_direct3])
 			{
 				value += Gapped_Three;
@@ -1159,7 +1161,8 @@ long int line(bool state[], int vector[], int raw, int column, int step_count)//
 			&& (raw - 3 * dx >= 0) && (raw - 3 * dx <= 14)
 			&& (column - 3 * dy >= 0) && (column - 3 * dy <= 14))
 		{
-			value -= Gapped_Three;
+			value -= 2 * Gapped_Three;
+			value += Double_Gapped_Three;
 			if (state[other_direct1] || state[other_direct2] || state[other_direct3])
 			{
 				value += Gapped_Three;

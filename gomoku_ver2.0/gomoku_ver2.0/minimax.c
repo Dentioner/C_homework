@@ -610,7 +610,7 @@ long int Minimax3(int step_count, bool my_turn, int floor)
 	//下面是在建立ai先手、回合数与“是否是我方回合”的关系
 
 	//下面这个条件语句是用来打断点进行单步调试用的，正常工作的时候要注释掉
-	if (coordinate[0] == 7 && coordinate[1] == 8 && floor == FLOOR2)
+	if (coordinate[0] == 0 && coordinate[1] == 0 && floor == FLOOR2)
 	{
 		printf("\n");
 		show_me_the_array = true;
@@ -824,8 +824,8 @@ long int Minimax3(int step_count, bool my_turn, int floor)
 			/*
 			else
 			{*/
-
-
+			else
+			{ 
 				bool initialized = false;//false表示best_score还没有被赋值过
 
 				for (int a = 0; a < 10; a++)
@@ -934,7 +934,7 @@ long int Minimax3(int step_count, bool my_turn, int floor)
 
 				}
 
-			//}
+			}
 		}
 
 	}
