@@ -18,10 +18,14 @@ extern unsigned long long hashing_value2[depth_of_hashing][3];
 long int best_score_of_upper[11] = { -infinity , infinity , -infinity, infinity , -infinity, infinity, -infinity , infinity , -infinity, infinity, -infinity };//给minimax里面的剪枝用的
 //注意上下这两个数组的编号问题。floor是从11往0递归的，因此要保持最后一个元素不变。
 long int best_score_of_upper_ver2[12] = { infinity ,-infinity , infinity , -infinity, infinity , -infinity, infinity, -infinity , infinity , -infinity, infinity, -infinity };//给minimax里面的剪枝用的
-
 bool not_in_the_same_branch[11] = { true, true, true, true, true, true, true, true, true, true, true };
 long int value_for_board = 0;//新加
 bool ai_first = false;//默认电脑后走
+long int empty_score_total[15][15] = { 0 };
+long int empty_score_horizon[15][15] = { 0 };
+long int empty_score_perpendicular[15][15] = { 0 };
+long int empty_score_up_right_down_left[15][15] = { 0 };
+long int empty_score_up_left_down_right[15][15] = { 0 };
 
 void pve(long int value)
 {

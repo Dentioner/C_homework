@@ -20,7 +20,7 @@ extern long int value_for_board;//新加
 extern long int best_score_of_upper_ver2[12];
 bool show_me_the_array =  false;//测试用的布尔值
 extern bool ai_first;
-
+int temp_point[2] = { 0,0 };//临时落子坐标，在minimax的里面迭代的时候落子的时候用
 long int Minimax2(int step_count, bool my_turn, bool ai_first, int floor)
 {
 

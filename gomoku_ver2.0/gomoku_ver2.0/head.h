@@ -1,5 +1,5 @@
 #define FLOOR 1
-#define FLOOR2 6//新加
+#define FLOOR2 8//新加
 #define FLOOR_VCX 3
 //每次更改FLOOR，需要将board.c中的priority, best_score_of_upper, not_in_the_same_branch这三个数组的大小改一下
 #define Consecutive_Five 10000000//连五
