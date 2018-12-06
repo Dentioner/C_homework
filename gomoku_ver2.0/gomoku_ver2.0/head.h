@@ -1,5 +1,5 @@
 #define FLOOR 1
-#define FLOOR2 8//新加
+#define FLOOR2 6//新加
 #define FLOOR_VCX 3
 //每次更改FLOOR，需要将board.c中的priority, best_score_of_upper, not_in_the_same_branch这三个数组的大小改一下
 #define Consecutive_Five 10000000//连五
@@ -46,7 +46,7 @@ int offensive();
 void auto_play(int chess, int opponent_chess);
 long int Minimax2(int step_count, bool my_turn, bool ai_first, int floor);
 int before_evaluation_ver3(int priority_ver2[][2], int floor, int step_count, bool my_turn);
-void quick_sort(int temp_priority[][3], int l, int r);
+void quick_sort(long int temp_priority[][3], int l, int r);
 long int Minimax3(int step_count, bool my_turn, int floor);
 long int deepest(int step_count, bool my_turn);
 void shallowest(int step_count, bool my_turn);
@@ -54,3 +54,8 @@ void init_best_score_of_upper();
 int before_evaluation_ver4(int priority_ver2[][2], int floor, int step_count, bool my_turn);
 long int line(bool state[], int vector[], int raw, int column, int step_count);
 long int evaluation_ver2(int step_count, bool my_turn, int raw, int column);
+void refresh_score(int step_count, bool my_turn);
+void re_calculate(int vector[], int step_count, bool my_turn);
+int before_evaluation_ver5(int priority_ver2[][2], int step_count);
+void quick_sort2(long int** temp_priority, int l, int r);
+int before_evaluation_ver4_5(int priority_ver2[][2], int step_count);

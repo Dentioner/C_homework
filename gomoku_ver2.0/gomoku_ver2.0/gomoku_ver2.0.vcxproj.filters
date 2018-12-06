@@ -45,6 +45,9 @@
     <ClCompile Include="evaluation_ver2.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="enlighting_searching2.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="head.h">

@@ -21,11 +21,9 @@ long int best_score_of_upper_ver2[12] = { infinity ,-infinity , infinity , -infi
 bool not_in_the_same_branch[11] = { true, true, true, true, true, true, true, true, true, true, true };
 long int value_for_board = 0;//新加
 bool ai_first = false;//默认电脑后走
-long int empty_score_total[15][15] = { 0 };
-long int empty_score_horizon[15][15] = { 0 };
-long int empty_score_perpendicular[15][15] = { 0 };
-long int empty_score_up_right_down_left[15][15] = { 0 };
-long int empty_score_up_left_down_right[15][15] = { 0 };
+long int empty_score_total_black[15][15] = { 0 };//对于黑棋来说的空位的总分
+long int empty_score_total_white[15][15] = { 0 };//对于黑棋来说的空位的总分
+extern int temp_point[2];
 
 void pve(long int value)
 {
@@ -139,6 +137,12 @@ void pve(long int value)
 			end_time = clock();
 			cost_time = (end_time - start_time) / CLK_TCK;
 			printf("time=%fs.\n", cost_time);
+			//如果仅仅是将落子的部位无效化的话，不用在意我方是黑子还是白子，两个数组都将该点无效化即可
+			empty_score_total_black[coordinate[0]][coordinate[1]] = 0;
+			empty_score_total_white[coordinate[0]][coordinate[1]] = 0;
+			temp_point[0] = coordinate[0];
+			temp_point[1] = coordinate[1];
+			refresh_score(step_count, my_turn);
 
 		}
 		else
@@ -165,7 +169,12 @@ void pve(long int value)
 				DrawBoard(value, 2, step_count);
 				continue;
 			}
-
+			//如果仅仅是将落子的部位无效化的话，不用在意我方是黑子还是白子，两个数组都将该点无效化即可
+			empty_score_total_black[coordinate[0]][coordinate[1]] = 0;
+			empty_score_total_white[coordinate[0]][coordinate[1]] = 0;
+			temp_point[0] = coordinate[0];
+			temp_point[1] = coordinate[1];
+			refresh_score(step_count, my_turn);
 		}
 
 		continue_playing = judgement(step_count);

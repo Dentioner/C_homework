@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="enlighting_searching.c" />
+    <ClCompile Include="enlighting_searching2.c" />
     <ClCompile Include="evaluation_ver2.c" />
     <ClCompile Include="get_coordinate.c" />
     <ClCompile Include="hashing.c" />
