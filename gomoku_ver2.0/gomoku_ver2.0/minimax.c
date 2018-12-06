@@ -614,10 +614,10 @@ long int Minimax3(int step_count, bool my_turn, int floor)
 	//下面是在建立ai先手、回合数与“是否是我方回合”的关系
 
 	//下面这个条件语句是用来打断点进行单步调试用的，正常工作的时候要注释掉
-	if (coordinate[0] == 6 && coordinate[1] == 6 && floor == FLOOR2)
+	if (coordinate[0] == 7 && coordinate[1] == 9 && floor == FLOOR2)
 	{
 		printf("\n");
-		show_me_the_array = true;
+		//show_me_the_array = true;
 	}
 
 
@@ -717,8 +717,8 @@ long int Minimax3(int step_count, bool my_turn, int floor)
 
 							//DrawBoard(board, 15, 0, 2, coordinate, step_count);
 
-
-
+							//if (raw == 10 && column == 8 && floor == 6)
+								//printf("test\n");
 							if (temp_score == 0)
 							{
 								temp_score = Minimax3(step_count + 1, !my_turn, floor - 1);
@@ -748,6 +748,9 @@ long int Minimax3(int step_count, bool my_turn, int floor)
 								{
 									if ((best_score > best_score_of_upper_ver2[floor]) && (not_in_the_same_branch[floor]))//剪枝
 									{
+
+										temp_point[0] = raw;
+										temp_point[1] = column;//需要重新赋值一遍，因为更下一层的递归修改过这个全局变量
 										board[raw][column] = temp_blank;
 										refresh_score(step_count, my_turn);
 										return infinity;
@@ -780,6 +783,8 @@ long int Minimax3(int step_count, bool my_turn, int floor)
 									{
 										if ((best_score > best_score_of_upper_ver2[floor]) && (not_in_the_same_branch[floor]))//剪枝
 										{
+											temp_point[0] = raw;
+											temp_point[1] = column;//需要重新赋值一遍，因为更下一层的递归修改过这个全局变量
 											board[raw][column] = temp_blank;
 											refresh_score(step_count, my_turn);
 											return infinity;
@@ -869,7 +874,8 @@ long int Minimax3(int step_count, bool my_turn, int floor)
 								temp_score = Minimax3(step_count + 1, !my_turn, floor - 1);
 							}
 
-
+							//if (raw == 8 && column == 6 && floor == 5)
+								//printf("test\n");
 
 							//下面是从井字棋那里搬过来的
 							//if ((temp_score != 0) && (best_score == 0))
@@ -894,6 +900,8 @@ long int Minimax3(int step_count, bool my_turn, int floor)
 								{
 									if ((best_score < best_score_of_upper_ver2[floor]) && not_in_the_same_branch[floor])//剪枝
 									{  
+										temp_point[0] = raw;
+										temp_point[1] = column;//需要重新赋值一遍，因为更下一层的递归修改过这个全局变量
 										board[raw][column] = temp_blank;
 										refresh_score(step_count, my_turn);
 										return -infinity;
@@ -923,6 +931,8 @@ long int Minimax3(int step_count, bool my_turn, int floor)
 									{
 										if ((best_score < best_score_of_upper_ver2[floor]) && not_in_the_same_branch[floor])//剪枝
 										{
+											temp_point[0] = raw;
+											temp_point[1] = column;//需要重新赋值一遍，因为更下一层的递归修改过这个全局变量
 											board[raw][column] = temp_blank;
 											refresh_score(step_count, my_turn);
 											return -infinity;

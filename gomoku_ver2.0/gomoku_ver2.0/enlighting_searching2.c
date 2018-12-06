@@ -150,6 +150,9 @@ void refresh_score(int step_count, bool my_turn)//重新刷新刚落下的子的四个方向上
 
 	}
 	*/
+	//if (temp_point[0] == 8 && temp_point[1] == 6)
+		//DrawBoard(0, 2, step_count);
+	
 	re_calculate(horizon, step_count, my_turn);//刷新水平方向的空格的分数
 	re_calculate(perpendicular, step_count, my_turn);//刷新竖直方向的空格的分数
 	re_calculate(up_right_down_left, step_count, my_turn);//刷新右上左下方向的空格的分数
@@ -183,7 +186,7 @@ void re_calculate(int vector[], int step_count, bool my_turn)
 				white_value = evaluation_ver2(3, true, raw, column);//将step_count强行令为奇数3，保证是白子得分，并将my_turn强行置为true，保证输出得分为正数
 				empty_score_total_black[raw][column] = black_value;
 				empty_score_total_white[raw][column] = white_value;
-				//if (empty_score_total_white[5][10] == 99950)
+				//if (empty_score_total_white[4][12] == 10000)
 					//printf("test\n");
 			}
 		}
