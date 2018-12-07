@@ -1,5 +1,5 @@
 #define FLOOR 1
-#define FLOOR2 6//新加
+#define FLOOR2 8//新加
 #define FLOOR_VCX 3
 //每次更改FLOOR，需要将board.c中的priority, best_score_of_upper, not_in_the_same_branch这三个数组的大小改一下
 #define Consecutive_Five 10000000//连五
@@ -24,6 +24,16 @@
 #define Open_two 1000//连二
 #define depth_of_hashing 100000
 #define infinity 89999900
+
+typedef struct temp_priority
+{
+	long int score;
+	int raw;
+	int column;
+	struct temp_priority* next;
+} Node;
+
+
 
 void myprintf(int array[], int length);
 void initial_board();
@@ -59,3 +69,4 @@ void re_calculate(int vector[], int step_count, bool my_turn);
 int before_evaluation_ver5(int priority_ver2[][2], int step_count);
 void quick_sort2(long int** temp_priority, int l, int r);
 int before_evaluation_ver4_5(int priority_ver2[][2], int step_count);
+int before_evaluation_ver6(int priority_ver2[][2], int step_count);

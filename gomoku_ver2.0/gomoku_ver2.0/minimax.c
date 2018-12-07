@@ -614,7 +614,7 @@ long int Minimax3(int step_count, bool my_turn, int floor)
 	//下面是在建立ai先手、回合数与“是否是我方回合”的关系
 
 	//下面这个条件语句是用来打断点进行单步调试用的，正常工作的时候要注释掉
-	if (coordinate[0] == 7 && coordinate[1] == 9 && floor == FLOOR2)
+	if (coordinate[0] == 9 && coordinate[1] == 4 && floor == FLOOR2)
 	{
 		printf("\n");
 		//show_me_the_array = true;
@@ -658,7 +658,7 @@ long int Minimax3(int step_count, bool my_turn, int floor)
 			//先将优先的那些点找到并递归
 			//旧的启发式搜索
 			//status = before_evaluation_ver2(board, priority, floor, step_count, my_turn);
-			status = before_evaluation_ver4_5(priority_ver2, step_count);
+			status = before_evaluation_ver6(priority_ver2, step_count);
 
 			if (status != 0)
 			{
@@ -828,7 +828,7 @@ long int Minimax3(int step_count, bool my_turn, int floor)
 		else
 		{
 			//best_score_of_upper[floor] = 0;
-			status = before_evaluation_ver4_5(priority_ver2, step_count);
+			status = before_evaluation_ver6(priority_ver2, step_count);
 			//final_hit = before_evaluation(board, priority, floor, step_count, my_turn);
 
 			
