@@ -14,13 +14,14 @@ void myprintf(int array[], int length)
 	printf("\n");
 }
 
-struct book
-{
-	char aznable
-};
+
 
 int main()
-{
-	
+{	
+	double a = -5;
+	double b = 1.5;
+	double c = fmod(a, b);
+
+	printf("%f mod %f = %f", a, b, c);
 	return 0;
 }

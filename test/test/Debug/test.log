@@ -1,5 +1,2 @@
 ﻿  test.c
-e:\coding\c_homework\test\test\test.c(123): warning C4028: 形参 1 与声明不同
-e:\coding\c_homework\test\test\test.c(123): warning C4273: “atof”: dll 链接不一致
-  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\corecrt_math.h(492): note: 参见“atof”的前一个定义
   test.vcxproj -> E:\coding\C_homework\test\Debug\test.exe
