@@ -1,8 +1,0 @@
-﻿  minimax.c
-e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\minimax.c(483): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
-e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\minimax.c(526): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
-e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\minimax.c(578): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
-e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\minimax.c(579): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
-e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\minimax.c(606): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
-e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\minimax.c(607): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
-  Project1.vcxproj -> E:\coding\C_homework\12.20_gomoku_nohash\littlehash\littlehash\Debug\Project1.exe

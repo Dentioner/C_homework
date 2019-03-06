@@ -1,0 +1,30 @@
+﻿  Mersenne_Twister.c
+  enlighting_searching.c
+  evaluation.c
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\evaluation.c(28): warning C4101: “i”: 未引用的局部变量
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\evaluation.c(107): warning C4013: “system”未定义；假设外部返回 int
+  forbidden.c
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\forbidden.c(81): warning C4013: “system”未定义；假设外部返回 int
+  hashing.c
+  main.c
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\main.c(133): warning C4013: “system”未定义；假设外部返回 int
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\main.c(215): warning C4996: 'scanf': This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\stdio.h(1274): note: 参见“scanf”的声明
+  minimax.c
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\minimax.c(483): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\minimax.c(526): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\minimax.c(578): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\minimax.c(579): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\minimax.c(606): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\minimax.c(607): warning C4244: “=”: 从“double”转换到“long”，可能丢失数据
+  open_database.c
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\open_database.c(24): warning C4244: “函数”: 从“time_t”转换到“unsigned int”，可能丢失数据
+  pve.c
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\pve.c(153): warning C4013: “system”未定义；假设外部返回 int
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\pve.c(216): warning C4996: 'scanf': This function or variable may be unsafe. Consider using scanf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\stdio.h(1274): note: 参见“scanf”的声明
+  pvp.c
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\pvp.c(60): warning C4013: “system”未定义；假设外部返回 int
+  正在生成代码...
+e:\coding\c_homework\12.20_gomoku_nohash\littlehash\littlehash\project1\mersenne_twister.c(172): warning C4715: “indexOf”: 不是所有的控件路径都返回值
+  Project1.vcxproj -> E:\coding\C_homework\12.20_gomoku_nohash\littlehash\littlehash\Debug\Project1.exe
