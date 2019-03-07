@@ -15,11 +15,11 @@ void reverse2(char s[], int i, int j)
 int main()
 {
 	char s[11] = {"abcdefghij"};
-    printf("µßµ¹Ç°£º\n");
+    printf("??????\n");
     printf(s);
     printf("\n");
 	reverse2(s, 0, strlen(s) - 1);
-    printf("µßµ¹ºó£º\n");
+    printf("?????\n");
     printf(s);
     printf("\n");
     system("pause");
