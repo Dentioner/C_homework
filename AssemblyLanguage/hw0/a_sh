@@ -1,0 +1,2 @@
+as -o test.o helloUCAS.S
+ld -o test2 test.o
