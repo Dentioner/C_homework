@@ -2,17 +2,19 @@
 .section .data
 	inputdata:
 		.byte 0,0,0,0,0,0,0,0,0,0
-	#          0,x,1,2,3,4,5,6,7,8,\0
+	
 	enter:
 		.asciz "\n"
 	signsymbol:
 		.asciz "-"
+	justzero:
+		.asciz "0"
 
 .section .text
 .globl _start
 _start:
 	
-#input
+
 	mov $3, %eax
 	mov $1, %ebx
 	mov $inputdata, %ecx
@@ -41,8 +43,8 @@ print_hex:
 	mov	%esi, -12(%ebp)
 	
 	mov	$0, %edi
-	mov	10(%ebp), %ecx #这里不是8，因为开头有0x前缀要拿掉
-	mov  14(%ebp), %ebx  #后4位，也就是低4位
+	mov	10(%ebp), %ecx 
+	mov  14(%ebp), %ebx  
 	
 	movb	$'0', 0(%esp)
 	movb	$'x', 1(%esp)
@@ -50,16 +52,15 @@ print_hex:
 
 	
 	mov		%ecx, %edx 
-	#shrl		$12,   %edx #这个操作使得edx的最高位跑到dl上面去
-	andb	$0xf, %dl  #不用右移，因为寄存器的存储方向和内存是反过来的
-	cmpb	$8, %dl	#比8大说明是负数补码
+	
+	
+	cmpb	$0x38, %dl	
 	jl		normal
 	mov		$1, %edi		
-#从补码返回原码，直接改内存中inputdata的值
-#这一段里面ebx ecx暂时没用了
+
 	mov		%ebp, %eax
-	add		$10, %eax #eax现在是inputdata的指针了
-	mov		$8, %ecx #循环计数器
+	add		$10, %eax 
+	mov		$8, %ecx 
 	mov		$0, %esi
 	
 loooop:
@@ -67,26 +68,26 @@ loooop:
 	cmpb	$0x39, %bl
 	jna		L1
 	jmp		L2
-L1:  #将数字字符转为真实数字	
+L1: 	
 	subb		$0x30, %bl
 	jmp		L3
-L2: #将字母字符转为真实数字
+L2: 
 	subb		$87, %bl
 	jmp		L3
-L3: #统一取异或值
+L3: 
 	xorb		$0xf, %bl
 	cmp		$7,	%esi
 	jne		L3_5
-	addb		$1, %bl #原补码互相转换最后一位要+1
+	addb		$1, %bl 
 L3_5:
 	cmpb	$9, %bl
 	jna		L4
 	jmp		L5
 	
-L4: #将≤9的数字转为数字字符
+L4: 
 	addb	$0x30, %bl
 	jmp		L6
-L5: #将＞9的数字转为字母
+L5: 
 	addb	$87, %bl
 	jmp		L6
 L6:
@@ -96,8 +97,8 @@ L6:
 
 loop loooop
 
-	mov	10(%ebp), %ecx #这里不是8，因为开头有0x前缀要拿掉
-	mov  14(%ebp), %ebx  #后4位，也就是低4位
+	mov	10(%ebp), %ecx 
+	mov  14(%ebp), %ebx  
 
 
 
@@ -108,9 +109,9 @@ normal:
 	movl		%ebx,  6(%esp)
 	
 	cmp		$1, %edi
-	jne		printmain
-	addl		$1, 9(%esp)#补码返回原码的时候取完反之后尾数还要+1 #←要改
-#print
+	jne		print0x
+	
+
 
 printsign:
 	movl	$4, %eax
@@ -119,17 +120,48 @@ printsign:
 	movl	$1, %edx
 	int	$0x80
 
-#下面打印部分需要改成循环打印
+
+print0x:
+	movl	$4, %eax
+	movl	$1, %ebx
+	movl	%esp, %ecx
+	movl	$2, %edx
+	int	$0x80
+
+	addl	$2, %esp
+	movl	$0, %esi
+	
+	
 printmain:	
 	mov	$4, %eax
 	mov	$1, %ebx
+
+	subl	$1, %esp	
+findno0:
+	addl	$1, %esi
+	addl	$1, %esp
+	cmpb	$0x30, (%esp)
+	je	findno0
+printelement:	
+	
+	movl	$4, %eax
+	movl	$1, %ebx
 	mov	%esp, %ecx
-	mov	$10, %edx
+	mov	$1, %edx
+	int	$0x80
+	addl	$1, %esp
+	cmpb	$0, (%esp)
+	jne		printelement
+	
+	cmp	$9, %esi
+	jne		printenter
+	movl	$4, %eax
+	movl	$1, %ebx
+	mov	$justzero, %ecx
+	mov	$1, %edx
 	int	$0x80
 
-
-
-
+printenter:
 	movl	$4, %eax
 	movl	$1, %ebx
 	movl	$enter, %ecx
@@ -141,6 +173,3 @@ printmain:
 	mov	-12(%ebp), %esi
 	leave
 	ret
-	
-	
-	
