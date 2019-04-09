@@ -5,13 +5,13 @@
 #define MAXLENGTH 20
 #define ADDLENGTH 10
 
-int addlen(int * x, int len)
+int* addlen(int * x, int *len)
 {
-	x = (int*)realloc(x, (len + ADDLENGTH) * sizeof(int));
+	x = (int*)realloc(x, (*len + ADDLENGTH) * sizeof(int));
 	if (!x)
 		printf("ERROR");
-	len += ADDLENGTH;
-	return len;
+	*len += ADDLENGTH;
+	return x;
 }
 
 
@@ -34,7 +34,7 @@ int main()
 		s[sindex] = ch;
 		sindex++;
 		if (sindex >= slen)
-			slen = addlen(s, slen);
+			s = addlen(s, &slen);
 	}
 	
 
@@ -44,7 +44,7 @@ int main()
 		t[tindex] = ch;
 		tindex++;
 		if (tindex >= tlen)
-			tlen = addlen(t, tlen);
+			t = addlen(t, &tlen);
 	}
 
 	for (int i = 0; i < tindex && i < sindex; i++)
@@ -70,6 +70,8 @@ int main()
 
 	printf("%d", answer);
 
+	free(s);
+	free(t);
 	system("pause");
 	return 0;
 }
