@@ -152,7 +152,8 @@ void compare_priority(int input_ch)
 	{
 		printf("%c", a);
 		pop(&sheet);
-		compare_priority(input_ch);
+		if (sheet.top != sheet.bottom)
+			compare_priority(input_ch);
 	}
 	else
 	{
