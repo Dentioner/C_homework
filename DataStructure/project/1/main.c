@@ -4,13 +4,10 @@
 #include<stdbool.h>
 
 
-#define BOARD_SIZE 63
+#define BOARD_SIZE 64
 
-void printboard();
-void initial_tree();
-void init_Node();
-void horse();
-bool check_coordinate();
+
+
 
 typedef struct TNode
 {
@@ -21,12 +18,19 @@ typedef struct TNode
 	struct TNode * parent;
 }TreeNode;
 
+void printboard();
+void initial_tree();
+void init_Node();
+void horse();
+bool check_coordinate();
+void DestroyLeaf(TreeNode*temp_root);
+
 int board[8][8];
 TreeNode * Node_now, *Node_before;
 int step_counter;
 int vector[8][2] = { {-2, 1} ,{-1, 2}, {1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1} };
 TreeNode *root;
-
+int show;//展示用
 
 
 int main()
@@ -34,6 +38,9 @@ int main()
 	initial_tree();
 	printf("Please choose a start TreeNode. Use ',' to distinguish raw & column.\n");
 	scanf("%d,%d", &(Node_now->raw), &(Node_now->column));
+	printf("Step by step? Enter 1 means yes and 0 means no.\n");
+	scanf("%d", &show);
+
 	horse();
 
     printboard();
@@ -150,9 +157,19 @@ void horse()
 			Node_now->banned = true;
 			board[Node_now->raw][Node_now->column] = 0;//还原
 			step_counter--;
+			DestroyLeaf(Node_now);
+
 			Node_now = Node_now->parent;//回溯
 		}
 
+		//下面是展示用的，可以删掉
+		if (show)
+
+		{
+			system("cls");
+			printboard();
+			system("pause");
+		}
 	}
 
 	return;
@@ -165,4 +182,18 @@ bool check_coordinate()//检查是否是合法坐标
 		return false;
 	else
 		return true;
+}
+
+void DestroyLeaf(TreeNode * temp_root)//此函数只砍掉叶节点，保留根节点
+{
+	TreeNode *temp_leaf;
+	for (int i = 0; i < 8; i++)
+	{
+		temp_leaf = temp_root->children[i];
+		if (temp_leaf == NULL)//如果该叶节点是NULL，直接跳到下一个
+			continue;
+		free(temp_leaf);
+	}
+	temp_root->banned = true; 
+	return;
 }
