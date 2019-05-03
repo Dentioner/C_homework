@@ -31,7 +31,7 @@ int step_counter;
 int vector[8][2] = { {-2, 1} ,{-1, 2}, {1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1} };
 TreeNode *root;
 int show;//展示用
-
+TreeNode *best_son;//贪心算法使用
 
 int main()
 {
@@ -151,6 +151,47 @@ void horse()
 				break;//如果找到了一个空位，则将这个地方写下步数，跳出循环，在此基础上进行下一步探索
 			}
 		}
+		//上面是没有优化过的遍历
+
+
+
+
+
+		for (vector_index = 0; vector_index < 8; vector_index++)//8个方向遍历
+		{
+			if (Node_now->children[vector_index] != NULL //首先判断该节点是不是之前遍历过的，标准就是它有没有叶节点 
+				&& Node_now->children[vector_index]->banned)//如果发现该方位在之前遍历的时候已经走不通了
+				continue;//就跳到下一个方位
+
+			Node_before = Node_now;
+			init_Node();
+
+			Node_before->children[vector_index] = Node_now;
+			Node_now->parent = Node_before;//生成亲子关系
+
+			Node_now->raw = Node_before->raw + vector[vector_index][0];
+			Node_now->column = Node_before->column + vector[vector_index][1];//生成下一步探索的坐标
+			
+			if ((!check_coordinate())
+				||board[Node_now->raw][Node_now->column])//如果棋盘的那个位置不合法，或者不是0
+			{
+				Node_now->banned = true;
+				Node_now = Node_before;//撤退到上一层
+				continue;//跳到下一个vector
+			}
+			else
+			{
+				find_it = true;
+
+				//在这里进行优化，因为这个地方表示的是，如果找到可以走的点就走
+				//因此应该在这个地方写一个判断最优子节点的代码，遍历8次之后才准备break，而不是马上就break
+				
+				board[Node_now->raw][Node_now->column] = ++step_counter;
+				break;//如果找到了一个空位，则将这个地方写下步数，跳出循环，在此基础上进行下一步探索
+			}
+		}
+
+
 
 		if (!find_it)//如果8个方向都是死路
 		{//返回上一层，回溯
@@ -164,7 +205,6 @@ void horse()
 
 		//下面是展示用的，可以删掉
 		if (show)
-
 		{
 			system("cls");
 			printboard();
