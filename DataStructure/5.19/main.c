@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
+#pragma warning(disable:4996)
 
 #define MAXLENGTH 50
 #define ADDLENGTH 10
@@ -10,7 +11,7 @@ typedef int ElemType ;
 typedef struct matrix
 {
     ElemType * base;
-    int raw;
+    int row;
     int column;
     int elemtotal;    
 }mx;
@@ -39,13 +40,13 @@ int main()
         printf("null");
     else
     {
-        printf("%d", ap.base[0]);
-        for (int i = 1; i < ap.num; i++)
-            printf(",%d", ap.base[i]);
+		;//printf("%d", ap.base[0]);
+		for (int i = 1; i < ap.num; i++)
+			;//printf(",%d", ap.base[i]);
     }
     
     
-    system("pause");
+   // system("pause");
     return 0;
 }
 
@@ -54,40 +55,60 @@ int main()
 
 status InitMatrix()
 {
-    int ch; 
+    int ch, number; 
     int elem_max_num = MAXLENGTH;
     int index = 0;
     m.base = (ElemType *)malloc(sizeof(ElemType)*elem_max_num);
     if (!m.base)
         exit(ERROR);
+	if (!scanf("%d", &number))
+		exit(ERROR);
     ch = getchar();
-    while(ch != EOF && ch != '\n')
-    {
-        while (ch != ';')
-        {
-            if (ch != ',')
-            {
-                if (m.elemtotal >= elem_max_num)
-                {
-                    elem_max_num += ADDLENGTH;
-                    m.base = (ElemType *)realloc(m.base, sizeof(ElemType)*elem_max_num);
-                    if (!m.base)
-                        exit(ERROR);
-                }
-                m.base[m.raw * m.column + index] = ch;
-                index ++;
-            }
-            ch = getchar();
-        }
-        if (m.raw == 0)
-            m.column = index;
-        else if (m.column != index)
-            exit(ERROR);
-        m.raw ++;
-        index = 0;
-        ch = getchar();
-    }
+	while (ch != EOF && ch != '\n')
+	{
+		while (ch != ';'&& ch != EOF && ch != '\n')
+		{
 
+			if (m.elemtotal >= elem_max_num)
+			{
+				elem_max_num += ADDLENGTH;
+				m.base = (ElemType *)realloc(m.base, sizeof(ElemType)*elem_max_num);
+				if (!m.base)
+					exit(ERROR);
+			}
+			m.base[m.row * m.column + index] = number;
+			index++;
+
+			if (!scanf("%d", &number))
+				exit(ERROR);
+			ch = getchar();
+		}
+		if (ch != ';' || ch != EOF || ch != '\n')
+		{
+			if (m.elemtotal >= elem_max_num)
+			{
+				elem_max_num += ADDLENGTH;
+				m.base = (ElemType *)realloc(m.base, sizeof(ElemType)*elem_max_num);
+				if (!m.base)
+					exit(ERROR);
+			}
+			m.base[m.row * m.column + index] = number;
+			index++;
+		}
+		if (m.row == 0)
+			m.column = index;
+		else if (m.column != index)
+			exit(ERROR);
+		m.row++;
+		index = 0;
+		if (ch != EOF && ch != '\n')
+		{
+			if (!scanf("%d", &number))
+				exit(ERROR);
+			ch = getchar();
+
+		}
+	}
     return OK;
 }
 
@@ -98,7 +119,7 @@ status an_search()
     ap.base = (ElemType*)malloc(sizeof(ElemType)*m.elemtotal);
     if (!ap.base)
         exit(ERROR);
-    for (i = 0; i < m.raw; i++)
+    for (i = 0; i < m.row; i++)
     {
         bestj = 0;
         for (j = 0; j <m.column; j ++)
@@ -107,17 +128,23 @@ status an_search()
                 bestj = j;
         }
 
-        for (k = 0; k < m.raw; k++)
-        {
-            if (m.base[i*m.column + bestj] < m.base[k*m.column + bestj])
-                break;
-        }
+		for (j = 0; j < m.column; j++)
+		{
+			if (m.base[i*m.column + bestj] == m.base[i*m.column + j])
+			{
+				for (k = 0; k < m.row; k++)
+				{
+					if (m.base[i*m.column + j] < m.base[k*m.column + j])
+						break;
+				}
+			}
 
-        if (k == m.raw)
-        {
-            ap.base[ap.num ++] = m.base[i*m.column + bestj];
-        }
-
+			if (k == m.row)
+			{
+				ap.base[ap.num++] = m.base[i*m.column + j];
+			}
+			k = 0;
+		}
     }
 
     ap.base[ap.num] = '\0';
@@ -131,11 +158,11 @@ void an_sort()
 {
     int i,j;
     ElemType temp;
-    for (i=0; i<ap.num-1; i++) /* 外循环为排序趟数，len个数进行len-1趟 */
+    for (i=0; i<ap.num-1; i++)
         for (j=0; j<ap.num-1-i; j++) 
-        { /* 内循环为每趟比较的次数，第i趟比较len-i次 */
+        { 
             if (ap.base[j] > ap.base[j+1])
-            { /* 相邻元素比较，若逆序则交换（升序为左大于右，降序反之） */
+            { 
                 temp = ap.base[j];
                 ap.base[j] = ap.base[j+1];
                 ap.base[j+1] = temp;
