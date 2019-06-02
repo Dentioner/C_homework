@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <sys/time.h>  //in Linux
-#include <time.h> //in Windows
+#include <sys/time.h>  //in Linux
+//#include <time.h> //in Windows
 
 
 #define N 1024
