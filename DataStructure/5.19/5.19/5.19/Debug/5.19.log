@@ -1,2 +1,4 @@
 ﻿  main.c
+e:\coding\c_homework\datastructure\5.19\main.c(119): warning C4101: “k”: 未引用的局部变量
+e:\coding\c_homework\datastructure\5.19\main.c(120): warning C4101: “bestj”: 未引用的局部变量
   5.19.vcxproj -> E:\coding\C_homework\DataStructure\5.19\5.19\Debug\5.19.exe

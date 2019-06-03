@@ -29,6 +29,8 @@ an_point ap;
 status InitMatrix();
 status an_search();
 void an_sort();
+status biggest_in_column(int i, int j);
+status smallest_in_row(int i, int j);
 
 int main()
 {
@@ -121,29 +123,12 @@ status an_search()
         exit(ERROR);
     for (i = 0; i < m.row; i++)
     {
-        bestj = 0;
-        for (j = 0; j <m.column; j ++)
-        {
-            if (m.base[i*m.column + bestj] > m.base[i*m.column + j])
-                bestj = j;
-        }
-
 		for (j = 0; j < m.column; j++)
 		{
-			if (m.base[i*m.column + bestj] == m.base[i*m.column + j])
-			{
-				for (k = 0; k < m.row; k++)
-				{
-					if (m.base[i*m.column + j] < m.base[k*m.column + j])
-						break;
-				}
-			}
-
-			if (k == m.row)
+			if ((!smallest_in_row(i, j)) && (!biggest_in_column(i, j)))
 			{
 				ap.base[ap.num++] = m.base[i*m.column + j];
 			}
-			k = 0;
 		}
     }
 
@@ -152,6 +137,29 @@ status an_search()
     an_sort();
 
     return OK;
+}
+
+status smallest_in_row(int i, int j)
+{
+	int index;
+	for (index = 0; index < m.column; index++)
+	{
+		if (m.base[i*m.column + j] > m.base[i*m.column + index])
+			return ERROR;
+	}
+
+	return OK;
+}
+
+status biggest_in_column(int i, int j)
+{
+	int index;
+	for (index = 0; index < m.row; index++)
+	{
+		if (m.base[i*m.column + j] < m.base[index*m.column + j])
+			return ERROR;
+	}
+	return OK;
 }
 
 void an_sort()
