@@ -4,7 +4,7 @@
 #include<stdbool.h>
 
 
-#define BOARD_SIZE 20
+#define BOARD_SIZE 5
 #define Instruction_ADD 1
 #define Instruction_SUB 2
 
@@ -23,19 +23,29 @@ typedef struct Node
 {
 	int row;
 	int column;
+	int son[8][2];//记录儿子数组,每个son[i][0]记录儿子相对于此节点的方位，即vector数组的索引值
+	//每个son[i][1]记录儿子含有的孙子个数
+	//例如，如果最佳儿子是位于本节点的右边的最下方那个4号节点，该节点就2个孙子，那么s[0][1]=4，s[0][2] = 2;
+	//如果某个儿子走不通，那么它的孙子个数为9以上，以便排序的时候能够放在最后考虑
+	int back_track_counter;//记录回溯次数，同时此变量也可作为下一步访问的儿子数组的元素索引
 }Node;
 
 typedef struct 
 {
-	Node stack_array[BOARD_SIZE];
+	Node* stack_array[BOARD_SIZE];
 	int  top;
 } SqStack;
 
 void printboard();
-
+void push(Node* point_pointer);
+Node* pop();
+Node* get_top();
+void Init_Stack();
+void refresh_next_board(Node* point, int instruction);
 void horse();
-bool check_coordinate(Node point);
-
+bool check_coordinate(Node* point);
+Node* next_step(Node* point);
+void Init_nodeboard();
 
 int board[8][8];
 int board_for_next_step[8][8] = {//这个棋盘用来记录某个点下一个可以走的方位有几个
@@ -57,16 +67,20 @@ const int vector[8][2] = { {-2, 1} ,{-1, 2}, {1, 2}, {2, 1}, {2, -1}, {1, -2}, {
 int show;//展示用
 
 SqStack stack;
-Node now, before;
+Node *now, *before;
 
+Node nodeboard[8][8];
 
 int main()
 {
-	initial_tree();
+	Init_nodeboard();
+	int first_row, first_column;
 	printf("Please choose a start TreeNode. Use ',' to distinguish row & column.\n");
-	scanf("%d,%d", &(now.row), &(now.column));
+	scanf("%d,%d", &(first_row), &(first_column));
 	printf("Step by step? Enter 1 means yes and 0 means no.\n");
 	scanf("%d", &show);
+	now = &nodeboard[first_row][first_column];
+
 
 	horse();
 
@@ -93,20 +107,20 @@ void printboard()
 
 
 
-void push(Node point)
+void push(Node *point_pointer)
 {
 	if (stack.top >= BOARD_SIZE)
 	{
 		printf("Stack is full, ERROR\n");
 		exit(1);
 	}
-	stack.stack_array[stack.top++] = point;
+	stack.stack_array[stack.top++] = point_pointer;
 	return;
 }
 
-Node pop()
+Node* pop()
 {
-	Node Re;
+	Node* Re;
 	if (!stack.top)
 	{
 		printf("Stack is empty, ERROR\n");
@@ -116,9 +130,9 @@ Node pop()
 	return Re;
 }
 
-Node get_top()
+Node* get_top()
 {
-	Node top;
+	Node* top;
 	if (!stack.top)
 	{
 		printf("Stack is empty, ERROR\n");
@@ -134,97 +148,171 @@ void Init_Stack()
 	stack.top = 0;
 }
 
-void refresh_next_board(Node point, int instruction)//刷新孙子棋盘
+void refresh_next_board(Node* point, int instruction)//刷新孙子棋盘
 {//instruction 指的是，是要减，还是要加，因为悔棋的时候得恢复孙子个数
 
-	Node next;//这里的next实际上是以now为下一步的那些点
+	Node* next;//这里的next实际上是以now为下一步的那些点
 	for (int vector_index = 0; vector_index < 8; vector_index++)//8个方向遍历
-	{
-		next.row = point.row + vector[vector_index][0];
-		next.column = point.column + vector[vector_index][1];//生成坐标
+	{		
+		next = &nodeboard[point->row + vector[vector_index][0]][point->column + vector[vector_index][1]];
 		if (!check_coordinate(next))
 		{
 			continue;
 		}
 		if (instruction == Instruction_SUB)
 		{
-			board_for_next_step[next.row][next.column] --;
+			board_for_next_step[next->row][next->column] --;
 		}
 		else
 		{
-			board_for_next_step[next.row][next.column] ++;
+			board_for_next_step[next->row][next->column] ++;
 		}
 	}
 
 	return;
 }
 
-bool check_coordinate(Node point)//检查是否是合法坐标
+bool check_coordinate(Node* point)//检查是否是合法坐标
 {
-	if (point.row >= 8 || point.row < 0 || point.column >= 8 || point.column < 0 
-		|| board[point.row][point.column])//如果棋盘的那个位置不合法，或者不是0
+	if (point->row >= 8 || point->row < 0 || point->column >= 8 || point->column < 0 
+		|| board[point->row][point->column])//如果棋盘的那个位置不合法，或者不是0
 		return false;
 	else
 		return true;
 }
 
-Node next_step(Node point)//找下一步应该去哪
+Node* next_step(Node* point)//找下一步应该去哪
 {//使用贪心算法，检索孙子棋盘
-	Node next;
-	Node best_son;
+	//在此步内生成每个Node的儿子数组
+	Node* next;
+	Node* best_son;
 	bool has_been_initialized = false;//最佳儿子是否被初始化了
-	for (int vector_index = 0; vector_index < 8; vector_index++)//8个方向遍历
+	int i = 0;
+	int vector_index = 0;
+	//首先在生成儿子之前先看看有没有之前生成过儿子了，否则就不用再跑一次循环
+	//判断之前有没有生成儿子的方式，我觉得可以根据Node结构里面的那个回溯计数器来搞
+	if (!point->back_track_counter)//计数器为0说明没有回溯过
 	{
-		next.row = point.row + vector[vector_index][0];
-		next.column = point.column + vector[vector_index][1];//生成坐标
-		if (!check_coordinate(next))
+		for (; vector_index < 8; vector_index++)//8个方向遍历
 		{
-			continue;
-		}
-		if (!has_been_initialized)//如果之前还未初始化最佳儿子，这里就初始化
-		{
-			best_son = next;
-			has_been_initialized = true;
-		}
-		else
-		{
-			if (board_for_next_step[next.row][next.column]
-				< board_for_next_step[best_son.row][best_son.column])
+			next = &nodeboard[point->row + vector[vector_index][0]][point->column + vector[vector_index][1]];
+			point->son[i][0] = vector_index;
+
+
+			if (!check_coordinate(next))
 			{
-				best_son = next;
+				point->son[i++][1] = 9 + vector_index;//瞎写的一个大于9的数值			
+				continue;
+			}
+			else
+			{
+				point->son[i++][1] = board_for_next_step[next->row][next->column];
 			}
 		}
+		//跑完8次之后执行排序
+
+		int ii, jj, key, key_vec;
+		for (ii = 1; ii < 8; ii++)
+		{
+			key_vec = point->son[ii][0];
+			key = point->son[ii][1];
+			jj = ii - 1;
+			while ((jj >= 0) && (point->son[jj][1] > key))
+			{
+				point->son[jj + 1][0] = point->son[jj][0];
+				point->son[jj + 1][1] = point->son[jj][1];
+
+				jj--;
+			}
+			point->son[jj + 1][0] = key_vec;
+			point->son[jj + 1][1] = key;
+
+		}//排序
+		
+		best_son = 
+			&nodeboard
+			[point->row + vector[point->son[point->back_track_counter][0]][0]]
+			[point->column + vector[point->son[point->back_track_counter][0]][1]];
+		
+		point->back_track_counter++;
 	}
+
+	else//back_track_counter != 0
+	{
+		best_son =
+			&nodeboard
+			[point->row + vector[point->son[point->back_track_counter][0]][0]]
+			[point->column + vector[point->son[point->back_track_counter][0]][1]];
+
+		point->back_track_counter++;
+	}
+
 
 	return best_son;
 }
 
+void Init_nodeboard()
+{
+	int i, j;
+	for (i = 0; i < 8; i++)
+	{
+		for (j = 0; j < 8; j++)
+		{
+			nodeboard[i][j].row = i;
+			nodeboard[i][j].column = j;
+			nodeboard[i][j].back_track_counter = 0;
+		}
+	}
+	return;
+}
+
 void horse()
 {
-	int vector_index;
-	bool find_it;
+	//int vector_index;
+	//bool find_it;
 	if (!step_counter)//第一步，把选定的地方写上1
 	{
-		board[now.row][now.column] = ++step_counter;
+		board[now->row][now->column] = ++step_counter;
 		push(now);
 		refresh_next_board(now, Instruction_SUB);
+		before = now;
+		now = next_step(before);
 	}
 	
 	while (stack.top)//只要栈不为空，就一直可以跑下去
 	{
-		if (!board_for_next_step[now.row][now.column])//如果现在没有子节点可以走了
+		//now = get_top();
+		if (step_counter == BOARD_SIZE)//跑完了
 		{
-			board[now.row][now.column] = 0;
+			printboard();
+			board[now->row][now->column] = 0;
 			step_counter--;
-
+			pop();
+			now = get_top();
+			continue;
 		}
-
+		if (!board_for_next_step[now->row][now->column])//如果现在没有子节点可以走了
+		{
+			board[now->row][now->column] = 0;
+			step_counter--;
+			pop();
+			now = get_top();
+			continue;
+		}
 		
+		if (now->back_track_counter >= board_for_next_step[now->row][now->column])//可行方向都搞过了
+		{
+			board[now->row][now->column] = 0;
+			step_counter--;
+			pop();
+			now = get_top();
+			continue;
+		}
 		
 		if (check_coordinate(now))//如果当前位置合法
 		{
 			push(now);
-			board[now.row][now.column] = step_counter++;
+			board[now->row][now->column] = step_counter++;
 			before = now;
 			refresh_next_board(before, Instruction_SUB);
 			now = next_step(before);
