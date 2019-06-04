@@ -4,8 +4,9 @@
 #include<stdbool.h>
 
 
-#define BOARD_SIZE 64
-
+#define BOARD_SIZE 20
+#define Instruction_ADD 1
+#define Instruction_SUB 2
 
 
 
@@ -18,28 +19,52 @@ typedef struct TNode
 	struct TNode * parent;
 }TreeNode;
 
+typedef struct Node
+{
+	int row;
+	int column;
+}Node;
+
+typedef struct 
+{
+	Node stack_array[BOARD_SIZE];
+	int  top;
+} SqStack;
+
 void printboard();
-void initial_tree();
-void init_Node();
+
 void horse();
-bool check_coordinate();
-void DestroyLeaf(TreeNode*temp_root);
-void which_is_the_best_son();
+bool check_coordinate(Node point);
 
 
 int board[8][8];
-TreeNode * Node_now, *Node_before;
+int board_for_next_step[8][8] = {//这个棋盘用来记录某个点下一个可以走的方位有几个
+	{2, 3, 4, 4, 4, 4, 3, 2},//每下一个子就得更新一次它
+	{3, 4, 6, 6, 6, 6, 4, 3},//这个就是下文提及的孙子棋盘
+	{4, 6, 8, 8, 8, 8, 6, 4},
+	{4, 6, 8, 8, 8, 8, 6, 4},
+	{4, 6, 8, 8, 8, 8, 6, 4},
+	{4, 6, 8, 8, 8, 8, 6, 4},
+	{3, 4, 6, 6, 6, 6, 4, 3},
+	{2, 3, 4, 4, 4, 4, 3, 2} 
+};
+
+
+
 int step_counter;
-int vector[8][2] = { {-2, 1} ,{-1, 2}, {1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1} };
-TreeNode *root;
+const int vector[8][2] = { {-2, 1} ,{-1, 2}, {1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1} };
+
 int show;//展示用
-TreeNode *best_son;//贪心算法使用
+
+SqStack stack;
+Node now, before;
+
 
 int main()
 {
 	initial_tree();
 	printf("Please choose a start TreeNode. Use ',' to distinguish row & column.\n");
-	scanf("%d,%d", &(Node_now->row), &(Node_now->column));
+	scanf("%d,%d", &(now.row), &(now.column));
 	printf("Step by step? Enter 1 means yes and 0 means no.\n");
 	scanf("%d", &show);
 
@@ -64,148 +89,152 @@ void printboard()
 	return;
 }
 
-void initial_tree()
+
+
+
+
+void push(Node point)
 {
-	init_Node();
-	root = Node_now;
-	root->parent = NULL;
+	if (stack.top >= BOARD_SIZE)
+	{
+		printf("Stack is full, ERROR\n");
+		exit(1);
+	}
+	stack.stack_array[stack.top++] = point;
 	return;
 }
 
-void init_Node()//每次初始化都搞出8个子节点
+Node pop()
 {
-	Node_now = (TreeNode*)malloc(sizeof(TreeNode));
-	if (Node_now == NULL)
+	Node Re;
+	if (!stack.top)
 	{
-		printf("malloc failed.\n");
+		printf("Stack is empty, ERROR\n");
 		exit(1);
 	}
-	for (int i = 0; i < 8; i++)
-		Node_now->children[i] = NULL;
+	Re = stack.stack_array[stack.top--];
+	return Re;
+}
+
+Node get_top()
+{
+	Node top;
+	if (!stack.top)
+	{
+		printf("Stack is empty, ERROR\n");
+		exit(1);
+	}
+	top = stack.stack_array[stack.top];
+	return top;
+}
+
+void Init_Stack()
+{
+	//stack.stack_array = (Node*)malloc(sizeof(Node)*BOARD_SIZE);
+	stack.top = 0;
+}
+
+void refresh_next_board(Node point, int instruction)//刷新孙子棋盘
+{//instruction 指的是，是要减，还是要加，因为悔棋的时候得恢复孙子个数
+
+	Node next;//这里的next实际上是以now为下一步的那些点
+	for (int vector_index = 0; vector_index < 8; vector_index++)//8个方向遍历
+	{
+		next.row = point.row + vector[vector_index][0];
+		next.column = point.column + vector[vector_index][1];//生成坐标
+		if (!check_coordinate(next))
+		{
+			continue;
+		}
+		if (instruction == Instruction_SUB)
+		{
+			board_for_next_step[next.row][next.column] --;
+		}
+		else
+		{
+			board_for_next_step[next.row][next.column] ++;
+		}
+	}
+
 	return;
 }
 
-/*
-void push(TreeNode local)
+bool check_coordinate(Node point)//检查是否是合法坐标
 {
-	if ((leaf - root) > (BOARD_SIZE * sizeof(TreeNode)))
-	{
-		printf("Error1\n");
-		exit(1);
-	}
-	*leaf = local;
-	leaf++;
-	return;
+	if (point.row >= 8 || point.row < 0 || point.column >= 8 || point.column < 0 
+		|| board[point.row][point.column])//如果棋盘的那个位置不合法，或者不是0
+		return false;
+	else
+		return true;
 }
 
-TreeNode pop()
-{
-	if (leaf == root)
+Node next_step(Node point)//找下一步应该去哪
+{//使用贪心算法，检索孙子棋盘
+	Node next;
+	Node best_son;
+	bool has_been_initialized = false;//最佳儿子是否被初始化了
+	for (int vector_index = 0; vector_index < 8; vector_index++)//8个方向遍历
 	{
-		printf("Error2\n");
-		exit(1);
+		next.row = point.row + vector[vector_index][0];
+		next.column = point.column + vector[vector_index][1];//生成坐标
+		if (!check_coordinate(next))
+		{
+			continue;
+		}
+		if (!has_been_initialized)//如果之前还未初始化最佳儿子，这里就初始化
+		{
+			best_son = next;
+			has_been_initialized = true;
+		}
+		else
+		{
+			if (board_for_next_step[next.row][next.column]
+				< board_for_next_step[best_son.row][best_son.column])
+			{
+				best_son = next;
+			}
+		}
 	}
-	leaf--;
-	return *leaf;
+
+	return best_son;
 }
-*/
+
 void horse()
 {
 	int vector_index;
 	bool find_it;
 	if (!step_counter)//第一步，把选定的地方写上1
 	{
-		board[Node_now->row][Node_now->column] = ++step_counter;
+		board[now.row][now.column] = ++step_counter;
+		push(now);
+		refresh_next_board(now, Instruction_SUB);
+	}
+	
+	while (stack.top)//只要栈不为空，就一直可以跑下去
+	{
+		if (!board_for_next_step[now.row][now.column])//如果现在没有子节点可以走了
+		{
+			board[now.row][now.column] = 0;
+			step_counter--;
+
+		}
+
+		
+		
+		if (check_coordinate(now))//如果当前位置合法
+		{
+			push(now);
+			board[now.row][now.column] = step_counter++;
+			before = now;
+			refresh_next_board(before, Instruction_SUB);
+			now = next_step(before);
+		}
 
 
 	}
-	while (step_counter < BOARD_SIZE)//当步数超过64步的时候停下来
-	{
-		find_it = false;
-		for (vector_index = 0; vector_index < 8; vector_index++)//8个方向遍历
-		{
-			if (Node_now->children[vector_index] != NULL //首先判断该节点是不是之前遍历过的，标准就是它有没有叶节点 
-				&& Node_now->children[vector_index]->banned)//如果发现该方位在之前遍历的时候已经走不通了
-				continue;//就跳到下一个方位
-
-			Node_before = Node_now;
-			init_Node();
-
-			Node_before->children[vector_index] = Node_now;
-			Node_now->parent = Node_before;//生成亲子关系
-
-			Node_now->row = Node_before->row + vector[vector_index][0];
-			Node_now->column = Node_before->column + vector[vector_index][1];//生成下一步探索的坐标
-			
-			if ((!check_coordinate())
-				||board[Node_now->row][Node_now->column])//如果棋盘的那个位置不合法，或者不是0
-			{
-				Node_now->banned = true;
-				Node_now = Node_before;//撤退到上一层
-				continue;//跳到下一个vector
-			}
-			else
-			{
-				find_it = true;
-
-
-				board[Node_now->row][Node_now->column] = ++step_counter;
-				break;//如果找到了一个空位，则将这个地方写下步数，跳出循环，在此基础上进行下一步探索
-			}
-		}
-		//上面是没有优化过的遍历
 
 
 
-
-		//下面这个是尝试使用贪心算法的东西
-		for (vector_index = 0; vector_index < 8; vector_index++)//8个方向遍历
-		{
-			if (Node_now->children[vector_index] != NULL //首先判断该节点是不是之前遍历过的，标准就是它有没有叶节点 
-				&& Node_now->children[vector_index]->banned)//如果发现该方位在之前遍历的时候已经走不通了
-				continue;//就跳到下一个方位
-
-			Node_before = Node_now;//Node_before表示当前研究的节点
-			init_Node();//初始化直接初始Node_now
-
-			Node_before->children[vector_index] = Node_now;//该空节点为当前研究节点的第i个子节点
-			Node_now->parent = Node_before;//生成亲子关系
-
-			Node_now->row = Node_before->row + vector[vector_index][0];
-			Node_now->column = Node_before->column + vector[vector_index][1];//生成下一步探索的坐标
-			
-			if ((!check_coordinate())
-				||board[Node_now->row][Node_now->column])//如果棋盘的那个位置不合法，或者不是0
-			{
-				Node_now->banned = true;
-				Node_now = Node_before;//撤退到上一层
-				continue;//跳到下一个vector
-			}
-			else
-			{
-				find_it = true;
-
-				//在这里进行优化，因为这个地方表示的是，如果找到可以走的点就走
-				//因此应该在这个地方写一个判断最优子节点的代码，遍历8次之后才准备break，而不是马上就break
-				
-
-
-				board[Node_now->row][Node_now->column] = ++step_counter;
-				break;//如果找到了一个空位，则将这个地方写下步数，跳出循环，在此基础上进行下一步探索
-			}
-		}
-
-
-
-		if (!find_it)//如果8个方向都是死路
-		{//返回上一层，回溯
-			Node_now->banned = true;
-			board[Node_now->row][Node_now->column] = 0;//还原
-			step_counter--;
-			DestroyLeaf(Node_now);
-
-			Node_now = Node_now->parent;//回溯
-		}
 
 		//下面是展示用的，可以删掉
 		if (show)
@@ -214,83 +243,12 @@ void horse()
 			printboard();
 			system("pause");
 		}
-	}
+	
 
 	return;
 }
 
-bool check_coordinate()//检查是否是合法坐标
-{
-	if (Node_now->row >= 8 || Node_now->row < 0 ||
-		Node_now->column >= 8 || Node_now->column < 0)
-		return false;
-	else
-		return true;
-}
 
-void DestroyLeaf(TreeNode * temp_root)//此函数只砍掉叶节点，保留根节点
-{
-	TreeNode *temp_leaf;
-	for (int i = 0; i < 8; i++)
-	{
-		temp_leaf = temp_root->children[i];
-		if (temp_leaf == NULL)//如果该叶节点是NULL，直接跳到下一个
-			continue;
-		free(temp_leaf);
-	}
-	temp_root->banned = true; 
-	return;
-}
 
-void which_is_the_best_son()
-{
-	//TreeNode * Node_now, *Node_before;
-	TreeNode * Node_grandparents = Node_before;//令Node_before为祖父母节点
-	TreeNode * Node_son;//
-	int grandson_number[8];//统计每个子节点的孙子节点数
-	int tmp_row_of_grandson, tmp_column_of_grandson;//孙子节点临时的坐标
-	int index_of_bestson = -1;//初始化最佳儿子的方位，初始值为-1
 
-	for (int i = 0; i < 8; i++)//首先最外层循环是对Node_before的8个方向遍历
-	{
-		if (Node_now->children[i] != NULL //首先判断该节点是不是之前遍历过的，标准就是它有没有叶节点 
-			&& Node_now->children[i]->banned)//如果发现该方位在之前遍历的时候已经走不通了
-		{
-			grandson_number[i] = 0;//该子节点没有孙子
-			continue;//就跳到下一个方位
-		}
-			
-		//由于这时候Node_before已经产生了8个子节点，因此不用再次生成子节点
-		//而是对每个子节点进行孙子节点统计
 
-		Node_son = Node_grandparents->children[i];//Node_son指向祖父母节点的第i个子节点
-		for (int k = 0; k < 8; k++)//循环8次，研究son节点的孙子节点有几个
-		{
-			//有几个可以走的孙子节点，就是有几个空的方向
-			//因此现在只要看这个子节点四周有几个空位就行
-			//Node_son现在还没有和孙子节点建立关系
-			//其实也不用建立关系，直接扫描棋盘计数就行
-			tmp_row_of_grandson = Node_son->row + vector[k][0];
-			tmp_column_of_grandson = Node_son->column + vector[k][1];
-			if (!board[tmp_row_of_grandson][tmp_column_of_grandson])//如果这个孙子节点的位置是0，则说明可以走这
-			{
-				grandson_number[i]++;//孙子数+1, 注意这里是i不是k，k是孙子的index，i是儿子的index
-			}
-		}
-		//循环结束后，得到了该儿子的孙子个数，现在开始统计哪个儿子的孙子最少
-		if (index_of_bestson == -1 && grandson_number[i] != 0)
-		{
-			index_of_bestson = i;//如果最佳儿子index还没有赋值，而且当前儿子有可以走的孙子的话，就初始化最佳儿子index
-		}
-		else
-		{
-			if (grandson_number[i] < grandson_number[index_of_bestson] && grandson_number[i]!=0)
-				index_of_bestson = i;
-		}
-		
-		//如果所有的儿子，都没有可以走的孙子，那么这时候儿子index还是-1，这就说明这个祖父母节点走不通了
-		if (index_of_bestson != -1)
-			best_son = Node_grandparents->children[index_of_bestson];
-		else
-			best_son = NULL;//走不通的时候bestson = NULL
-}
