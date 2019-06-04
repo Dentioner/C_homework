@@ -43,7 +43,7 @@ Node* get_top();
 void Init_Stack();
 void refresh_next_board(Node* point, int instruction);
 void horse();
-bool check_coordinate(Node* point);
+bool check_coordinate(Node testpoint);
 Node* next_step(Node* point);
 void Init_nodeboard();
 
@@ -150,12 +150,14 @@ void Init_Stack()
 
 void refresh_next_board(Node* point, int instruction)//刷新孙子棋盘
 {//instruction 指的是，是要减，还是要加，因为悔棋的时候得恢复孙子个数
-
+	Node testnode;
 	Node* next;//这里的next实际上是以now为下一步的那些点
 	for (int vector_index = 0; vector_index < 8; vector_index++)//8个方向遍历
-	{		
+	{
+		testnode.row = point->row + vector[vector_index][0];
+		testnode.column = point->column + vector[vector_index][1];
 		next = &nodeboard[point->row + vector[vector_index][0]][point->column + vector[vector_index][1]];
-		if (!check_coordinate(next))
+		if (!check_coordinate(testnode))
 		{
 			continue;
 		}
@@ -172,10 +174,10 @@ void refresh_next_board(Node* point, int instruction)//刷新孙子棋盘
 	return;
 }
 
-bool check_coordinate(Node* point)//检查是否是合法坐标
+bool check_coordinate(Node testpoint)//检查是否是合法坐标
 {
-	if (point->row >= 8 || point->row < 0 || point->column >= 8 || point->column < 0 
-		|| board[point->row][point->column])//如果棋盘的那个位置不合法，或者不是0
+	if (testpoint.row >= 8 || testpoint.row < 0 || testpoint.column >= 8 || testpoint.column < 0
+		|| board[testpoint.row][testpoint.column])//如果棋盘的那个位置不合法，或者不是0
 		return false;
 	else
 		return true;
@@ -184,6 +186,7 @@ bool check_coordinate(Node* point)//检查是否是合法坐标
 Node* next_step(Node* point)//找下一步应该去哪
 {//使用贪心算法，检索孙子棋盘
 	//在此步内生成每个Node的儿子数组
+	Node testnode;
 	Node* next;
 	Node* best_son;
 	bool has_been_initialized = false;//最佳儿子是否被初始化了
@@ -195,11 +198,13 @@ Node* next_step(Node* point)//找下一步应该去哪
 	{
 		for (; vector_index < 8; vector_index++)//8个方向遍历
 		{
+			testnode.row = point->row + vector[vector_index][0];
+			testnode.column = point->column + vector[vector_index][1];
 			next = &nodeboard[point->row + vector[vector_index][0]][point->column + vector[vector_index][1]];
 			point->son[i][0] = vector_index;
 
 
-			if (!check_coordinate(next))
+			if (!check_coordinate(testnode))
 			{
 				point->son[i++][1] = 9 + vector_index;//瞎写的一个大于9的数值			
 				continue;
@@ -229,6 +234,7 @@ Node* next_step(Node* point)//找下一步应该去哪
 
 		}//排序
 		
+		//******这个地方似乎没有检查生成的那一长串坐标值，是不是正常的
 		best_son = 
 			&nodeboard
 			[point->row + vector[point->son[point->back_track_counter][0]][0]]
@@ -239,6 +245,7 @@ Node* next_step(Node* point)//找下一步应该去哪
 
 	else//back_track_counter != 0
 	{
+		//******这个地方似乎没有检查生成的那一长串坐标值，是不是正常的
 		best_son =
 			&nodeboard
 			[point->row + vector[point->son[point->back_track_counter][0]][0]]
@@ -270,6 +277,7 @@ void horse()
 {
 	//int vector_index;
 	//bool find_it;
+	Node testnode;
 	if (!step_counter)//第一步，把选定的地方写上1
 	{
 		board[now->row][now->column] = ++step_counter;
@@ -282,6 +290,8 @@ void horse()
 	while (stack.top)//只要栈不为空，就一直可以跑下去
 	{
 		//now = get_top();
+		testnode.row = now->row;
+		testnode.column = now->column;
 		if (step_counter == BOARD_SIZE)//跑完了
 		{
 			printboard();
@@ -309,7 +319,7 @@ void horse()
 			continue;
 		}
 		
-		if (check_coordinate(now))//如果当前位置合法
+		if (check_coordinate(testnode))//如果当前位置合法
 		{
 			push(now);
 			board[now->row][now->column] = step_counter++;
