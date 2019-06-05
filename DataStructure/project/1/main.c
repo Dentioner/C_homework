@@ -334,13 +334,13 @@ void horse()
 	while (stack.top!=-1)//只要栈不为空，就一直可以跑下去
 	{
 		//now = get_top();
-
+		/*
 		if (step_counter == 63)
 		{
 			printf("test.\n");
 			printboard();
 		}
-
+		*/
 
 		testnode.row = now->row;
 		testnode.column = now->column;

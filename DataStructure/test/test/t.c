@@ -8,10 +8,10 @@ int main()
 	int i, j;
 	int k;
 	//while((scanf("%d", &i)!=1))
-	j = scanf("%d", &i);
+	scanf("%d", &j);
 	printf("%d", j);
-	k = getchar();
-	printf("%c", k);
+	//k = getchar();
+	//printf("%c", k);
 
 
 	system("pause");

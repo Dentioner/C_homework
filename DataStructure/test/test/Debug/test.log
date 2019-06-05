@@ -1,3 +1,5 @@
 ﻿  t.c
 e:\coding\c_homework\datastructure\test\test\t.c(17): warning C4013: “system”未定义；假设外部返回 int
+e:\coding\c_homework\datastructure\test\test\t.c(9): warning C4101: “k”: 未引用的局部变量
+e:\coding\c_homework\datastructure\test\test\t.c(8): warning C4101: “i”: 未引用的局部变量
   test.vcxproj -> E:\coding\C_homework\DataStructure\test\Debug\test.exe
