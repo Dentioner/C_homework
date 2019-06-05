@@ -4,7 +4,7 @@
 #include<stdbool.h>
 
 
-#define BOARD_SIZE 8
+#define BOARD_SIZE 64
 #define Instruction_ADD 1
 #define Instruction_SUB 2
 
@@ -212,6 +212,11 @@ Node* next_step(Node* point)//找下一步应该去哪
 	int vector_index = 0;
 	//首先在生成儿子之前先看看有没有之前生成过儿子了，否则就不用再跑一次循环
 	//判断之前有没有生成儿子的方式，我觉得可以根据Node结构里面的那个回溯计数器来搞
+
+	if (point->row == 2 && point->column == 1 && step_counter == 2)
+		printf("\n");
+
+
 	if (!point->back_track_counter)//计数器为0说明没有回溯过
 	{
 		for (; vector_index < 8; vector_index++)//8个方向遍历
@@ -329,28 +334,47 @@ void horse()
 	while (stack.top!=-1)//只要栈不为空，就一直可以跑下去
 	{
 		//now = get_top();
+
+		if (step_counter == 63)
+		{
+			printf("test.\n");
+			printboard();
+		}
+
+
 		testnode.row = now->row;
 		testnode.column = now->column;
-		if (step_counter == BOARD_SIZE)//跑完了
-		{
+		//if (step_counter == BOARD_SIZE)
+		//{
 			
+			
+		//}
+		if (step_counter == BOARD_SIZE - 1 && board[now->row][now->column] == 0)//跑完了
+		{
 			if (print_counter == 1375)
 				printf("test\n");//test
-			
+
+			push(now);
+			board[now->row][now->column] = ++step_counter;
 
 			printf("第%d次\n", ++print_counter);
 			printboard();
 			printf("\n");
-			//board[now->row][now->column] = 0;
-			board[before->row][before->column] = 0;//不知道对不对
-			refresh_next_board(before, Instruction_ADD);
+			
+			board[now->row][now->column] = 0;
+			//board[before->row][before->column] = 0;//不知道对不对
+			
+			//refresh_next_board(before, Instruction_ADD);
 			//refresh_next_board(now, Instruction_ADD);
+			
 			step_counter--;
 			Re = pop();
 			Re->back_track_counter = 0;//复原
 			now = get_top();
 			continue;
 		}
+
+
 		if (!board_for_next_step[now->row][now->column])//如果现在没有子节点可以走了
 		{
 			//board[now->row][now->column] = 0;
