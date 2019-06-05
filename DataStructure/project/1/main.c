@@ -74,6 +74,7 @@ Node nodeboard[8][8];
 int main()
 {
 	Init_nodeboard();
+	Init_Stack();
 	int first_row, first_column;
 	printf("Please choose a start TreeNode. Use ',' to distinguish row & column.\n");
 	scanf("%d,%d", &(first_row), &(first_column));
@@ -114,7 +115,7 @@ void push(Node *point_pointer)
 		printf("Stack is full, ERROR\n");
 		exit(1);
 	}
-	stack.stack_array[stack.top++] = point_pointer;
+	stack.stack_array[++stack.top] = point_pointer;
 	return;
 }
 
@@ -145,7 +146,7 @@ Node* get_top()
 void Init_Stack()
 {
 	//stack.stack_array = (Node*)malloc(sizeof(Node)*BOARD_SIZE);
-	stack.top = 0;
+	stack.top = -1;
 }
 
 void refresh_next_board(Node* point, int instruction)//刷新孙子棋盘
@@ -287,7 +288,7 @@ void horse()
 		now = next_step(before);
 	}
 	
-	while (stack.top)//只要栈不为空，就一直可以跑下去
+	while (stack.top!=-1)//只要栈不为空，就一直可以跑下去
 	{
 		//now = get_top();
 		testnode.row = now->row;
@@ -295,7 +296,8 @@ void horse()
 		if (step_counter == BOARD_SIZE)//跑完了
 		{
 			printboard();
-			board[now->row][now->column] = 0;
+			//board[now->row][now->column] = 0;
+			board[before->row][before->column] = 0;//不知道对不对
 			step_counter--;
 			pop();
 			now = get_top();
@@ -322,7 +324,7 @@ void horse()
 		if (check_coordinate(testnode))//如果当前位置合法
 		{
 			push(now);
-			board[now->row][now->column] = step_counter++;
+			board[now->row][now->column] = ++step_counter;
 			before = now;
 			refresh_next_board(before, Instruction_SUB);
 			now = next_step(before);
