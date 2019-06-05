@@ -4,7 +4,7 @@
 #include<stdbool.h>
 
 
-#define BOARD_SIZE 4
+#define BOARD_SIZE 8
 #define Instruction_ADD 1
 #define Instruction_SUB 2
 
@@ -167,6 +167,21 @@ void refresh_next_board(Node* point, int instruction)//刷新孙子棋盘
 		if (instruction == Instruction_SUB)
 		{
 			board_for_next_step[next->row][next->column] --;
+
+			//下面是debug用的
+			
+			if (board[1][5] == 0 || board[2][6] == 0)
+			{
+				if (board_for_next_step[0][7] <= 0)
+					printf("test.\n");
+			}
+			
+			if (board[1][5] == 0 && board[2][6] == 0)
+			{
+				if (board_for_next_step[0][7] <= 1)
+					printf("test.\n");
+			}
+
 		}
 		else
 		{
@@ -318,9 +333,10 @@ void horse()
 		testnode.column = now->column;
 		if (step_counter == BOARD_SIZE)//跑完了
 		{
-			if (print_counter == 27)
+			
+			if (print_counter == 1375)
 				printf("test\n");//test
-
+			
 
 			printf("第%d次\n", ++print_counter);
 			printboard();
@@ -328,28 +344,48 @@ void horse()
 			//board[now->row][now->column] = 0;
 			board[before->row][before->column] = 0;//不知道对不对
 			refresh_next_board(before, Instruction_ADD);
+			//refresh_next_board(now, Instruction_ADD);
 			step_counter--;
-			pop();
+			Re = pop();
+			Re->back_track_counter = 0;//复原
 			now = get_top();
 			continue;
 		}
 		if (!board_for_next_step[now->row][now->column])//如果现在没有子节点可以走了
 		{
-			board[now->row][now->column] = 0;
+			//board[now->row][now->column] = 0;
+			board[before->row][before->column] = 0;
 			refresh_next_board(before, Instruction_ADD);
+			//refresh_next_board(now, Instruction_ADD);
 			step_counter--;
-			pop();
+			Re = pop();
+			Re->back_track_counter = 0;//复原
 			now = get_top();
 			continue;
 		}
 		
 		if (now->back_track_counter >= board_for_next_step[now->row][now->column])//可行方向都搞过了
 		{
-			board[now->row][now->column] = 0;
-			refresh_next_board(before, Instruction_ADD);
+
+			if (step_counter == 7 && print_counter == 1432)
+				printf("test.\n");
+
+			if (board_for_next_step[now->row][now->column] == 0)//这个说明压根就没有可行方向
+			{
+				board[before->row][before->column] = 0;
+			}
+
+			else
+			{
+				board[now->row][now->column] = 0;
+			}
+			//refresh_next_board(before, Instruction_ADD);
+			refresh_next_board(now, Instruction_ADD);
 			step_counter--;
-			pop();
-			now = get_top();
+			Re = pop();
+			Re->back_track_counter = 0;//复原
+			if (stack.top > -1)//避免最后弹栈完毕之后报错
+				now = get_top();
 			continue;
 		}
 		if (step_counter == board[now->row][now->column])//这个条件说明当前的now结点之前走过了，now是从栈里面出来的
@@ -361,9 +397,11 @@ void horse()
 			{
 				now = before;
 				board[now->row][now->column] = 0;
-				refresh_next_board(before, Instruction_ADD);
+				//refresh_next_board(before, Instruction_ADD);
+				refresh_next_board(now, Instruction_ADD);
 				step_counter--;
-				pop();
+				Re = pop();
+				Re->back_track_counter = 0;//复原
 				now = get_top();
 				continue;
 			}
@@ -382,9 +420,11 @@ void horse()
 				{
 					now = before;
 					board[now->row][now->column] = 0;
-					refresh_next_board(before, Instruction_ADD);
+					//refresh_next_board(before, Instruction_ADD);
+					refresh_next_board(now, Instruction_ADD);
 					step_counter--;
-					pop();
+					Re = pop();
+					Re->back_track_counter = 0;//复原
 					now = get_top();
 					continue;
 				}
