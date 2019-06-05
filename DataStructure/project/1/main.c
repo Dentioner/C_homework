@@ -4,7 +4,7 @@
 #include<stdbool.h>
 
 
-#define BOARD_SIZE 5
+#define BOARD_SIZE 4
 #define Instruction_ADD 1
 #define Instruction_SUB 2
 
@@ -60,11 +60,13 @@ int board_for_next_step[8][8] = {//Õâ¸öÆåÅÌÓÃÀ´¼ÇÂ¼Ä³¸öµãÏÂÒ»¸ö¿ÉÒÔ×ßµÄ·½Î»ÓÐ¼¸¸
 };
 
 
-
+int print_counter;
 int step_counter;
 const int vector[8][2] = { {-2, 1} ,{-1, 2}, {1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1} };
 
 int show;//Õ¹Ê¾ÓÃ
+
+bool no_more_grandson = false;//next_stepÓÃ
 
 SqStack stack;
 Node *now, *before;
@@ -122,7 +124,7 @@ void push(Node *point_pointer)
 Node* pop()
 {
 	Node* Re;
-	if (!stack.top)
+	if (stack.top == -1)
 	{
 		printf("Stack is empty, ERROR\n");
 		exit(1);
@@ -134,7 +136,7 @@ Node* pop()
 Node* get_top()
 {
 	Node* top;
-	if (!stack.top)
+	if (stack.top == -1)
 	{
 		printf("Stack is empty, ERROR\n");
 		exit(1);
@@ -241,6 +243,16 @@ Node* next_step(Node* point)//ÕÒÏÂÒ»²½Ó¦¸ÃÈ¥ÄÄ
 			[point->row + vector[point->son[point->back_track_counter][0]][0]]
 			[point->column + vector[point->son[point->back_track_counter][0]][1]];
 		
+		if (point->son[point->back_track_counter][1] > 8)//ËµÃ÷Ã»ÓÐ¸ü¶àµÄËï×ÓÁË£¬´óÓÚ8µÄ¶¼ÊÇÖ®Ç°Ô¤ÉèµÄÀ¬»øÖµ
+		{
+			no_more_grandson = true;
+
+		}
+		else
+		{
+			no_more_grandson = false;
+		}
+			
 		point->back_track_counter++;
 	}
 
@@ -251,6 +263,16 @@ Node* next_step(Node* point)//ÕÒÏÂÒ»²½Ó¦¸ÃÈ¥ÄÄ
 			&nodeboard
 			[point->row + vector[point->son[point->back_track_counter][0]][0]]
 			[point->column + vector[point->son[point->back_track_counter][0]][1]];
+
+		if (point->son[point->back_track_counter][1] > 8)//ËµÃ÷Ã»ÓÐ¸ü¶àµÄËï×ÓÁË£¬´óÓÚ8µÄ¶¼ÊÇÖ®Ç°Ô¤ÉèµÄÀ¬»øÖµ
+		{
+			no_more_grandson = true;
+
+		}
+		else
+		{
+			no_more_grandson = false;
+		}
 
 		point->back_track_counter++;
 	}
@@ -279,6 +301,7 @@ void horse()
 	//int vector_index;
 	//bool find_it;
 	Node testnode;
+	Node* Re;//ÓÃÓÚ´æ´¢popµÄ·µ»ØÖµ
 	if (!step_counter)//µÚÒ»²½£¬°ÑÑ¡¶¨µÄµØ·½Ð´ÉÏ1
 	{
 		board[now->row][now->column] = ++step_counter;
@@ -295,9 +318,16 @@ void horse()
 		testnode.column = now->column;
 		if (step_counter == BOARD_SIZE)//ÅÜÍêÁË
 		{
+			if (print_counter == 27)
+				printf("test\n");//test
+
+
+			printf("µÚ%d´Î\n", ++print_counter);
 			printboard();
+			printf("\n");
 			//board[now->row][now->column] = 0;
 			board[before->row][before->column] = 0;//²»ÖªµÀ¶Ô²»¶Ô
+			refresh_next_board(before, Instruction_ADD);
 			step_counter--;
 			pop();
 			now = get_top();
@@ -306,6 +336,7 @@ void horse()
 		if (!board_for_next_step[now->row][now->column])//Èç¹ûÏÖÔÚÃ»ÓÐ×Ó½Úµã¿ÉÒÔ×ßÁË
 		{
 			board[now->row][now->column] = 0;
+			refresh_next_board(before, Instruction_ADD);
 			step_counter--;
 			pop();
 			now = get_top();
@@ -315,22 +346,51 @@ void horse()
 		if (now->back_track_counter >= board_for_next_step[now->row][now->column])//¿ÉÐÐ·½Ïò¶¼¸ã¹ýÁË
 		{
 			board[now->row][now->column] = 0;
+			refresh_next_board(before, Instruction_ADD);
 			step_counter--;
 			pop();
 			now = get_top();
 			continue;
 		}
-		
-		if (check_coordinate(testnode))//Èç¹ûµ±Ç°Î»ÖÃºÏ·¨
+		if (step_counter == board[now->row][now->column])//Õâ¸öÌõ¼þËµÃ÷µ±Ç°µÄnow½áµãÖ®Ç°×ß¹ýÁË£¬nowÊÇ´ÓÕ»ÀïÃæ³öÀ´µÄ
 		{
-			push(now);
-			board[now->row][now->column] = ++step_counter;
 			before = now;
-			refresh_next_board(before, Instruction_SUB);
+			//refresh_next_board(before, Instruction_SUB);
 			now = next_step(before);
+			if (no_more_grandson)
+			{
+				now = before;
+				board[now->row][now->column] = 0;
+				refresh_next_board(before, Instruction_ADD);
+				step_counter--;
+				pop();
+				now = get_top();
+				continue;
+			}
+
 		}
+		else//·ñÔòËµÃ÷µ±Ç°µÄnow½áµãÊÇnext²úÉúµÄ
+		{
+			if (check_coordinate(testnode))//Èç¹ûµ±Ç°Î»ÖÃºÏ·¨
+			{
+				push(now);
+				board[now->row][now->column] = ++step_counter;
+				before = now;
+				refresh_next_board(before, Instruction_SUB);
+				now = next_step(before);
+				if (no_more_grandson)
+				{
+					now = before;
+					board[now->row][now->column] = 0;
+					refresh_next_board(before, Instruction_ADD);
+					step_counter--;
+					pop();
+					now = get_top();
+					continue;
+				}
 
-
+			}
+		}
 	}
 
 
