@@ -45,6 +45,8 @@ void sever(char str[], char hstr[])
 	int i = -1;
 	int k = 0;
 	char ch;
+	int index2 = 0;
+	char backup_str[MAXLENGTH] = { 0 };
 	do
 	{
 		i++;
@@ -61,18 +63,47 @@ void sever(char str[], char hstr[])
 		substring(hstr, str, 0, i );
 		substring(str, str, i + 1, n - i);
 		//还得给str加一层括号
+		//str加括号
+		backup_str[0] = '(';
+		for (index2 = 0; str[index2] != '\0'; index2++)
+		{
+			backup_str[index2 + 1] = str[index2];
+		}
+		backup_str[index2 + 1] = ')';
+		backup_str[index2 + 2] = '\0';
+		strcpy(str, backup_str);
+	}
+	else//此时只有一对括号，没法分离，例如str = (a,b,c,d)这样
+	{
+		//strcpy(hstr, str);
+		hstr[0] = str[1];
+		hstr[1] = '\0';
+		
+		int length_of_str = strlen(str);
+		if (length_of_str > 3)
+		{
+			for (index2 = 3; index2 < length_of_str; index2++)
+			{
+				str[index2 - 2] = str[index2];
+			}
+			str[length_of_str - 2] = '\0';
+		}
+		else
+		{
+			str[1] = ')';
+			str[2] = '\0';
+		}
+
+
 
 	}
-	else
-	{
-		strcpy(hstr, str);
-		
-	}
+
+	
 
 	return;
 }
 
-Status CreateGList(GLNode *L, char string[])
+Status CreateGList(GList *L, char string[])
 {
 	int ch;
 //	int nextch;//ch的后一位
@@ -85,25 +116,25 @@ Status CreateGList(GLNode *L, char string[])
 	ch = string[index];
 
 	if (strcmp(string, emp) == 0)
-		L = NULL;
+		*L = NULL;
 	else
 	{
-		if (!(L = (GList)malloc(sizeof(GLNode))))
+		if (!((*L) = (GList)malloc(sizeof(GLNode))))
 			return ERROR;
 		if (strlen(string) == 1)//单原子广义表
 		{
-			L->tag = atom;
-			L->atom = string[0];
+			(*L)->tag = atom;
+			(*L)->atom = string[0];
 		}
 		else
 		{
-			L->tag = list;
-			p = L;
+			(*L)->tag = list;
+			p = (*L);
 			substring(sub, string, 1, strlen(string) - 2);//脱括号
 			do
 			{
 				sever(sub, hsub);
-				CreateGList(p->ptr.hp, sub);
+				CreateGList(&(p->ptr.hp), hsub);
 				q = p;
 				if (strcmp(sub, emp))//表尾不空
 				{
@@ -169,7 +200,7 @@ void getstr(char string[])
 
 int main()
 {
-	GLNode L ;
+	GList L ;
 	char string[MAXLENGTH];
 
 
