@@ -33,16 +33,45 @@ int this_position_is_not_a_number_ver2[MAXLENGTH] = { 0 };//after rearrangement(
 
 void create_array()
 {
-	int ch;
+	int ch, ch2;
 	int number = -1;
+	char numberc;
 	int index = 0;
-	int scanf_detector;//判断这一波是符号还是数字
-	scanf_detector =  scanf("%d", &number);
-	ch = getchar();
-	if (scanf_detector == 0 && ch == ',')//很奇怪，读到+号会跳到后一个去，但是-、*、/不会
+	int scanf_detector, scanf_detector2;//判断这一波是符号还是数字
+	scanf_detector2 = scanf("%c", &numberc);//很奇怪，读到+-号会跳到后一个去，但是*、/不会
+	
+	if (numberc == '+' || numberc == '-')
+	{
+		scanf_detector = 0;
+		ch = getchar();//读'，'这个符号，将这个符号从缓冲区拿掉
+		ch = (int)numberc;
+	}
+	else if (numberc == '*' || numberc == '/')
+	{
+		scanf_detector = 0;
+		ch = getchar();//读'，'这个符号，将这个符号从缓冲区拿掉
+		ch = (int)numberc;
+	}
+	else
+	{
+		scanf_detector =  scanf("%d", &number);
+		ch = getchar();//ch一定能读到','
+		if (number == -1)//只有一位数
+		{
+			number = (int)(numberc - '0');
+		}
+		else//两位数
+		{
+			number += (int)(numberc - '0')*10;
+		}
+	}
+	
+	/*
+	if (scanf_detector == 0 && ch == ',')
 	{
 		ch = (int)'+';
 	}
+	*/
 	while (ch != EOF && ch != '\n' && ch != '\0' && ch != ';')
 	{
 		if (scanf_detector || ch == 'n')//读到的是数字而不是符号，或者读到的是null的首字母n
@@ -50,7 +79,7 @@ void create_array()
 			if (number == -1)//null
 			{
 				//ch = getchar();//n
-				ch = getchar();//u
+				//ch = getchar();//u
 				ch = getchar();//l
 				ch = getchar();//l
 
@@ -75,16 +104,50 @@ void create_array()
 			data_array[index] = ch;
 			length_notNULL++;
 			this_position_is_not_a_number[index] = 1;
-			if (ch != '+')//如果ch之前是+号，那么后面的那个都号就读过了，不用再刷新一次了
+			if (ch != '+' && ch != '-' && ch != '*' && ch != '/')//如果ch之前是+-号，那么后面的那个逗号就读过了，不用再刷新一次了
 				ch = getchar();//读'，'这个符号，将这个符号从缓冲区拿掉
 		}
 		//下一个
 		number = -1;
-		scanf_detector = scanf("%d", &number);
-		ch = getchar();
-		if (scanf_detector == 0 && ch == ',')//很奇怪，读到+号会跳到后一个去，但是-、*、/不会
+		scanf_detector2 = scanf("%c", &numberc);//很奇怪，读到+-号会跳到后一个去，但是*、/不会
+		ch2 = getchar();//读取可能存在的\n符号
+
+		if (numberc == '+' || numberc == '-')
 		{
-			ch = (int)'+';
+			scanf_detector = 0;
+			ch = ch2;//读'，'这个符号，将这个符号从缓冲区拿掉
+			ch = (int)numberc;
+		}
+		else if (numberc == 'n')//null
+		{
+			ch = (int)numberc;//注意，ch2已经将null里面的u读了
+			scanf_detector = 0;
+		}
+		else if (numberc == '*' || numberc == '/')
+		{
+			scanf_detector = 0;
+			ch = ch2;//读'，'这个符号，将这个符号从缓冲区拿掉
+			ch = (int)numberc;
+		}
+		else
+		{
+			
+			//scanf_detector = scanf("%d", &number);
+			//ch = getchar();//ch一定能读到','
+			if ('0' > ch2 || ch2 > '9')//只有一位数
+			{
+				number = (int)(numberc - '0');
+				scanf_detector = 1;
+				ch = ch2;
+			}
+			else//两位数
+			{
+				number = (int)(numberc - '0') * 10 + (int)(ch2 - '0');
+				scanf_detector = 1;
+				ch = getchar();//ch把那个剩下来的符号给读了
+			}
+			
+			
 		}
 		index++;
 	}
@@ -242,14 +305,43 @@ void Visit(elemtype e)
 	return;
 }
 
+int compare_symbol(int a, int b)
+{
+	char cha = (char)a;
+	char chb = (char)b;
+	//if ((cha == '*' || cha == '/') && (chb == '+' || chb == '-'))
+	if ((cha == '*' || cha == '/' || cha == '-') && (chb == '+' || chb == '-'))
+		return 1;
+	
+	else
+		return 0;
+}
 
 void InorderTraverse(tree T, void(*Visit)(elemtype e))
 {
-	if (T) {
+	if (T) 
+	{
+	
 		InorderTraverse(T->lchild, Visit);
 		this_position_is_not_a_number_ver2[visit_counter] = T->tag;
+		
 		Visit(T->data);
+
+		if (T->tag == symbol && T->rchild->tag == symbol)
+			if (compare_symbol(T->data, T->rchild->data))
+			{
+				Visit((int)'(');
+				this_position_is_not_a_number_ver2[visit_counter- 1] = 1;
+			}
+
 		InorderTraverse(T->rchild, Visit);
+		//这里试着加上一个打印括号的内容
+		if (T->tag == symbol && T->rchild->tag == symbol)
+			if (compare_symbol(T->data, T->rchild->data))
+			{
+				Visit((int)')');
+				this_position_is_not_a_number_ver2[visit_counter - 1] = 1;
+			} 
 	}
 	return;
 }
