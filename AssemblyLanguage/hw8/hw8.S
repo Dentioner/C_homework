@@ -1,17 +1,21 @@
 Inthandler:
 	pushw	%ax
+	pushw	%bx 
 1:
 	movb	(%si), %al
-	test	%al, %al
+	movb	1(%si), %bl #bl saves the following char  
+	test	%al, %al 
 	jz	1f
-	subb	$'a', %al
-	cmp	$26, %al
+	subb	$'0', %al
+	cmp	$9, %al 
 	jae	2f
-	addb	$0x41, %al
+	movb	%bl, %al # move the following char to the current position
 	movb	%al, (%si)
+	dec	%si #if we do not add this instruction, char in bl may also be a number but we just skip it
 2:
 	inc	%si
 	jmp	1b
 1:
+	popw	%bx
 	popw	%ax
 	iret
