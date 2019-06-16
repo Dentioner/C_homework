@@ -1,5 +1,5 @@
 Inthandler:
-	push	%ax
+	pushw	%ax
 1:
 	movb	(%si), %al
 	test	%al, %al
