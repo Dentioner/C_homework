@@ -230,17 +230,47 @@ void Visit(elemtype e)
 
 
 void InorderTraverse(tree T, void(*Visit)(elemtype e))
+//void InorderTraverse(tree T, void(*Visit)(node * p))
 {
 	if (T) 
 	{
 		InorderTraverse(T->lchild, Visit);
 		Visit(T->data);
-		
+		/*
+		Visit(T);
+		if (T->rtag == thread && T->rchild == root->lchild)//最后一个节点
+		;
+		else
+		{
+			printf(";");
+		}
+		*/
 		InorderTraverse(T->rchild, Visit);
 	}
 	return;
 }
 
+void InorderTraverse_thr(tree T, void(*Visit)(elemtype e))
+{
+	tree p;
+	p = T->lchild;
+	while (p != T)
+	{
+		while (p->ltag == link)
+		{
+			p = p->lchild;
+		}
+		Visit(p->data);
+		while (p->rtag == thread && p->rchild != T)
+		{
+			p = p->rchild;
+			Visit(p->data);
+		}
+		p = p->rchild;
+	}
+	
+	return;
+}
 
 
 void visit_print()
@@ -353,6 +383,12 @@ void InorderThreading(tree* head, tree T)
 	return;
 }
 
+void Visit2(node * p)
+{
+	printf("%d,%d,%d,%d", p->ltag, p->lchild->data, p->rtag, p->rchild->data);
+	return;
+}
+
 int main()
 {
 	tree T_for_recur;
@@ -364,9 +400,14 @@ int main()
 	add_tree();
 
 	T_for_recur = root;
-	InorderTraverse(T_for_recur, Visit);
-	visit_print();
+	
+	//InorderTraverse(T_for_recur, Visit);
+	//visit_print();
+
 	InorderThreading(&head, T_for_recur);
+	//InorderTraverse(T_for_recur, Visit2);
+	InorderTraverse_thr(T_for_recur, Visit);
+	visit_print();
 
 	system("pause");
 	return 0;
