@@ -251,7 +251,7 @@ void InorderTraverse(tree T, void(*Visit)(elemtype e))
 	return;
 }
 
-void InorderTraverse_thr(tree T, void(*Visit2)(node *p))
+void InorderTraverse_thr(tree T, void(*Visit2)(node * p))
 {
 	tree p;
 	p = T->lchild;
@@ -262,22 +262,18 @@ void InorderTraverse_thr(tree T, void(*Visit2)(node *p))
 			p = p->lchild;
 		}
 		Visit2(p);
-		printf(";");
+		if (p->rchild != head_thread)
+				printf(";");
 		while (p->rtag == thread && p->rchild != T)
 		{
-			if (p == head_thread)
-				return;
 			p = p->rchild;
-			//printf(";");
-			if (p != head_thread)
-				Visit2(p);
-			if (p->rchild != head_thread && p!=head_thread)
+			Visit2(p);
+			if (p->rchild != head_thread)
 				printf(";");
 		}
 		p = p->rchild;
 	}
 	
-	Visit2(T);
 	return;
 }
 
@@ -428,7 +424,7 @@ int main()
 	InorderThreading(&head, T_for_recur);
 	//InorderTraverse(T_for_recur, Visit2);
 	head_thread = head;
-	InorderTraverse_thr(T_for_recur, Visit2);
+	InorderTraverse_thr(head, Visit2);
 	//visit_print();
 
 	system("pause");
