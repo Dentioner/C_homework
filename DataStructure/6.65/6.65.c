@@ -69,29 +69,111 @@ void create_array()
 可以考虑使用递归方式
 参数为根节点的位置，以及需要处理的数组的范围
  */
-void create_tree(tree root)
+void create_subtree(tree *parent, tree *sub_root, int start_index, int end_index)
+{
+	int index1, index2;
+	if (start_index != end_index)
+	{
+		(*sub_root) = (tree)malloc(sizeof(node));
+		(*sub_root)->data = 0;
+		(*sub_root)->lchild = (*sub_root)->rchild = (*sub_root)->parent = NULL;
+
+		for (index1 = pre_len - 1; preorder_array[index1] >= 0; index1--)
+			;
+		index1++;
+		(*sub_root)->data = preorder_array[index1];
+
+		(*sub_root)->parent = *parent;
+		for (index2 = start_index; preorder_array[index1] != inorder_array[index2]; index2++)
+			;
+
+		preorder_array[index1] = -1;
+		if (end_index - start_index <= 1)//此时不能更下一层递归了
+			return;
+		else
+		{
+			create_subtree(sub_root, &((*sub_root)->lchild), start_index, index2);//前：包括；后：不包括
+			create_subtree(sub_root, &((*sub_root)->rchild), index2 + 1, end_index);
+		}
+
+
+		return;
+	}
+	else
+	{
+		return;
+	}
+}
+
+
+
+void create_root(tree *root)
 {
     int index1, index2;
-    if (root == NULL)
+    if ((*root) == NULL)
     {
-        root = (tree)malloc(sizeof(node));
-        root->data = 0;
-        root->lchild = root->lchild = root->parent = NULL;
+		(*root) = (tree)malloc(sizeof(node));
+		(*root)->data = 0;
+		(*root)->lchild = (*root)->rchild = (*root)->parent = NULL;
     }
-    tree p;
-    for (index1 = 0; index1 < pre_len; index1++)
-    {
-
-    }
-
+	index1 = 0;
+	(*root)->data = preorder_array[index1];
+	
+	for (index2 = 0; index2 < in_len; index2++)
+	{
+		if (preorder_array[index1] == inorder_array[index2])
+			break;
+	}
+	preorder_array[index1] = -1;//使用过的根节点数值标记一下，当做哨兵
+	create_subtree(root, &((*root)->lchild), 0, index2);//前：包括；后：不包括
+	create_subtree(root, &((*root)->rchild), index2 + 1, pre_len);
     return;
 }
 
+elemtype visit_array[MAXLENGTH] = { 0 };
+int visit_counter = 0;
+
+void Visit(elemtype e)
+{
+	/*
+	if (visit_counter < length - 1)
+		printf("%d,", e);
+	else
+		printf("%d", e);
+	visit_counter++;
+	*/
+	visit_array[visit_counter] = e;
+	visit_array[visit_counter + 1] = '\0';
+	visit_counter++;
+	return;
+}
+
+void PostorderTraverse(tree T, void(*Visit)(elemtype e))
+{
+	if (T)
+	{
+		PostorderTraverse(T->lchild, Visit);
+		PostorderTraverse(T->rchild, Visit);
+		Visit(T->data);
+	}
+	return;
+}
+
+void visit_print()
+{
+	int index;
+	for (index = 0; index < visit_counter - 1; index++)
+		printf("%d,", visit_array[index]);
+	printf("%d", visit_array[index]);
+	return;
+}
 
 int main()
 {
     tree root = NULL;
     create_array();
-
+	create_root(&root);
+	PostorderTraverse(root, Visit);
+	visit_print();
     return 0;
 }
