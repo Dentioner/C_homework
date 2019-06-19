@@ -27,6 +27,23 @@ void create_array()
 		s[index] = number;
 	}
 	s[vexnum + 1] = '\0';
+
+	for (index = 0; index < vexnum + 1; index++)
+	{
+		scanf("%d", &number);
+		ch = getchar();// '\n' or ',' or ' '
+		fst[index] = number;
+	}
+	fst[vexnum + 1] = '\0';
+
+	for (index = 0; index < vexnum + 1; index++)
+	{
+		scanf("%d", &number);
+		ch = getchar();// '\n' or ',' or ' '
+		lst[index] = number;
+	}
+	lst[vexnum + 1] = '\0';
+
 	return;
 }
 
