@@ -1,0 +1,4 @@
+﻿  7.15.c
+e:\coding\c_homework\datastructure\7.15\7.15\7.15.c(42): warning C4101: “index2”: 未引用的局部变量
+e:\coding\c_homework\datastructure\7.15\7.15\7.15.c(42): warning C4101: “index1”: 未引用的局部变量
+  7.15.vcxproj -> E:\coding\C_homework\DataStructure\7.15\Debug\7.15.exe
