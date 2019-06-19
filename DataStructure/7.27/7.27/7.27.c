@@ -3,6 +3,9 @@
 #pragma warning(disable:4996)
 
 #define MAX_VERTEX_NUM 20
+#define ERROR 0
+#define OK 1
+#define TRUE 1
 
 typedef struct ArcNode
 {
@@ -23,6 +26,20 @@ typedef struct
 	int vexnum, arcnum;//顶点数，边数
 	int kind;//图的种类
 }ALGraph;
+
+typedef int QElemType;
+
+typedef struct Node 
+{
+	QElemType data;
+	struct Node *next;
+}QNode;
+
+typedef struct 
+{
+	QNode *front;
+	QNode *rear;
+}LinkedQueue;
 
 ALGraph g;
 int exist[MAX_VERTEX_NUM] = { 0 };//可能有的点不存在
@@ -56,24 +73,26 @@ void create_graph()//注意这次是无向图
 	{
 		exist[v1] = 1;
 		exist[v2] = 1;
-		v3 = v2;
-		v4 = v1;
+		//v3 = v2;
+		//v4 = v1;
 		p = (ArcNode*)malloc(sizeof(ArcNode));
-		p2 = (ArcNode*)malloc(sizeof(ArcNode));
+		//p2 = (ArcNode*)malloc(sizeof(ArcNode));
 		p->adjvex = v2;
-		p2->adjvex = v4;
+		//p2->adjvex = v4;
 		p->nextarc = NULL;
-		p2->nextarc = NULL;
+		//p2->nextarc = NULL;
 		index1 = 0;
 		index2 = 0;
 		while (g.vertices[index1].data != v1)
 		{
 			index1++;
 		}//找一下v1在哪
+		/*
 		while (g.vertices[index2].data != v3)
 		{
 			index2++;
 		}//找一下v3在哪
+		*/
 		if (g.vertices[index1].firstarc == NULL)
 			g.vertices[index1].firstarc = p;//一个节点都没有的时候
 		else
@@ -101,6 +120,7 @@ void create_graph()//注意这次是无向图
 				p->nextarc = q;
 			}
 		}
+		/*
 		//复读一次上面的语句，将v3v4搞进去
 		if (g.vertices[index2].firstarc == NULL)
 			g.vertices[index2].firstarc = p2;//一个节点都没有的时候
@@ -129,31 +149,33 @@ void create_graph()//注意这次是无向图
 				p2->nextarc = q2;
 			}
 		}
-
+		*/
 		scanf("%d-%d", &v1, &v2);
 		ch = getchar();//',' or '\n'
 	}
 
 	exist[v1] = 1;
 	exist[v2] = 1;
-	v3 = v2;
-	v4 = v1;
+	//v3 = v2;
+	//v4 = v1;
 	p = (ArcNode*)malloc(sizeof(ArcNode));
 	p->adjvex = v2;
 	p->nextarc = NULL;
-	p2 = (ArcNode*)malloc(sizeof(ArcNode));
-	p2->adjvex = v4;
-	p2->nextarc = NULL;
+	//p2 = (ArcNode*)malloc(sizeof(ArcNode));
+	//p2->adjvex = v4;
+	//p2->nextarc = NULL;
 	index1 = 0;
 	index2 = 0;
 	while (g.vertices[index1].data != v1)
 	{
 		index1++;
 	}//找一下v1在哪
+	/*
 	while (g.vertices[index2].data != v3)
 	{
 		index2++;
 	}//找一下v3在哪
+	*/
 	if (g.vertices[index1].firstarc == NULL)
 		g.vertices[index1].firstarc = p;
 	else
@@ -181,7 +203,7 @@ void create_graph()//注意这次是无向图
 			p->nextarc = q;
 		}
 	}
-
+	/*
 	if (g.vertices[index2].firstarc == NULL)
 		g.vertices[index2].firstarc = p2;
 	else
@@ -209,7 +231,7 @@ void create_graph()//注意这次是无向图
 			p2->nextarc = q2;
 		}
 	}
-	
+	*/
 
 	return;
 }
@@ -241,9 +263,143 @@ void print_graph()
 	return;
 }
 
+int InitQueue(LinkedQueue *lq) 
+{
+	lq->front = lq->rear = (QNode *)malloc(sizeof(QNode));
+	if (!lq->front) 
+		return 0;
+	lq->front->next = NULL;
+	return 1;
+}
+
+int Enqueue(LinkedQueue *lq, QElemType e) 
+{
+	QNode *p;
+	p = (QNode *)malloc(sizeof(QNode));
+	if (!p) 
+		return ERROR;
+	p->data = e; 
+	p->next = NULL;
+	lq->rear->next = p; //修改尾指针
+	lq->rear = p;
+	return OK;
+}
+
+int IsQueueEmpty(LinkedQueue *lq) 
+{
+	if (lq->front == lq->rear)
+		return 1;
+	else 
+		return 0;
+}
+
+int Dequeue(LinkedQueue *lq, QElemType *e) 
+{
+	QNode *p;
+	if (lq->front == lq->rear) 
+		return ERROR; //空队列的话，则出错
+	p = lq->front->next; //修改头指针
+	*e = p->data;
+	lq->front->next = p->next;
+	if (lq->rear == p) 
+			lq->rear = lq->front;//修改尾指针
+	free(p);
+	return OK;
+}
+
+//返回顶点x的第一个邻接顶点
+int FirstAdjVex(int x) 
+{
+	ArcNode *p;
+	p = g.vertices[x].firstarc;
+	if (p) 
+		return p->adjvex;
+	else 
+		return  -1;
+}
+
+//返回顶点x的(相对于y的)下一个邻接顶点
+int NextAdjVex(int x, int y) 
+{
+	if (x == -1) 
+		return -1;
+	ArcNode *p = g.vertices[x].firstarc;
+	while (p != NULL && p->adjvex != y) 
+		p = p->nextarc;
+	if (p != NULL && p->nextarc != NULL)
+		return p->nextarc->adjvex;
+	return -1;
+}
+
+
+void BFS()
+{
+	LinkedQueue Q;
+	QElemType v, w, u;
+	//printf("\n");//test
+	int distance = 0;
+	//int input_counter = 0;
+	int floor_detector = 0;
+	int first_input = 0;
+	for (v = 0; v < MAX_VERTEX_NUM; v++)
+	{
+		visited[v] = 0;
+	}
+	InitQueue(&Q);
+	//for (v = 0; v < MAX_VERTEX_NUM; v++) 
+	//{
+		//if (!exist[v])
+			//continue;
+	v = vi;
+		if (!visited[v]) 
+		{
+			visited[v] = 1;
+			//printf("-%d-", v);//访问v
+			Enqueue(&Q, v);//v入队列
+			//input_counter++;
+			first_input = v;
+			while (!IsQueueEmpty(&Q)) 
+			{
+				Dequeue(&Q, &u);
+				//input_counter--;
+				//if (input_counter == 0)
+					//distance++;
+				if (u == first_input)
+					distance++;
+				floor_detector = 0;
+				for (w = FirstAdjVex(u); w >= 0; w = NextAdjVex(u, w))
+					if (!visited[w]) 
+					{
+						visited[w] = TRUE;
+						//printf("-%d-", w);
+						if (w == vj)
+							if (distance == k)
+								findit = 1;
+						//input_counter++;
+						Enqueue(&Q, w);
+						if (!floor_detector)
+						{
+							floor_detector = 1;
+							first_input = w;
+						}
+						
+					}//if
+				//distance++;
+			}//while
+		}//if
+	//}//for every vertex
+}
+
+
+
 int main()
 {
 	create_graph();
-	print_graph();
+	//print_graph();
+	BFS();
+	if (findit)
+		printf("yes");
+	else
+		printf("no");
 	return 0;
 }

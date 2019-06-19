@@ -1,2 +1,7 @@
 ﻿  7.27.c
+e:\coding\c_homework\datastructure\7.27\7.27\7.27.c(56): warning C4101: “v3”: 未引用的局部变量
+e:\coding\c_homework\datastructure\7.27\7.27\7.27.c(58): warning C4101: “r2”: 未引用的局部变量
+e:\coding\c_homework\datastructure\7.27\7.27\7.27.c(58): warning C4101: “q2”: 未引用的局部变量
+e:\coding\c_homework\datastructure\7.27\7.27\7.27.c(58): warning C4101: “p2”: 未引用的局部变量
+e:\coding\c_homework\datastructure\7.27\7.27\7.27.c(56): warning C4101: “v4”: 未引用的局部变量
   7.27.vcxproj -> E:\coding\C_homework\DataStructure\7.27\Debug\7.27.exe
