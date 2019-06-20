@@ -2,16 +2,15 @@
 #include<stdlib.h>
 #pragma warning(disable:4996)
 //#define FootLoc(p) (p+p->size-1)
-#define MEMSIZE 10000
+
 
 
 typedef struct WORD
 {
-	union 
-	{
-		struct WORD *llink;//头部域，指向空闲表的前驱结点，这个是head用的
-		struct WORD *uplink;//尾部域，指向本结点的头部，这个是foot用的
-	};
+	
+	struct WORD *llink;//头部域，指向空闲表的前驱结点，这个是head用的
+	struct WORD *uplink;//尾部域，指向本结点的头部，这个是foot用的
+	struct WORD *tail;
 	int tag;//0：空闲；1：占用
 	int location;//起始地址
 	int size;
@@ -21,6 +20,7 @@ typedef struct WORD
 
 
 const int e = 16; //不保留小于等于e的剩余量
+space pav = NULL;
 
 space FootLoc(space p) 
 { //分配单位为 字符/字节
@@ -152,110 +152,184 @@ void FreeBoundTag(space *pav, int loc, int size)
 	}
 }
 
-space create_pav(space pav)
+space create_pav()
 {
-	head *p, *p2;
-	//foot *q;
-	int ch;
+	space p, q;
 	int tag, location, size;
-	scanf("%d %d %d", &tag, &location, &size);
-	ch = getchar();// '\n'
+	int ch;
+	int counter = 0;
+	pav = NULL;
+	ch = getchar();
+	p = q = NULL;
 	
-
-
-	pav = (space)malloc(size);
-	//q = (space)malloc(sizeof(word));
-	//pav->llink = pav->rlink = pav->uplink = NULL;
-	pav->rlink = NULL;
-	pav->tag = tag;
-	pav->size = size;
-	pav->location = location;
-	pav->llink = NULL;//第一个节点没有前驱
-	
-
-	p2 = NULL;
-	p = pav;
-	//q = (space)(p + p->size);
-	//q->uplink = p;
-	//q->tag = p->tag;
-	//q->location = p->location + p->size;
-	p2 = p;
-	p = p->rlink;
-
-	ch = getchar();//下一个字符如果还是换行的话就说明要添加的节点都添加完了
 	while (ch != '\n')
 	{
-		tag = ch - '0';//如果刚才ch没有读到换行符，它就把tag给读了
 		scanf(" %d %d", &location, &size);
+		tag = ch - '0';
+		if (counter == 0)
+		{
+			pav = (space)malloc(sizeof(word));
+			pav->tag = tag;
+			pav->location = location;
+			pav->size = size;
+			pav->llink = NULL;
+			pav->uplink = NULL;
+			
+			pav->tail = (space)malloc(sizeof(word));
+			pav->tail->uplink = pav;
+			pav->tail->location = pav->location + pav->size;
+			pav->tail->tag = pav->tag;
+			pav->tail->llink = pav->tail->rlink = pav->tail->tail = NULL;
+			pav->tail->size = pav->size;
+
+			q = pav;
+			p = pav->rlink;
+		}
+		else
+		{
+			p = (space)malloc(sizeof(word));
+			q->rlink = p;
+			p->tag = tag;
+			p->location = location;
+			p->size = size;
+			p->llink = q;
+			p->uplink = NULL;
+
+			p->tail = (space)malloc(sizeof(word));
+			p->tail->uplink = p;
+			p->tail->location = p->location + p->size;
+			p->tail->tag = p->tag;
+			p->tail->llink = p->tail->rlink = p->tail->tail = NULL;
+			p->tail->size = p->size;
+
+			q = p;
+			p = p->rlink;
+		}
+
+		counter++;
 		ch = getchar();// '\n'
-		p = (space)malloc(size);
-		
-		p->tag = tag;
-		p->location = location;
-		p->size = size;
-		//q = (space)(p + p->size);
-		//q->uplink = p;
-		//q->tag = p->tag;
-		//q->location = p->location + p->size;
-		p->llink = p2;
-		p2->rlink = p;
-		
-		p2 = p;
-		p = p->rlink;
-
-		
-		ch = getchar();//下一个字符如果还是换行的话就说明要添加的节点都添加完了
-
-		
+		ch = getchar();
 	}
-
-	//读到换行符的最后一组输入
-	/*
-		p->llink = p2;
-		p2->rlink = p;
-	
-	p->tag = tag;
-	p->location = location;
-	p->size = size;
-*/
-	//q->uplink = p;
-	//q->tag = p->tag;
-	//q->location = p->location + p->size;
-
-	p2->rlink = pav;//指回去
-	pav->llink = p2;
+	pav->llink = q;
+	q->rlink = pav;
 
 
 	return pav;
 }
 
-void free_pav(space *pav)
+void free_block(int location, int size)
+{
+	space p, q, r;
+	p = pav;
+	while (1)
+	{//定位
+		if (location == 0)
+			break;
+
+		if (p->location < location && p->rlink->location >location)
+			break;
+		p = p->rlink;
+	}
+	q = p->rlink;
+
+	if (location > p->tail->location && location + size < q->location)
+	{//左、右邻块均为占用块
+		r = (space)malloc(sizeof(word));
+		r->location = location;
+		r->size = size;
+		r->tag = 0;
+		r->llink = p;
+		r->rlink = q;
+		
+		r->tail = (space)malloc(sizeof(word));
+		r->tail->uplink = r;
+		r->tail->location = r->location + r->size;
+		r->tail->tag = r->tag;
+		r->tail->llink = r->tail->rlink = r->tail->tail = NULL;
+		r->tail->size = r->size;
+
+		p->rlink = r;
+		q->llink = r;
+	}
+	else if (location <= p->tail->location && location + size < q->location)
+	{//左邻块空闲而右邻块为占用
+		p->size += size;
+
+		p->tail = (space)malloc(sizeof(word));
+		p->tail->uplink = p;
+		p->tail->location = p->location + p->size;
+		p->tail->tag = p->tag;
+		p->tail->llink = p->tail->rlink = p->tail->tail = NULL;
+		p->tail->size = p->size;
+	}
+	else if (location > p->tail->location && location + size >= q->location)
+	{
+		q->location = location;
+		q->size += size;
+
+		q->tail->location = q->location + q->size;
+		q->tail->size = q->size;
+		
+	}
+	else
+	{
+		p->rlink = q->rlink;
+		q->rlink->llink = p;
+
+		p->size = p->size + q->size + size;
+
+		p->tail = (space)malloc(sizeof(word));
+		p->tail->uplink = p;
+		p->tail->location = p->location + p->size;
+		p->tail->tag = p->tag;
+		p->tail->llink = p->tail->rlink = p->tail->tail = NULL;
+		p->tail->size = p->size;
+
+		if (p != q)
+			free(q);
+	}
+
+	return;
+}
+
+space free_pav()
 {
 	int tag, location, size;
 	int ch;
-	scanf("%d %d %d", &tag, &location, &size);
-	ch = getchar();// '\n'
-	FreeBoundTag(pav, location, size);
-	
-	
 	ch = getchar();
-	while (ch == '0' || ch == '1')
+	while (ch == '0'|| ch == '1')
 	{
-		tag = ch - '0';
 		scanf(" %d %d", &location, &size);
-
-		FreeBoundTag(pav, location, size);
+		tag = ch - '0';
+		free_block(location, size);
 		ch = getchar();// '\n'
-		if (ch == '\n')
-			ch = getchar();
+		ch = getchar();
+		
 	}
+
+	return pav;
+}
+
+void print_pav()
+{
+	space p;
+	p = pav;
+	do
+	{
+		printf("%d %d %d", p->tag, p->location, p->size);
+		if (p->rlink != pav)
+			printf("\n");
+		p = p->rlink;
+	} while (p!=pav);
 	return;
 }
 
 int main()
 {
-	space pav = NULL;
-	pav = create_pav(pav);
-	free_pav(&pav);
+	
+	
+	create_pav();
+	free_pav();
+	print_pav();
 	return 0;
 }
