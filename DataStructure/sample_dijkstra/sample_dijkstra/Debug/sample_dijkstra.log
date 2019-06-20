@@ -1,0 +1,6 @@
+﻿  main.cpp
+e:\coding\c_homework\datastructure\sample_dijkstra\sample_dijkstra\mgraph.h(5): warning C4005: “INFINITY”: 宏重定义
+  c:\program files (x86)\windows kits\10\include\10.0.17763.0\ucrt\corecrt_math.h(90): note: 参见“INFINITY”的前一个定义
+  MGraph.cpp
+  正在生成代码...
+  sample_dijkstra.vcxproj -> E:\coding\C_homework\DataStructure\sample_dijkstra\Debug\sample_dijkstra.exe
