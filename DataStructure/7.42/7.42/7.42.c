@@ -32,7 +32,7 @@ int findit = 0;
 int start_point = 0;
 int P[MAX_VERTEX_NUM][MAX_VERTEX_NUM] = { 0 };
 int D[MAX_VERTEX_NUM] = { 0 };
-
+int final[MAX_VERTEX_NUM] = { 0 };//final[v] = 1的时候，说明已经求出 到v的最短路径了
 
 void create_graph()
 {
@@ -169,14 +169,22 @@ void ShortestPath_DIJ()
 {
 	int i = 0, j, v, w, min;
 	int index1;
-	int final[MAX_VERTEX_NUM];//final[v] = 1的时候，说明已经求出 到v的最短路径了
+	
 	int weight1;
 	ArcNode *p1, *p2;
-	for (v = 0, p1 = g.vertices[start_point].firstarc; v < MAX_VERTEX_NUM && p1!= NULL; v++) 
+	p1 = g.vertices[start_point].firstarc;
+
+	for (int i = 0; i < MAX_VERTEX_NUM; i++)
+		D[i] = INFINITY;//初始化
+
+	while(p1 != NULL)
 	{
-		final[v] = 0;
-		if (!exist[v])
-			continue;
+		v = p1->adjvex;
+		//final[v] = 0;
+		//if (!exist[v])
+			//continue;
+		//if (v == start_point)
+			//continue;
 		D[v] = p1->weight;
 		for (w = 0; w < MAX_VERTEX_NUM; w++)
 			P[v][w] = 0; // 设空路径
@@ -187,6 +195,8 @@ void ShortestPath_DIJ()
 		}
 		p1 = p1->nextarc;
 	}
+
+
 	D[start_point] = 0; 
 	final[start_point] = 1; // 初始化，起始点属于S集
    //主循环：每次求得start_point到某个v顶点的最短路径并加v到S集
@@ -201,13 +211,19 @@ void ShortestPath_DIJ()
 		//for (w = 0; w < g.vexnum; ++w)
 			//printf("%d ", D[w]);
 		//printf("\n");
-		for (w = 0; w < g.vexnum; ++w)
+		for (w = 0; w < MAX_VERTEX_NUM; ++w)
+		{
+			if (!exist[w])
+				continue;
+			if (w == start_point)
+				continue;
 			if (!final[w]) // w顶点在V-S中
 				if (D[w] < min) // w顶点离v0顶点更近
 				{
-					v = w; 
+					v = w;
 					min = D[w];
 				}
+		}
 		final[v] = 1; // 离start_point最近的v加入S集
 		// 更新当前最短路径及距离
 		for (w = 0; w < MAX_VERTEX_NUM; w++)
@@ -225,7 +241,7 @@ void ShortestPath_DIJ()
 				}
 			}
 			if (p2 == NULL)
-				weight1 = 0;
+				weight1 = INFINITY;
 			else
 				weight1 = p2->weight;
 			if (!final[w] && (min + weight1 < D[w]))
@@ -242,13 +258,32 @@ void ShortestPath_DIJ()
 			}//if
 		}
 	}//for
-	
+	return;
+}
+
+void print_path()
+{
+	int index1;
+	int print_counter = 0;
+	for(index1 = 0;index1 < MAX_VERTEX_NUM; index1++)
+	{ 
+		if (!exist[index1])
+			continue;
+		if (index1 == start_point)
+			continue;
+		printf("%d", D[index1]);
+		print_counter++;
+		if (print_counter <= g.vexnum - 2)
+			printf(",");
+	}
+	return;
 }
 
 int main()
 {
 	create_graph();
-	print_graph();
+	//print_graph();
 	ShortestPath_DIJ();
+	print_path();
 	return 0;
 }
