@@ -4,6 +4,7 @@
 
 #define MAXLENGTH 50
 #define ADDLENGTH 10
+#define MINUS_INFINITY -100
 typedef int elemtype;
 
 typedef struct BiTNode
@@ -562,7 +563,7 @@ int main()
 	create_tree_array();
 	create_tree_array2();
 	rearrangement();
-	rearrangement2();
+	//rearrangement2();
 	create_tree_relationship();
 	create_tree_relationship2();
 	T_for_recur = root;
