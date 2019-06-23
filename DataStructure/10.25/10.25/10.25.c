@@ -16,8 +16,8 @@ LinkList l = NULL;
 
 void create_array()
 {
-	int number;
-	int ch;
+	int number = 0;
+	int ch = ' ';
 	do
 	{
 		scanf("%d", &number);
@@ -31,9 +31,9 @@ void create_array()
 void create_link()
 {
 	LinkList p, q;
-	
+	p = q = NULL;
 	int index1 = 0;
-	int before;
+	int before = 0;
 
 	while (index1 < length_int)
 	{
@@ -81,6 +81,7 @@ void print_link()
 {
 	int counter = 0;
 	LinkList p;
+	
 	p = l;
 	do
 	{

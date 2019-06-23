@@ -1,0 +1,4 @@
+﻿  10.35.c
+e:\coding\c_homework\datastructure\10.35\10.35\10.35.c(248): warning C4101: “tmp2”: 未引用的局部变量
+e:\coding\c_homework\datastructure\10.35\10.35\10.35.c(248): warning C4101: “tmp1”: 未引用的局部变量
+  10.35.vcxproj -> E:\coding\C_homework\DataStructure\10.35\Debug\10.35.exe
