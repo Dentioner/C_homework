@@ -2,12 +2,15 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdbool.h>
+#include<time.h>
 
 
 #define BOARD_SIZE 64
 #define Instruction_ADD 1
 #define Instruction_SUB 2
-
+#define MANUAL 2
+#define AUTO 1
+#define TIME_LIMIT 1000 //单位：ms
 
 
 typedef struct TNode
@@ -46,6 +49,9 @@ void horse();
 bool check_coordinate(Node testpoint);
 Node* next_step(Node* point);
 void Init_nodeboard();
+void wait();
+void show_printer();
+void get_input();
 
 int board[8][8];
 int board_for_next_step[8][8] = {//这个棋盘用来记录某个点下一个可以走的方位有几个
@@ -65,6 +71,8 @@ int step_counter;
 const int vector[8][2] = { {-2, 1} ,{-1, 2}, {1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1} };
 
 int show;//展示用
+int mode_number;
+int solution_upper_bound;
 
 bool no_more_grandson = false;//next_step用
 
@@ -77,21 +85,121 @@ int main()
 {
 	Init_nodeboard();
 	Init_Stack();
-	int first_row, first_column;
-	printf("Please choose a start TreeNode. Use ',' to distinguish row & column.\n");
-	scanf("%d,%d", &(first_row), &(first_column));
-	printf("Step by step? Enter 1 means yes and 0 means no.\n");
-	scanf("%d", &show);
-	now = &nodeboard[first_row][first_column];
-
+	
+	get_input();
 
 	horse();
 
-    printboard();
+    //printboard();
     system("pause");
     return 0;
 }
 
+
+void get_input()
+{
+	int first_row, first_column;
+	int input_index;
+	int invalid_input = 1;
+	while (invalid_input)
+	{
+		printf("Please choose a start TreeNode. Use ',' to distinguish row & column.\n");
+		input_index = scanf("%d,%d", &(first_row), &(first_column));
+		while (getchar() != '\n')
+			continue;
+		if (input_index != 2)
+		{
+			printf("Invalid input. Try again.\n");
+			continue;
+		}
+		
+		if (first_row < 0 || first_row >= 8)
+		{
+			printf("Invalid input. Try again.\n");
+			continue;
+		}
+		if (first_column < 0 || first_column >= 8)
+		{
+			printf("Invalid input. Try again.\n");
+			continue;
+		}
+		
+		invalid_input = 0;
+	}
+
+	invalid_input = 1;
+	while (invalid_input)
+	{
+		printf("Step by step? Enter 1 means yes and 0 means no.\n");
+		input_index = scanf("%d", &show);
+		while (getchar() != '\n')
+			continue;
+		if (input_index != 1)
+		{
+			printf("Invalid input. Try again.\n");
+			continue;
+		}
+
+		if (show != 0 && show != 1)
+		{
+			printf("Invalid input. Try again.\n");
+			continue;
+		}
+
+		invalid_input = 0;
+	}
+
+
+	if (show)
+	{
+		invalid_input = 1;
+		while (invalid_input)
+		{
+			printf("Auto mode(1) or Manual mode(2)?\n");
+			input_index = scanf("%d", &mode_number);
+			while (getchar() != '\n')
+				continue;
+			if (input_index != 1)
+			{
+				printf("Invalid input. Try again.\n");
+				continue;
+			}
+			if (mode_number != 1 && mode_number != 2)
+			{
+				printf("Invalid input. Try again.\n");
+				continue;
+			}
+			invalid_input = 0;
+		}
+	}
+	else
+		mode_number = 0;
+	invalid_input = 1;
+	while (invalid_input)
+	{
+		printf("How many solutions?\n");
+		input_index = scanf("%d", &solution_upper_bound);
+		while (getchar() != '\n')
+			continue;
+		if (input_index != 1)
+		{
+			printf("Invalid input. Try again.\n");
+			continue;
+		}
+		
+		if (solution_upper_bound < 0)
+		{
+			printf("Invalid input. Try again.\n");
+			continue;
+		}
+
+		invalid_input = 0;
+	}
+
+	now = &nodeboard[first_row][first_column];
+
+	return;
+}
 
 void printboard()
 {
@@ -167,21 +275,6 @@ void refresh_next_board(Node* point, int instruction)//刷新孙子棋盘
 		if (instruction == Instruction_SUB)
 		{
 			board_for_next_step[next->row][next->column] --;
-
-			//下面是debug用的
-			
-			if (board[1][5] == 0 || board[2][6] == 0)
-			{
-				if (board_for_next_step[0][7] <= 0)
-					printf("test.\n");
-			}
-			
-			if (board[1][5] == 0 && board[2][6] == 0)
-			{
-				if (board_for_next_step[0][7] <= 1)
-					printf("test.\n");
-			}
-
 		}
 		else
 		{
@@ -316,6 +409,40 @@ void Init_nodeboard()
 	return;
 }
 
+void wait()
+{
+	double start_time;
+	double current_time;
+	start_time = clock();
+	current_time = clock();
+	while (current_time - start_time < TIME_LIMIT)
+	{
+		current_time = clock();
+		continue;
+	}
+
+	return;
+}
+
+void show_printer()
+{
+	
+	system("cls");
+	printf("=============================backtracking mode=============================\n");
+	printf("automode:");
+	if (mode_number == AUTO)
+		printf("on\n");
+	else
+		printf("off\n");
+	printf("第%d次\n", print_counter + 1);
+	printboard();
+	if (mode_number == MANUAL)
+		system("pause");
+	else
+		wait();
+	
+}
+
 void horse()
 {
 	//int vector_index;
@@ -330,33 +457,34 @@ void horse()
 		before = now;
 		now = next_step(before);
 	}
-	
-	while (stack.top!=-1)//只要栈不为空，就一直可以跑下去
+	if (!show)
 	{
-		//now = get_top();
-		/*
-		if (step_counter == 63)
-		{
-			printf("test.\n");
-			printboard();
-		}
-		*/
+		system("cls");
+		printf("=============================illustration mode=============================\n");
+	}
+
+	while (stack.top!=-1 && print_counter < solution_upper_bound)//只要栈不为空，就一直可以跑下去
+	{
 
 		testnode.row = now->row;
 		testnode.column = now->column;
-		//if (step_counter == BOARD_SIZE)
-		//{
-			
-			
-		//}
+
 		if (step_counter == BOARD_SIZE - 1 && board[now->row][now->column] == 0)//跑完了
 		{
-			if (print_counter == 1375)
-				printf("test\n");//test
+
 
 			push(now);
 			board[now->row][now->column] = ++step_counter;
-
+			if (show)
+			{
+				system("cls");
+				printf("=============================backtracking mode=============================\n");
+				printf("automode:");
+				if (mode_number == AUTO)
+					printf("on\n");
+				else
+					printf("off\n");
+			}
 			printf("第%d次\n", ++print_counter);
 			printboard();
 			printf("\n");
@@ -371,7 +499,14 @@ void horse()
 			Re = pop();
 			Re->back_track_counter = 0;//复原
 			now = get_top();
-			continue;
+			if (show && print_counter < solution_upper_bound)
+			{
+				if (mode_number == MANUAL)
+					system("pause");
+				else
+					wait();
+				show_printer();
+			}continue;
 		}
 
 
@@ -385,14 +520,15 @@ void horse()
 			Re = pop();
 			Re->back_track_counter = 0;//复原
 			now = get_top();
+			if (show)
+				show_printer();
 			continue;
 		}
 		
 		if (now->back_track_counter >= board_for_next_step[now->row][now->column])//可行方向都搞过了
 		{
 
-			if (step_counter == 7 && print_counter == 1432)
-				printf("test.\n");
+			
 
 			if (board_for_next_step[now->row][now->column] == 0)//这个说明压根就没有可行方向
 			{
@@ -410,6 +546,8 @@ void horse()
 			Re->back_track_counter = 0;//复原
 			if (stack.top > -1)//避免最后弹栈完毕之后报错
 				now = get_top();
+			if (show)
+				show_printer();
 			continue;
 		}
 		if (step_counter == board[now->row][now->column])//这个条件说明当前的now结点之前走过了，now是从栈里面出来的
@@ -427,6 +565,8 @@ void horse()
 				Re = pop();
 				Re->back_track_counter = 0;//复原
 				now = get_top();
+				if (show)
+					show_printer();
 				continue;
 			}
 
@@ -450,24 +590,23 @@ void horse()
 					Re = pop();
 					Re->back_track_counter = 0;//复原
 					now = get_top();
+					if (show)
+						show_printer();
 					continue;
 				}
 
 			}
-		}
-	}
-
-
-
-
-		//下面是展示用的，可以删掉
-		if (show)
-		{
-			system("cls");
-			printboard();
-			system("pause");
-		}
+		}//else
 	
+
+
+
+
+		//展示
+		if (show)
+			show_printer();
+		
+	}//while
 
 	return;
 }
