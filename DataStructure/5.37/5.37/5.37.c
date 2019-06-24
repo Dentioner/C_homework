@@ -5,6 +5,8 @@
 
 #define MAXLENGTH 50
 #define ADDLENGTH 10
+#define NUMBER 1
+#define CHARACTER 2
 
 typedef enum { OK, ERROR } Status;
 typedef int ElemType;
@@ -21,11 +23,14 @@ typedef struct GLNode
 			struct GLNode *hp, *tp;
 		}ptr;
 	};
+	int atom_type;
 }GLNode, *GList;
 
 char emp[] = "()";
 int deletechar;
-
+int visit_array[MAXLENGTH] = { 0 };
+int visit_counter = 0;
+int string_tag[MAXLENGTH] = { 0 };
 
 Status substring(char sub[], char str[], int pos, int len)
 {
@@ -46,6 +51,10 @@ void sever(char str[], char hstr[])
 	int k = 0;
 	char ch;
 	int index2 = 0;
+	int index3 = 0;
+	int index4 = 0;
+	int length_3 = 0;
+	int single_ch;
 	char backup_str[MAXLENGTH] = { 0 };
 	do
 	{
@@ -76,17 +85,63 @@ void sever(char str[], char hstr[])
 	else//此时只有一对括号，没法分离，例如str = (a,b,c,d)这样
 	{
 		//strcpy(hstr, str);
-		hstr[0] = str[1];
-		hstr[1] = '\0';
-		
+		if (strlen(str) == 1)
+		{
+			/*
+			single_ch = str[0];
+			str[0] = '(';
+			str[1] = single_ch;
+			str[2] = ')';
+			str[3] = '\0';
+			*/
+			strcpy(hstr, str);
+			str[0] = '(';
+			str[1] = ')';
+			str[2] = '\0';
+			
+		}
+		else if (str[1] != '(')
+		{
+			hstr[0] = str[1];
+			hstr[1] = '\0';
+			length_3 = 1;
+		}
+		else
+		{
+			for (index3 = 1; str[index3] != ')'; index3++)
+			{
+				hstr[index3 - 1] = str[index3];
+				length_3++;
+			}
+			hstr[length_3] = ')';
+			hstr[length_3 + 1] = '\0';
+			length_3++;
+		}
+
 		int length_of_str = strlen(str);
 		if (length_of_str > 3)
 		{
-			for (index2 = 3; index2 < length_of_str; index2++)
+			if (length_3 == 1) 
 			{
-				str[index2 - 2] = str[index2];
+				for (index2 = 3; index2 < length_of_str; index2++)
+				{
+					str[index2 - 2] = str[index2];
+				}
+				str[length_of_str - 2] = '\0';
 			}
-			str[length_of_str - 2] = '\0';
+			else
+			{
+				str[index4++] = '(';
+				if (str[index3 + 1] == ',')
+					index2 = index3 + 2;
+				else
+					index2 = index3 + 1;
+				for (; index2 < length_of_str; index2++)
+				{
+					str[index4++] = str[index2];
+				}
+				str[index4] = '\0';
+			}
 		}
 		else
 		{
@@ -184,6 +239,8 @@ void getstr(char string[])
 {
 	char ch;
 	int index = 0;
+	int number_tmp1;
+	int number_tmp2;
 	deletechar = getchar();//待删除的元素
 	ch = getchar();//除掉分号
 
@@ -192,9 +249,56 @@ void getstr(char string[])
 	{
 		string[index++] = ch;
 		ch = getchar();
+		if (string[index - 1] >= '0' && string[index - 1] <= '9')
+		{
+			if (ch >= '0' && ch <= '9')//控制台输入了一个2位数
+			{
+				number_tmp1 = (int)(string[index - 1] - '0');
+				number_tmp2 = (int)(ch - '0');
+				number_tmp1 = number_tmp1 * 10 + number_tmp2;
+				string[index - 1] = (char)number_tmp1;
+				string_tag[index - 1] = NUMBER;
+				ch = getchar();
+			}
+			else
+			{
+				string_tag[index - 1] = CHARACTER;
+			}
+		}
+		else
+		{
+			string_tag[index - 1] = CHARACTER;
+		}
+		
 	}
 
 	string[index] = '\0';
+	return;
+}
+
+void visit_list(GList L)
+{
+	
+	if (L)
+	{
+		if (L->tag == atom)
+		{
+			if (L->atom != deletechar)
+				visit_array[visit_counter++] = L->atom;
+		}
+		else
+		{
+			if(L->ptr.hp->tag == list)
+				visit_array[visit_counter++] = '(';
+			visit_list(L->ptr.hp);
+			
+			if(L->ptr.tp == NULL)
+				visit_array[visit_counter++] = ')';
+			visit_list(L->ptr.tp);
+			
+		}
+	}
+	
 	return;
 }
 
@@ -207,7 +311,45 @@ int main()
 	getstr(string);
 	if(CreateGList(&L, string) == ERROR)
 		exit(1);
+	visit_array[visit_counter++] = '(';
+	visit_list(L);
+	for (int i = 0; i < visit_counter; i++)
+	{
+		if (visit_array[i] >= 'a' && visit_array[i] <= 'z')
+			printf("%c", visit_array[i]);
+		else if(visit_array[i] >= 'A' && visit_array[i] <= 'Z')
+			printf("%c", visit_array[i]);
+		else if(visit_array[i] >= '0' && visit_array[i] <= '9')
+			printf("%c", visit_array[i]);
+		else if(visit_array[i] == '(' || visit_array[i] == ')')
+			printf("%c", visit_array[i]);
+		else
+			printf("%d", visit_array[i]);
+		if (visit_array[i] != '(' && visit_array[i] != ')')
+		{
+			if (visit_array[i + 1] != '(' && visit_array[i + 1] != ')')
+			{
+				if (i < visit_counter - 1)
+					printf(",");
+			}
+			else if (visit_array[i + 1] == '(')
+				if (i < visit_counter - 1)
+					printf(",");
 
-	system("pause");
+		}
+		else if (visit_array[i] == ')')
+		{
+			if (visit_array[i + 1] == '(')
+			{
+				if (i < visit_counter - 1)
+					printf(",");
+			}
+			else if (visit_array[i + 1] != '(' && visit_array[i + 1] != ')')
+				if (i < visit_counter - 1)
+					printf(",");
+		}
+		
+	}
+	
 	return 0;
 }
