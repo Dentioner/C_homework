@@ -2,7 +2,7 @@
 #include<stdlib.h>
 #pragma warning(disable:4996)
 
-#define MAXLENGTH 50
+#define MAXLENGTH 1000
 #define ADDLENGTH 10
 
 typedef enum {OK, ERROR} status;
@@ -27,7 +27,8 @@ typedef struct
 an_point ap;
 ElemType min[MAXLENGTH] = {0};
 ElemType max[MAXLENGTH] = {0};
-
+ElemType print_array[MAXLENGTH] = {0};
+int visit_counter = 0;
 
 status InitMatrix()
 {
@@ -107,19 +108,36 @@ void create_min_row()
 void create_max_column()
 {
 	int index1, index2;
+	index2 = 0;
 	int max_ele;
 	for(index1 = 0; index1 < m.column; index1++)
 	{
-		max_ele = m.base[index1 * m.column];
-		for(index2 = 0; index2 < m.row; index2++)
+		max_ele = m.base[index2 * m.column + index1];
+		for(; index2 < m.row; index2++)
 		{
-			if (m.base[index1 * m.column + index2] > max_ele)
-				max_ele = m.base[index1 * m.column + index2];
+			if (m.base[index2 * m.column + index1] > max_ele)
+				max_ele = m.base[index2 * m.column + index1];
 		}
 		max[index1] = max_ele;
+		index2 = 0;
 	}
 }
 
+void search()
+{
+	int r, c;
+	int ele;
+	for(r = 0; r< m.row; r++)
+	{
+		for(c = 0; c<m.column; c++)
+		{
+			ele = m.base[r*m.column + c];
+			if(ele == min[r] && ele == max[c])
+				print_array[visit_counter++] = ele;
+		}
+	}
+	return;
+}
 
 int main()
 {
@@ -130,7 +148,18 @@ int main()
 	create_min_row();
 	create_max_column();
     
-    
+    search();
+	if (visit_counter == 0)
+		printf("null");
+	else
+	{	
+		for (int i = 0; i< visit_counter ; i++)
+		{
+			printf("%d", print_array[i]);
+			if(i < visit_counter - 1)
+				printf(",");
+		}
+	}
    // system("pause");
     return 0;
 }
