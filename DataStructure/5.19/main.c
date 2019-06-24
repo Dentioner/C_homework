@@ -25,34 +25,8 @@ typedef struct
 }an_point;
 
 an_point ap;
-
-status InitMatrix();
-status an_search();
-void an_sort();
-status biggest_in_column(int i, int j);
-status smallest_in_row(int i, int j);
-
-int main()
-{
-    if(InitMatrix())
-        exit(ERROR);
-    if(an_search())
-        exit(ERROR);
-    if (ap.num == 0)
-        printf("null");
-    else
-    {
-		;//printf("%d", ap.base[0]);
-		for (int i = 1; i < ap.num; i++)
-			;//printf(",%d", ap.base[i]);
-    }
-    
-    
-   // system("pause");
-    return 0;
-}
-
-
+ElemType min[MAXLENGTH] = {0};
+ElemType max[MAXLENGTH] = {0};
 
 
 status InitMatrix()
@@ -114,69 +88,53 @@ status InitMatrix()
     return OK;
 }
 
-status an_search()
+void create_min_row()
 {
-    int i, j, k;
-    int bestj;
-    ap.base = (ElemType*)malloc(sizeof(ElemType)*m.elemtotal);
-    if (!ap.base)
-        exit(ERROR);
-    for (i = 0; i < m.row; i++)
-    {
-		for (j = 0; j < m.column; j++)
+	int index1, index2;
+	int min_ele;
+	for(index1 = 0; index1 < m.row; index1++)
+	{
+		min_ele = m.base[index1 * m.column];
+		for(index2 = 0; index2 < m.column; index2++)
 		{
-			if ((!smallest_in_row(i, j)) && (!biggest_in_column(i, j)))
-			{
-				ap.base[ap.num++] = m.base[i*m.column + j];
-			}
+			if (m.base[index1 * m.column + index2] < min_ele)
+				min_ele = m.base[index1 * m.column + index2];
 		}
-    }
-
-    ap.base[ap.num] = '\0';
-
-    an_sort();
-
-    return OK;
-}
-
-status smallest_in_row(int i, int j)
-{
-	int index;
-	for (index = 0; index < m.column; index++)
-	{
-		if (m.base[i*m.column + j] > m.base[i*m.column + index])
-			return ERROR;
+		min[index1] = min_ele;
 	}
-
-	return OK;
 }
 
-status biggest_in_column(int i, int j)
+void create_max_column()
 {
-	int index;
-	for (index = 0; index < m.row; index++)
+	int index1, index2;
+	int max_ele;
+	for(index1 = 0; index1 < m.column; index1++)
 	{
-		if (m.base[i*m.column + j] < m.base[index*m.column + j])
-			return ERROR;
+		max_ele = m.base[index1 * m.column];
+		for(index2 = 0; index2 < m.row; index2++)
+		{
+			if (m.base[index1 * m.column + index2] > max_ele)
+				max_ele = m.base[index1 * m.column + index2];
+		}
+		max[index1] = max_ele;
 	}
-	return OK;
 }
 
-void an_sort()
+
+int main()
 {
-    int i,j;
-    ElemType temp;
-    for (i=0; i<ap.num-1; i++)
-        for (j=0; j<ap.num-1-i; j++) 
-        { 
-            if (ap.base[j] > ap.base[j+1])
-            { 
-                temp = ap.base[j];
-                ap.base[j] = ap.base[j+1];
-                ap.base[j+1] = temp;
-            }
-        }
-
+    if(InitMatrix())
+        exit(ERROR);
+    //if(an_search())
+        //exit(ERROR);
+	create_min_row();
+	create_max_column();
+    
+    
+   // system("pause");
+    return 0;
 }
+
+
 
 
