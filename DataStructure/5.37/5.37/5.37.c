@@ -158,6 +158,69 @@ void sever(char str[], char hstr[])
 	return;
 }
 
+void print_2(char str[])
+{
+	int len3 = strlen(str);
+	int str2[MAXLENGTH];
+	int index1 = 0;
+	int visit_counter2 = 0;
+	while (str[index1] != '\0')
+	{
+		if (str[index1] == ',' || str[index1] == deletechar)
+		{
+			index1++;
+			continue;
+		}
+		else
+		{
+			str2[visit_counter2++] = (int)str[index1];
+			index1++;
+		}
+	}
+	str2[visit_counter2] = '\0';
+	len3 = visit_counter2;
+	for (int i = 0; i < len3; i++)
+	{
+		//if (str2[i] == deletechar)
+			//continue;
+		if (str2[i] >= 'a' && str2[i] <= 'z')
+			printf("%c", str2[i]);
+		else if (str2[i] >= 'A' && str2[i] <= 'Z')
+			printf("%c", str2[i]);
+		else if (str2[i] >= '0' && str2[i] <= '9')
+			printf("%c", str2[i]);
+		else if (str2[i] == '(' || str2[i] == ')')
+			printf("%c", str2[i]);
+		else
+			printf("%d", str2[i]);
+		if (str2[i] != '(' && str2[i] != ')')
+		{
+			if (str2[i + 1] != '(' && str2[i + 1] != ')')
+			{
+				if (i < visit_counter2 - 1)
+					printf(",");
+			}
+			else if (str2[i + 1] == '(')
+				if (i < visit_counter2 - 1)
+					printf(",");
+
+		}
+		else if (str2[i] == ')')
+		{
+			if (str2[i + 1] == '(')
+			{
+				if (i < visit_counter2 - 1)
+					printf(",");
+			}
+			else if (str2[i + 1] != '(' && str2[i + 1] != ')')
+				if (i < visit_counter2 - 1)
+					printf(",");
+		}
+
+	}
+	exit(0);
+}
+
 Status CreateGList(GList *L, char string[])
 {
 	int ch;
@@ -176,6 +239,7 @@ Status CreateGList(GList *L, char string[])
 	{
 		if (!((*L) = (GList)malloc(sizeof(GLNode))))
 			return ERROR;
+		print_2(string);
 		if (strlen(string) == 1)//单原子广义表
 		{
 			(*L)->tag = atom;
@@ -217,9 +281,9 @@ Status CreateGList(GList *L, char string[])
 			p->tag = list;
 		}
 		else if (ch == ',')
-		{
-
-		}
+		{*/
+		
+		/*}
 		else if (ch == ')')
 		{
 			depth--;
@@ -235,14 +299,30 @@ Status CreateGList(GList *L, char string[])
 	return OK;
 }
 
+
+
 void getstr(char string[])
 {
-	char ch;
+	char ch, ch2;
+	
 	int index = 0;
 	int number_tmp1;
 	int number_tmp2;
 	deletechar = getchar();//待删除的元素
-	ch = getchar();//除掉分号
+	ch2 = getchar();
+	if (ch2 >= '0' && ch2 <= '9')//控制台输入了一个2位数
+	{
+		number_tmp1 = deletechar - '0';
+		number_tmp2 = (int)(ch2 - '0');
+		deletechar = number_tmp1 * 10 + number_tmp2;
+		ch = getchar();//除掉分号
+	}
+	else
+	{
+		;//此时ch2就是分号
+	}
+	
+	
 
 	ch = getchar();
 	while (ch != EOF && ch != '\0' && ch != '\n')
@@ -302,26 +382,17 @@ void visit_list(GList L)
 	return;
 }
 
-int main()
+void visit_print()
 {
-	GList L ;
-	char string[MAXLENGTH];
-
-
-	getstr(string);
-	if(CreateGList(&L, string) == ERROR)
-		exit(1);
-	visit_array[visit_counter++] = '(';
-	visit_list(L);
 	for (int i = 0; i < visit_counter; i++)
 	{
 		if (visit_array[i] >= 'a' && visit_array[i] <= 'z')
 			printf("%c", visit_array[i]);
-		else if(visit_array[i] >= 'A' && visit_array[i] <= 'Z')
+		else if (visit_array[i] >= 'A' && visit_array[i] <= 'Z')
 			printf("%c", visit_array[i]);
-		else if(visit_array[i] >= '0' && visit_array[i] <= '9')
+		else if (visit_array[i] >= '0' && visit_array[i] <= '9')
 			printf("%c", visit_array[i]);
-		else if(visit_array[i] == '(' || visit_array[i] == ')')
+		else if (visit_array[i] == '(' || visit_array[i] == ')')
 			printf("%c", visit_array[i]);
 		else
 			printf("%d", visit_array[i]);
@@ -348,8 +419,23 @@ int main()
 				if (i < visit_counter - 1)
 					printf(",");
 		}
-		
+
 	}
+	return;
+}
+
+int main()
+{
+	GList L ;
+	char string[MAXLENGTH];
+
+
+	getstr(string);
+	if(CreateGList(&L, string) == ERROR)
+		exit(1);
+	visit_array[visit_counter++] = '(';
+	visit_list(L);
+	visit_print();
 	
 	return 0;
 }
