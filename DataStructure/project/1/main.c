@@ -205,10 +205,8 @@ void printboard()
 {
 	for (int i = 0; i < 8; i++)
 	{
-		for (int j = 0; j < 8; j++)
-		{
+		for (int j = 0; j < 8; j++)		
 			printf("%-4d", board[i][j]);
-		}
 		printf("\n");
 	}
 	return;
@@ -268,18 +266,15 @@ void refresh_next_board(Node* point, int instruction)//刷新孙子棋盘
 		testnode.row = point->row + vector[vector_index][0];
 		testnode.column = point->column + vector[vector_index][1];
 		next = &nodeboard[point->row + vector[vector_index][0]][point->column + vector[vector_index][1]];
-		if (!check_coordinate(testnode))
-		{
+		if (!check_coordinate(testnode))		
 			continue;
-		}
-		if (instruction == Instruction_SUB)
-		{
+		
+		if (instruction == Instruction_SUB)		
 			board_for_next_step[next->row][next->column] --;
-		}
-		else
-		{
+		
+		else		
 			board_for_next_step[next->row][next->column] ++;
-		}
+		
 	}
 
 	return;
@@ -325,10 +320,9 @@ Node* next_step(Node* point)//找下一步应该去哪
 				point->son[i++][1] = 9 + vector_index;//瞎写的一个大于9的数值			
 				continue;
 			}
-			else
-			{
+			else			
 				point->son[i++][1] = board_for_next_step[next->row][next->column];
-			}
+			
 		}
 		//跑完8次之后执行排序
 
@@ -350,42 +344,34 @@ Node* next_step(Node* point)//找下一步应该去哪
 
 		}//排序
 		
-		//******这个地方似乎没有检查生成的那一长串坐标值，是不是正常的
+	
 		best_son = 
 			&nodeboard
 			[point->row + vector[point->son[point->back_track_counter][0]][0]]
 			[point->column + vector[point->son[point->back_track_counter][0]][1]];
 		
 		if (point->son[point->back_track_counter][1] > 8)//说明没有更多的孙子了，大于8的都是之前预设的垃圾值
-		{
 			no_more_grandson = true;
-
-		}
-		else
-		{
+		else		
 			no_more_grandson = false;
-		}
-			
+
 		point->back_track_counter++;
 	}
 
 	else//back_track_counter != 0
 	{
-		//******这个地方似乎没有检查生成的那一长串坐标值，是不是正常的
+		
 		best_son =
 			&nodeboard
 			[point->row + vector[point->son[point->back_track_counter][0]][0]]
 			[point->column + vector[point->son[point->back_track_counter][0]][1]];
 
 		if (point->son[point->back_track_counter][1] > 8)//说明没有更多的孙子了，大于8的都是之前预设的垃圾值
-		{
 			no_more_grandson = true;
 
-		}
 		else
-		{
 			no_more_grandson = false;
-		}
+
 
 		point->back_track_counter++;
 	}
@@ -531,14 +517,12 @@ void horse()
 			
 
 			if (board_for_next_step[now->row][now->column] == 0)//这个说明压根就没有可行方向
-			{
 				board[before->row][before->column] = 0;
-			}
+			
 
-			else
-			{
+			else			
 				board[now->row][now->column] = 0;
-			}
+			
 			//refresh_next_board(before, Instruction_ADD);
 			refresh_next_board(now, Instruction_ADD);
 			step_counter--;
