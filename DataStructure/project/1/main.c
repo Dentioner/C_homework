@@ -13,15 +13,6 @@
 #define TIME_LIMIT 1000 //单位：ms
 
 
-typedef struct TNode
-{
-	bool banned;//代表这个节点走不通了
-	int row;
-	int column;
-	struct TNode * children[8];//8个子树
-	struct TNode * parent;
-}TreeNode;
-
 typedef struct Node
 {
 	int row;
@@ -52,6 +43,9 @@ void Init_nodeboard();
 void wait();
 void show_printer();
 void get_input();
+double start_time_all = 0;
+double end_time_all = 0;
+
 
 int board[8][8];
 int board_for_next_step[8][8] = {//这个棋盘用来记录某个点下一个可以走的方位有几个
@@ -83,14 +77,21 @@ Node nodeboard[8][8];
 
 int main()
 {
+	double procedure_time;
+	
+
 	Init_nodeboard();
 	Init_Stack();
 	
 	get_input();
 
+	start_time_all = clock();//test
 	horse();
 
+	end_time_all = clock();//test
     //printboard();
+	procedure_time = end_time_all - start_time_all;
+	printf("\ntime = %f\n", procedure_time);
     system("pause");
     return 0;
 }
@@ -205,6 +206,17 @@ void printboard()
 {
 	for (int i = 0; i < 8; i++)
 	{
+		/* 		
+		printf("%-4d", board[i][0]);
+		printf("%-4d", board[i][1]);
+		printf("%-4d", board[i][2]);
+		printf("%-4d", board[i][3]);
+		printf("%-4d", board[i][4]);
+		printf("%-4d", board[i][5]);
+		printf("%-4d", board[i][6]);
+		printf("%-4d", board[i][7]);
+		printf("\n");//循环展开
+		*/
 		for (int j = 0; j < 8; j++)		
 			printf("%-4d", board[i][j]);
 		printf("\n");

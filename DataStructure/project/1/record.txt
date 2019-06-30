@@ -1,0 +1,4 @@
+time:
+(0,0) 10 solutions
+502 ms ~644 ms
+
