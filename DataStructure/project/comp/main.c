@@ -7,9 +7,17 @@
 #define BOARD_SIZE 64
 #define Instruction_ADD 1
 #define Instruction_SUB 2
-#define MANUAL 2
-#define AUTO 1
-#define TIME_LIMIT 1000 //µ¥Î»£ºms
+
+
+
+typedef struct TNode
+{
+	bool banned;//´ú±íÕâ¸ö½Úµã×ß²»Í¨ÁË
+	int row;
+	int column;
+	struct TNode * children[8];//8¸ö×ÓÊ÷
+	struct TNode * parent;
+}TreeNode;
 
 typedef struct Node
 {
@@ -38,9 +46,6 @@ void horse();
 bool check_coordinate(Node testpoint);
 Node* next_step(Node* point);
 void Init_nodeboard();
-void wait();
-void show_printer();
-void get_input();
 
 int board[8][8];
 int board_for_next_step[8][8] = {//Õâ¸öÆåÅÌÓÃÀ´¼ÇÂ¼Ä³¸öµãÏÂÒ»¸ö¿ÉÒÔ×ßµÄ·½Î»ÓĞ¼¸¸ö
@@ -54,138 +59,61 @@ int board_for_next_step[8][8] = {//Õâ¸öÆåÅÌÓÃÀ´¼ÇÂ¼Ä³¸öµãÏÂÒ»¸ö¿ÉÒÔ×ßµÄ·½Î»ÓĞ¼¸¸
 	{2, 3, 4, 4, 4, 4, 3, 2} 
 };
 
+
 int print_counter;
 int step_counter;
 const int vector[8][2] = { {-2, 1} ,{-1, 2}, {1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1} };
+
 int show;//Õ¹Ê¾ÓÃ
-int mode_number;
-int solution_upper_bound;
+
 bool no_more_grandson = false;//next_stepÓÃ
+
 SqStack stack;
 Node *now, *before;
-Node nodeboard[8][8];
 
+Node nodeboard[8][8];
+double start_time_all = 0;
+double end_time_all = 0;
 int main()
 {
+	double procedure_time;
 	Init_nodeboard();
-	Init_Stack();	
-	get_input();	
+	Init_Stack();
+	int first_row, first_column;
+	printf("Please choose a start TreeNode. Use ',' to distinguish row & column.\n");
+	scanf("%d,%d", &(first_row), &(first_column));
+	printf("Step by step? Enter 1 means yes and 0 means no.\n");
+	scanf("%d", &show);
+	now = &nodeboard[first_row][first_column];
+
+	start_time_all = clock();//test
 	horse();
+	
+    printboard();
+	end_time_all = clock();//test
+	procedure_time = end_time_all - start_time_all;
+	printf("\ntime = %f\n", procedure_time);
     system("pause");
     return 0;
 }
 
 
-void get_input()
-{
-	int first_row, first_column;
-	int input_index;
-	int invalid_input = 1;
-	while (invalid_input)
-	{
-		printf("Please choose a start TreeNode. Use ',' to distinguish row & column.\n");
-		input_index = scanf("%d,%d", &(first_row), &(first_column));
-		while (getchar() != '\n')
-			continue;
-		if (input_index != 2)
-		{
-			printf("Invalid input. Try again.\n");
-			continue;
-		}		
-		if (first_row < 0 || first_row >= 8)
-		{
-			printf("Invalid input. Try again.\n");
-			continue;
-		}
-		if (first_column < 0 || first_column >= 8)
-		{
-			printf("Invalid input. Try again.\n");
-			continue;
-		}		
-		invalid_input = 0;
-	}
-
-	invalid_input = 1;
-	while (invalid_input)
-	{
-		printf("Step by step? Enter 1 means yes and 0 means no.\n");
-		input_index = scanf("%d", &show);
-		while (getchar() != '\n')
-			continue;
-		if (input_index != 1)
-		{
-			printf("Invalid input. Try again.\n");
-			continue;
-		}
-
-		if (show != 0 && show != 1)
-		{
-			printf("Invalid input. Try again.\n");
-			continue;
-		}
-		invalid_input = 0;
-	}
-
-
-	if (show)
-	{
-		invalid_input = 1;
-		while (invalid_input)
-		{
-			printf("Auto mode(1) or Manual mode(2)?\n");
-			input_index = scanf("%d", &mode_number);
-			while (getchar() != '\n')
-				continue;
-			if (input_index != 1)
-			{
-				printf("Invalid input. Try again.\n");
-				continue;
-			}
-			if (mode_number != 1 && mode_number != 2)
-			{
-				printf("Invalid input. Try again.\n");
-				continue;
-			}
-			invalid_input = 0;
-		}
-	}
-	else
-		mode_number = 0;
-	invalid_input = 1;
-	while (invalid_input)
-	{
-		printf("How many solutions?\n");
-		input_index = scanf("%d", &solution_upper_bound);
-		while (getchar() != '\n')
-			continue;
-		if (input_index != 1)
-		{
-			printf("Invalid input. Try again.\n");
-			continue;
-		}
-		
-		if (solution_upper_bound < 0)
-		{
-			printf("Invalid input. Try again.\n");
-			continue;
-		}
-
-		invalid_input = 0;
-	}
-	now = &nodeboard[first_row][first_column];
-	return;
-}
-
 void printboard()
 {
 	for (int i = 0; i < 8; i++)
 	{
-		for (int j = 0; j < 8; j++)		
+		for (int j = 0; j < 8; j++)
+		{
 			printf("%-4d", board[i][j]);
+		}
 		printf("\n");
 	}
 	return;
 }
+
+
+
+
 
 void push(Node *point_pointer)
 {
@@ -224,8 +152,8 @@ Node* get_top()
 
 void Init_Stack()
 {
+	//stack.stack_array = (Node*)malloc(sizeof(Node)*BOARD_SIZE);
 	stack.top = -1;
-	return;
 }
 
 void refresh_next_board(Node* point, int instruction)//Ë¢ĞÂËï×ÓÆåÅÌ
@@ -237,13 +165,35 @@ void refresh_next_board(Node* point, int instruction)//Ë¢ĞÂËï×ÓÆåÅÌ
 		testnode.row = point->row + vector[vector_index][0];
 		testnode.column = point->column + vector[vector_index][1];
 		next = &nodeboard[point->row + vector[vector_index][0]][point->column + vector[vector_index][1]];
-		if (!check_coordinate(testnode))		
-			continue;		
-		if (instruction == Instruction_SUB)		
-			board_for_next_step[next->row][next->column] --;		
-		else		
-			board_for_next_step[next->row][next->column] ++;		
+		if (!check_coordinate(testnode))
+		{
+			continue;
+		}
+		if (instruction == Instruction_SUB)
+		{
+			board_for_next_step[next->row][next->column] --;
+
+			//ÏÂÃæÊÇdebugÓÃµÄ
+			
+			if (board[1][5] == 0 || board[2][6] == 0)
+			{
+				if (board_for_next_step[0][7] <= 0)
+					printf("test.\n");
+			}
+			
+			if (board[1][5] == 0 && board[2][6] == 0)
+			{
+				if (board_for_next_step[0][7] <= 1)
+					printf("test.\n");
+			}
+
+		}
+		else
+		{
+			board_for_next_step[next->row][next->column] ++;
+		}
 	}
+
 	return;
 }
 
@@ -266,10 +216,11 @@ Node* next_step(Node* point)//ÕÒÏÂÒ»²½Ó¦¸ÃÈ¥ÄÄ
 	int i = 0;
 	int vector_index = 0;
 	//Ê×ÏÈÔÚÉú³É¶ù×ÓÖ®Ç°ÏÈ¿´¿´ÓĞÃ»ÓĞÖ®Ç°Éú³É¹ı¶ù×ÓÁË£¬·ñÔò¾Í²»ÓÃÔÙÅÜÒ»´ÎÑ­»·
-	//ÅĞ¶ÏÖ®Ç°ÓĞÃ»ÓĞÉú³É¶ù×ÓµÄ·½Ê½£¬¿ÉÒÔ¸ù¾İNode½á¹¹ÀïÃæµÄÄÇ¸ö»ØËİ¼ÆÊıÆ÷À´¸ã
+	//ÅĞ¶ÏÖ®Ç°ÓĞÃ»ÓĞÉú³É¶ù×ÓµÄ·½Ê½£¬ÎÒ¾õµÃ¿ÉÒÔ¸ù¾İNode½á¹¹ÀïÃæµÄÄÇ¸ö»ØËİ¼ÆÊıÆ÷À´¸ã
 
 	if (point->row == 2 && point->column == 1 && step_counter == 2)
 		printf("\n");
+
 
 	if (!point->back_track_counter)//¼ÆÊıÆ÷Îª0ËµÃ÷Ã»ÓĞ»ØËİ¹ı
 	{
@@ -279,13 +230,17 @@ Node* next_step(Node* point)//ÕÒÏÂÒ»²½Ó¦¸ÃÈ¥ÄÄ
 			testnode.column = point->column + vector[vector_index][1];
 			next = &nodeboard[point->row + vector[vector_index][0]][point->column + vector[vector_index][1]];
 			point->son[i][0] = vector_index;
+
+
 			if (!check_coordinate(testnode))
 			{
 				point->son[i++][1] = 9 + vector_index;//Ï¹Ğ´µÄÒ»¸ö´óÓÚ9µÄÊıÖµ			
 				continue;
 			}
-			else			
-				point->son[i++][1] = board_for_next_step[next->row][next->column];			
+			else
+			{
+				point->son[i++][1] = board_for_next_step[next->row][next->column];
+			}
 		}
 		//ÅÜÍê8´ÎÖ®ºóÖ´ĞĞÅÅĞò
 
@@ -299,39 +254,55 @@ Node* next_step(Node* point)//ÕÒÏÂÒ»²½Ó¦¸ÃÈ¥ÄÄ
 			{
 				point->son[jj + 1][0] = point->son[jj][0];
 				point->son[jj + 1][1] = point->son[jj][1];
+
 				jj--;
 			}
 			point->son[jj + 1][0] = key_vec;
 			point->son[jj + 1][1] = key;
+
 		}//ÅÅĞò
 		
-	
+		//******Õâ¸öµØ·½ËÆºõÃ»ÓĞ¼ì²éÉú³ÉµÄÄÇÒ»³¤´®×ø±êÖµ£¬ÊÇ²»ÊÇÕı³£µÄ
 		best_son = 
 			&nodeboard
 			[point->row + vector[point->son[point->back_track_counter][0]][0]]
 			[point->column + vector[point->son[point->back_track_counter][0]][1]];
 		
 		if (point->son[point->back_track_counter][1] > 8)//ËµÃ÷Ã»ÓĞ¸ü¶àµÄËï×ÓÁË£¬´óÓÚ8µÄ¶¼ÊÇÖ®Ç°Ô¤ÉèµÄÀ¬»øÖµ
+		{
 			no_more_grandson = true;
-		else		
+
+		}
+		else
+		{
 			no_more_grandson = false;
+		}
+			
 		point->back_track_counter++;
 	}
 
 	else//back_track_counter != 0
 	{
-		
+		//******Õâ¸öµØ·½ËÆºõÃ»ÓĞ¼ì²éÉú³ÉµÄÄÇÒ»³¤´®×ø±êÖµ£¬ÊÇ²»ÊÇÕı³£µÄ
 		best_son =
 			&nodeboard
 			[point->row + vector[point->son[point->back_track_counter][0]][0]]
 			[point->column + vector[point->son[point->back_track_counter][0]][1]];
 
 		if (point->son[point->back_track_counter][1] > 8)//ËµÃ÷Ã»ÓĞ¸ü¶àµÄËï×ÓÁË£¬´óÓÚ8µÄ¶¼ÊÇÖ®Ç°Ô¤ÉèµÄÀ¬»øÖµ
+		{
 			no_more_grandson = true;
+
+		}
 		else
+		{
 			no_more_grandson = false;
+		}
+
 		point->back_track_counter++;
 	}
+
+
 	return best_son;
 }
 
@@ -350,40 +321,10 @@ void Init_nodeboard()
 	return;
 }
 
-void wait()
-{
-	double start_time;
-	double current_time;
-	start_time = clock();
-	current_time = clock();
-	while (current_time - start_time < TIME_LIMIT)
-	{
-		current_time = clock();
-		continue;
-	}
-	return;
-}
-
-void show_printer()
-{	
-	system("cls");
-	printf("=============================backtracking mode=============================\n");
-	printf("automode:");
-	if (mode_number == AUTO)
-		printf("on\n");
-	else
-		printf("off\n");
-	printf("µÚ%d´Î\n", print_counter + 1);
-	printboard();
-	if (mode_number == MANUAL)
-		system("pause");
-	else
-		wait();
-	return;
-}
-
 void horse()
 {
+	//int vector_index;
+	//bool find_it;
 	Node testnode;
 	Node* Re;//ÓÃÓÚ´æ´¢popµÄ·µ»ØÖµ
 	if (!step_counter)//µÚÒ»²½£¬°ÑÑ¡¶¨µÄµØ·½Ğ´ÉÏ1
@@ -394,51 +335,50 @@ void horse()
 		before = now;
 		now = next_step(before);
 	}
-	if (!show)
+	
+	while (stack.top!=-1&& print_counter < 10  )//Ö»ÒªÕ»²»Îª¿Õ£¬¾ÍÒ»Ö±¿ÉÒÔÅÜÏÂÈ¥
 	{
-		system("cls");
-		printf("=============================illustration mode=============================\n");
-	}
-
-	while (stack.top!=-1 && print_counter < solution_upper_bound)//Ö»ÒªÕ»²»Îª¿Õ£¬¾ÍÒ»Ö±¿ÉÒÔÅÜÏÂÈ¥
-	{
+		//now = get_top();
+		/*
+		if (step_counter == 63)
+		{
+			printf("test.\n");
+			printboard();
+		}
+		*/
 
 		testnode.row = now->row;
 		testnode.column = now->column;
-
+		//if (step_counter == BOARD_SIZE)
+		//{
+			
+			
+		//}
 		if (step_counter == BOARD_SIZE - 1 && board[now->row][now->column] == 0)//ÅÜÍêÁË
 		{
-
+			if (print_counter == 1375)
+				printf("test\n");//test
 
 			push(now);
 			board[now->row][now->column] = ++step_counter;
-			if (show)
-			{
-				system("cls");
-				printf("=============================backtracking mode=============================\n");
-				printf("automode:");
-				if (mode_number == AUTO)
-					printf("on\n");
-				else
-					printf("off\n");
-			}
+
 			printf("µÚ%d´Î\n", ++print_counter);
 			printboard();
-			printf("\n");			
-			board[now->row][now->column] = 0;			
+			printf("\n");
+			
+			board[now->row][now->column] = 0;
+			//board[before->row][before->column] = 0;//²»ÖªµÀ¶Ô²»¶Ô
+			
+			//refresh_next_board(before, Instruction_ADD);
+			//refresh_next_board(now, Instruction_ADD);
+			
 			step_counter--;
 			Re = pop();
 			Re->back_track_counter = 0;//¸´Ô­
 			now = get_top();
-			if (show && print_counter < solution_upper_bound)
-			{
-				if (mode_number == MANUAL)
-					system("pause");
-				else
-					wait();
-				show_printer();
-			}continue;
+			continue;
 		}
+
 
 		if (!board_for_next_step[now->row][now->column])//Èç¹ûÏÖÔÚÃ»ÓĞ×Ó½Úµã¿ÉÒÔ×ßÁË
 		{
@@ -450,44 +390,51 @@ void horse()
 			Re = pop();
 			Re->back_track_counter = 0;//¸´Ô­
 			now = get_top();
-			if (show)
-				show_printer();
 			continue;
 		}
 		
 		if (now->back_track_counter >= board_for_next_step[now->row][now->column])//¿ÉĞĞ·½Ïò¶¼¸ã¹ıÁË
 		{
+
+			if (step_counter == 7 && print_counter == 1432)
+				printf("test.\n");
+
 			if (board_for_next_step[now->row][now->column] == 0)//Õâ¸öËµÃ÷Ñ¹¸ù¾ÍÃ»ÓĞ¿ÉĞĞ·½Ïò
-				board[before->row][before->column] = 0;		
-			else			
+			{
+				board[before->row][before->column] = 0;
+			}
+
+			else
+			{
 				board[now->row][now->column] = 0;
+			}
+			//refresh_next_board(before, Instruction_ADD);
 			refresh_next_board(now, Instruction_ADD);
 			step_counter--;
 			Re = pop();
 			Re->back_track_counter = 0;//¸´Ô­
 			if (stack.top > -1)//±ÜÃâ×îºóµ¯Õ»Íê±ÏÖ®ºó±¨´í
 				now = get_top();
-			if (show)
-				show_printer();
 			continue;
 		}
 		if (step_counter == board[now->row][now->column])//Õâ¸öÌõ¼şËµÃ÷µ±Ç°µÄnow½áµãÖ®Ç°×ß¹ıÁË£¬nowÊÇ´ÓÕ»ÀïÃæ³öÀ´µÄ
 		{
-			before = now;			
+			before = now;
+			//refresh_next_board(before, Instruction_SUB);
 			now = next_step(before);
 			if (no_more_grandson)
 			{
 				now = before;
-				board[now->row][now->column] = 0;				
+				board[now->row][now->column] = 0;
+				//refresh_next_board(before, Instruction_ADD);
 				refresh_next_board(now, Instruction_ADD);
 				step_counter--;
 				Re = pop();
 				Re->back_track_counter = 0;//¸´Ô­
 				now = get_top();
-				if (show)
-					show_printer();
 				continue;
 			}
+
 		}
 		else//·ñÔòËµÃ÷µ±Ç°µÄnow½áµãÊÇnext²úÉúµÄ
 		{
@@ -501,21 +448,36 @@ void horse()
 				if (no_more_grandson)
 				{
 					now = before;
-					board[now->row][now->column] = 0;					
+					board[now->row][now->column] = 0;
+					//refresh_next_board(before, Instruction_ADD);
 					refresh_next_board(now, Instruction_ADD);
 					step_counter--;
 					Re = pop();
 					Re->back_track_counter = 0;//¸´Ô­
 					now = get_top();
-					if (show)
-						show_printer();
 					continue;
 				}
+
 			}
-		}//else
-		//Õ¹Ê¾
+		}
+	}
+
+
+
+
+		//ÏÂÃæÊÇÕ¹Ê¾ÓÃµÄ£¬¿ÉÒÔÉ¾µô
 		if (show)
-			show_printer();		
-	}//while
+		{
+			system("cls");
+			printboard();
+			system("pause");
+		}
+	
+
 	return;
 }
+
+
+
+
+
