@@ -21,7 +21,8 @@ main:
 	
 	lw	$a0, (kernel)
 	li	$a1, 0x200
-	li	$a2, 0x400
+#	li	$a2, 0x400
+	mul	$a2, $t4, $t5
 	lw	$t0, (read_sd_card)
 
 
