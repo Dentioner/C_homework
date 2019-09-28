@@ -110,14 +110,14 @@ static void init_pcb()
 		queue_push(&ready_queue, &pcb[i]);
 	}
 
-	for(;i < num_sched1_tasks + 1 ; i++)
+	for(;i <num_lock_tasks + num_sched1_tasks + 1 ; i++)
 	{//this is used to load 3 tasks on pcb
 		pcb[i].kernel_context.regs[29] = STACK_TOP - i * STACK_SIZE;	//sp
-		pcb[i].kernel_context.regs[31] = sched1_tasks[i - 1]->entry_point;			//ra
+		pcb[i].kernel_context.regs[31] = sched1_tasks[i - num_lock_tasks - 1]->entry_point;			//ra
 
 		pcb[i].kernel_stack_top = STACK_TOP - i * STACK_SIZE;
 
-		pcb[i].type = sched1_tasks[i - 1]->type;
+		pcb[i].type = sched1_tasks[i - num_lock_tasks - 1]->type;
 		pcb[i].status = TASK_READY;
 
 		//assume that kernel shares the ccontext with user since there is no user in this task
