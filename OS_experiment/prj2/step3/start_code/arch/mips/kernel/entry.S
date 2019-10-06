@@ -57,7 +57,7 @@ END(open_all_interrupt)
 LEAF(reset_timer)
     mtc0    $0, CP0_COUNT
 #    li      k0, TIMER_INTERVAL
-    li      k0, 150000
+    li      k0, 1500000
     mtc0    k0, CP0_COMPARE
     jr      ra
 END(reset_timer)
@@ -66,6 +66,16 @@ LEAF(set_cp0_status)
     mtc0    a0, CP0_STATUS
     jr      ra
 END(set_cp0_status)
+
+LEAF(get_count)
+	mfc0	v0, CP0_COUNT
+	jr	ra
+END(get_count)
+
+LEAF(get_compare)
+	mfc0	v0, CP0_COMPARE
+	jr	ra
+END(get_compare)
 
 .macro SAVE_CONTEXT offset
     // TODO save context

@@ -7,9 +7,9 @@ static void irq_timer()
 {
     // TODO clock interrupt handler.
     // scheduler, time counter in here to do, emmmmmm maybe.
-    do_scheduler();
-    
-    time_elapsed += 10000000; // 暂定为1000,0000
+do_scheduler();
+	
+	time_elapsed += 10000000; // 暂定为1000,0000
     
     // reset cp0_count & cp0_compare
     /*
@@ -20,9 +20,10 @@ static void irq_timer()
 	);
     */ 
     reset_timer();
-    screen_reflush();
-    //do_scheduler();
-    
+    //screen_reflush(); 
+//	screen_clear();
+//    do_scheduler();
+//  	screen_reflush();  
     
 }
 

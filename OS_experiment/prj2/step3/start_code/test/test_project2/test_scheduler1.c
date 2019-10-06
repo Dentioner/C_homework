@@ -34,7 +34,7 @@ void printk_task2(void)
         disable_all_interrupt();
         vt100_move_cursor(1, print_location);
         printk("> [TASK] This task is to test scheduler. (%d)", i);
-        open_all_interrupt();
+         open_all_interrupt();
         // do_scheduler();
     }
 }

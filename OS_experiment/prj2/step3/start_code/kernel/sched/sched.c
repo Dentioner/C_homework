@@ -108,7 +108,8 @@ void switch_pcb()
     // because queue is FIFO, so the pcb that current_running pointed earlier
     // will not be pushed out firstly
 
-        //test.................
+
+    //test.................
   /*  vt100_move_cursor(1, 5);
     printk("pcb[1]:%d\t", pcb[1].status);
 //    vt100_move_cursor(1, 6);    
@@ -148,9 +149,7 @@ void switch_pcb()
 		for(asdfg = 0; asdfg < 10000000; asdfg ++);
 	}*/
 
-
-
-    return;
+ return;
 }
 
 void scheduler(void)
