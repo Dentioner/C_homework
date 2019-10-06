@@ -63,7 +63,7 @@ enum ExcCode
 #define BEV1_OFFSET 0x380
 
 #define TIMER_INTERVAL 150000
-#define CP0_STATUS_INIT 0x10008000
+#define CP0_STATUS_INIT 0x10008002
 
 
 void interrupt_helper(uint32_t, uint32_t);

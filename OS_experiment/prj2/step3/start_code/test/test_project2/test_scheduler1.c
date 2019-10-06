@@ -16,8 +16,10 @@ void printk_task1(void)
 
     for (i = 0;; i++)
     {
+        disable_all_interrupt();
         vt100_move_cursor(1, print_location);
         printk("> [TASK] This task is to test scheduler. (%d)", i);
+        open_all_interrupt();
         // do_scheduler();
     }
 }
@@ -29,8 +31,10 @@ void printk_task2(void)
 
     for (i = 0;; i++)
     {
+        disable_all_interrupt();
         vt100_move_cursor(1, print_location);
         printk("> [TASK] This task is to test scheduler. (%d)", i);
+        open_all_interrupt();
         // do_scheduler();
     }
 }
@@ -44,6 +48,7 @@ void drawing_task1(void)
         for (i = 60; i > 0; i--)
         {
             /* move */
+            disable_all_interrupt();
             vt100_move_cursor(i, j + 0);
             printk("%s", plane1);
 
@@ -55,8 +60,10 @@ void drawing_task1(void)
 
             vt100_move_cursor(i, j + 3);
             printk("%s", plane4);
+            open_all_interrupt();
         }
         // do_scheduler();
+        disable_all_interrupt();
 
         vt100_move_cursor(1, j + 0);
         printk("%s", blank);
@@ -69,5 +76,7 @@ void drawing_task1(void)
 
         vt100_move_cursor(1, j + 3);
         printk("%s", blank);
+
+        open_all_interrupt();
     }
 }

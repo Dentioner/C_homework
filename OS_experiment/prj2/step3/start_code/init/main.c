@@ -38,10 +38,10 @@ extern pid_t process_id;
 extern pcb_t pcb[NUM_MAX_TASK];//task array
 //extern unsigned int pcb_array_length;
 
-//extern queue_t ready_queue;
-extern queue_t ready_queue_p1;
-extern queue_t ready_queue_p2;
-extern queue_t ready_queue_p3;
+extern queue_t ready_queue;
+//extern queue_t ready_queue_p1;
+//extern queue_t ready_queue_p2;
+//extern queue_t ready_queue_p3;
 //extern queue_t block_queue;
 extern mutex_lock_t block_queue_array[NUM_MUTEX_LOCK];
 
@@ -96,29 +96,37 @@ static void init_pcb()
 	for(i = 1; i < num_lock_tasks + 1 ; i++)
 	{//this is used to load 2 tasks on pcb
 		pcb[i].kernel_context.regs[29] = STACK_TOP - i * STACK_SIZE;	//sp
-		pcb[i].kernel_context.regs[31] = lock_tasks[i - 1]->entry_point;			//ra
+		//pcb[i].kernel_context.regs[31] = lock_tasks[i - 1]->entry_point;			//ra
+		pcb[i].kernel_context.regs[31] = (uint32_t)handle_int + 0x14;			//ra
+		
 
 		pcb[i].kernel_stack_top = STACK_TOP - i * STACK_SIZE;
 
 		pcb[i].type = lock_tasks[i - 1]->type;
 		pcb[i].status = TASK_READY;
 		pcb[i].kernel_context.cp0_status = CP0_STATUS_INIT;
-
+	//	pcb[i].kernel_context.cp0_epc = lock_tasks[i - 1]->entry_point;
+	
+	
 	//	pcb[i].user_context.regs[29] = pcb[i].kernel_context.regs[29];
 	//	pcb[i].user_context.regs[31] = pcb[i].kernel_context.regs[31];
 	//	pcb[i].user_stack_top = pcb[i].kernel_stack_top;
 		pcb[i].user_context.regs[29] = STACK_TOP - i * STACK_SIZE - STACK_SIZE/2;
-		pcb[i].user_context.regs[31] = 0;
+		pcb[i].user_context.regs[31] = lock_tasks[i - 1]->entry_point;
 		pcb[i].user_stack_top = STACK_TOP - i * STACK_SIZE - STACK_SIZE/2;
 		pcb[i].user_context.cp0_status = CP0_STATUS_INIT;
+		pcb[i].user_context.cp0_epc = lock_tasks[i - 1]->entry_point; // because "eret" is after "RESTORE_CONTEXT(USER)"
 
-		queue_push(&ready_queue_p1, &pcb[i]);
+		//queue_push(&ready_queue_p1, &pcb[i]);
+		queue_push(&ready_queue, &pcb[i]);
 	}
 
 	for(;i <num_lock_tasks + num_sched1_tasks + 1 ; i++)
 	{//this is used to load 3 tasks on pcb
 		pcb[i].kernel_context.regs[29] = STACK_TOP - i * STACK_SIZE;	//sp
-		pcb[i].kernel_context.regs[31] = sched1_tasks[i - num_lock_tasks - 1]->entry_point;			//ra
+		//pcb[i].kernel_context.regs[31] = sched1_tasks[i - num_lock_tasks - 1]->entry_point;			//ra
+		pcb[i].kernel_context.regs[31] = (uint32_t)handle_int + 0x14;			//ra
+		
 
 		pcb[i].kernel_stack_top = STACK_TOP - i * STACK_SIZE;
 
@@ -126,16 +134,21 @@ static void init_pcb()
 		pcb[i].status = TASK_READY;
 
 		pcb[i].kernel_context.cp0_status = CP0_STATUS_INIT;
+		//pcb[i].kernel_context.cp0_epc = sched1_tasks[i - num_lock_tasks - 1]->entry_point;
+
 		//pcb[i].user_context.regs[29] = pcb[i].kernel_context.regs[29];
 		//pcb[i].user_context.regs[31] = pcb[i].kernel_context.regs[31];
 		
 		//pcb[i].user_stack_top = pcb[i].kernel_stack_top;
 		pcb[i].user_context.regs[29] = STACK_TOP - i * STACK_SIZE - STACK_SIZE/2;
-		pcb[i].user_context.regs[31] = 0;
+		pcb[i].user_context.regs[31] = sched1_tasks[i - num_lock_tasks - 1]->entry_point;
 		pcb[i].user_stack_top = STACK_TOP - i * STACK_SIZE - STACK_SIZE/2;
 		pcb[i].user_context.cp0_status = CP0_STATUS_INIT;
+		pcb[i].user_context.cp0_epc = sched1_tasks[i - num_lock_tasks - 1]->entry_point;
 
-		queue_push(&ready_queue_p1, &pcb[i]);
+		//queue_push(&ready_queue_p1, &pcb[i]);
+		queue_push(&ready_queue, &pcb[i]);
+		
 	}
 
 	// let pcb[0] become the first process
@@ -147,7 +160,10 @@ static void init_pcb()
 
 	// accorrding to lecture2.pdf, user shares the same address with kernel
 	pcb[0].user_context.regs[29] = pcb[0].kernel_context.regs[29];
-	pcb[0].user_stack_top = pcb[0].kernel_stack_top;
+	
+	//pcb[0].user_stack_top = pcb[0].kernel_stack_top;
+	pcb[0].user_stack_top = STACK_TOP - STACK_SIZE/2;
+
 
     /* previous, next pointer */
 	pcb[0].prev = NULL;
@@ -179,16 +195,16 @@ static void init_pcb()
 
 static void init_queue()
 {
-	// queue_init(&ready_queue); // part1
+	queue_init(&ready_queue); // part1
 	// queue_init(&block_queue);
 	//int i;
 	//for (i = 0; i < NUM_MUTEX_LOCK; i++ )	// part2
 	//{
 	//	do_mutex_lock_init(block_queue_array[i]);
 	//}
-	queue_init(&ready_queue_p1); // part3
-	queue_init(&ready_queue_p2); // part3
-	queue_init(&ready_queue_p3); // part3
+	// queue_init(&ready_queue_p1); // part3
+	// queue_init(&ready_queue_p2); // part3
+	// queue_init(&ready_queue_p3); // part3
 	
 
 
@@ -206,25 +222,40 @@ static void init_exception() // init the interrupt system
 	// 1. Get CP0_STATUS
 	// reference: https://blog.csdn.net/comcat/article/details/1557963
 	uint32_t my_cp0_status;
+	/*
 	asm volatile(
 		"mfc0	%0, CP0_STATUS\n\t"
 		:"=r"(my_cp0_status)
 		:
 		);
+	*/
+	my_cp0_status = get_cp0_status();
+
 	// 2. Disable all interrupt
-	asm volatile("CLI");
+	
+	//asm volatile("CLI");
+	disable_all_interrupt();
 
 	// 3. Copy the level 2 exception handling code to 0x80000180
 	memcpy(BEV0_EBASE + BEV0_OFFSET, exception_handler_begin, exception_handler_end - exception_handler_begin);
+	//memcpy(BEV1_EBASE + BEV1_OFFSET, exception_handler_begin, exception_handler_end - exception_handler_begin);
+	
 
 	// 4. reset CP0_COMPARE & CP0_COUNT & CP0_STATUS register
+	//my_cp0_status |= 0x10008001; // let status[28] = 1, status[15] = 1 and status[0] = 1
+	my_cp0_status |= 0x10008000;
+	/*
 	asm volatile(
 		"mtc0	$0, CP0_COUNT\n\t"
 		"li		k0, TIMER_INTERVAL\n\t"
 		"mtc0	k0, CP0_COMPARE\n\t"
-		
-	);// !!!!!!!!!!!!!!!!!!!!!!!!!!!! TODO:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		//	haven't init cp0_status yet
+		"mtc0	%0, CP0_STATUS\n\t"
+		:
+		:"r"(my_cp0_status)
+		);
+	*/
+	reset_timer();
+	set_cp0_status(my_cp0_status);
 }
 
 static void init_syscall(void)
@@ -258,7 +289,7 @@ void __attribute__((section(".entry_function"))) _start(void)
 	printk("> [INIT] SCREEN initialization succeeded.\n");
 
 	// TODO Enable interrupt
-	
+	open_all_interrupt();
 	while (1)
 	{
 		// (QAQQQQQQQQQQQ)

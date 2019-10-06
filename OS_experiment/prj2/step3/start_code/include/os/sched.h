@@ -144,6 +144,6 @@ void do_block(queue_t *);
 void do_unblock_one(queue_t *);
 void do_unblock_all(queue_t *);
 // void unblock(void);
-void ready_queue_push(pcb_t * pcb);
+// void ready_queue_push(pcb_t * pcb);
 
 #endif

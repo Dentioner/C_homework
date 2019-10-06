@@ -14,8 +14,12 @@
 .endm
 
 .macro CLI
+
     mfc0    k0, CP0_STATUS
-    andi    k0, k0, 0xfffffffe  # just let IE = 0
+    #andi    k0, k0, 0xfffffffe  # just let IE = 0
+    #and     k0, 0xfffffffe
+    li      k1, 0xfffffffe
+    and     k0, k0, k1
     mtc0    k0, CP0_STATUS
 .endm
 
@@ -31,6 +35,37 @@ LEAF(asm_start)
     
     jr  ra
 END(asm_start)
+
+# I find that I cannot use asm in .c file, so that I use LEAF&END to build small function
+# reference: https://blog.csdn.net/ivan240/article/details/5543985
+
+LEAF(get_cp0_status)
+    mfc0    v0, CP0_STATUS
+    jr      ra
+END(get_cp0_status)
+
+LEAF(disable_all_interrupt)
+    CLI
+    jr      ra
+END(disable_all_interrupt)
+
+LEAF(open_all_interrupt)
+    STI
+    jr      ra
+END(open_all_interrupt)
+
+LEAF(reset_timer)
+    mtc0    $0, CP0_COUNT
+#    li      k0, TIMER_INTERVAL
+    li      k0, 150000
+    mtc0    k0, CP0_COMPARE
+    jr      ra
+END(reset_timer)
+
+LEAF(set_cp0_status)
+    mtc0    a0, CP0_STATUS
+    jr      ra
+END(set_cp0_status)
 
 .macro SAVE_CONTEXT offset
     // TODO save context
@@ -178,6 +213,7 @@ exception_handler_begin:
     // TODO close interrupt
     // jmp exception_handler[i] which decided by CP0_CAUSE
     // Leve2 exception Handler.
+    
     #   close interrupt
     CLI
     

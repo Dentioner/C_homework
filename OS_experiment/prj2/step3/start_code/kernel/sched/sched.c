@@ -20,11 +20,13 @@ pid_t process_id = 1;
 //there are 2 queues in sched.h headed by "extern"
 //so do I need to define them here?
 
-// queue_t ready_queue;
+queue_t ready_queue;
+
+/*
 queue_t ready_queue_p1;
 queue_t ready_queue_p2;
 queue_t ready_queue_p3;
-
+*/
 
 
 //queue_t block_queue;    //it may not be used in part1
@@ -37,6 +39,7 @@ static void check_sleeping()
 {
 }
 
+/*
 void ready_queue_push(pcb_t * pcb)
 {
     if(pcb->priority == P1)
@@ -55,6 +58,7 @@ void ready_queue_push(pcb_t * pcb)
     }
     
 }
+*/
 
 void switch_pcb()
 {
@@ -76,11 +80,12 @@ void switch_pcb()
         
         //unblock();
         //if(current_running->pid != 2)
-        //queue_push(&ready_queue, current_running);
-        ready_queue_push(current_running);
+        queue_push(&ready_queue, current_running);
+        //ready_queue_push(current_running);
     }
-    //current_running = queue_dequeue(&ready_queue);
+    current_running = queue_dequeue(&ready_queue);
 
+    /*
     if(!queue_is_empty(&ready_queue_p1))
     {
         current_running = queue_dequeue(&ready_queue_p1);
@@ -98,10 +103,51 @@ void switch_pcb()
         printk("No process. Error condition.\n");
         while(1);
     }
-    
+    */
 
     // because queue is FIFO, so the pcb that current_running pointed earlier
     // will not be pushed out firstly
+
+        //test.................
+  /*  vt100_move_cursor(1, 5);
+    printk("pcb[1]:%d\t", pcb[1].status);
+//    vt100_move_cursor(1, 6);    
+    printk("pcb[2]:%d\t", pcb[2].status);
+//    vt100_move_cursor(1, 7);
+    printk("pcb[3]:%d\t", pcb[3].status);
+  //  vt100_move_cursor(1, 8);
+
+    printk("pcb[4]:%d\t", pcb[4].status);
+   // vt100_move_cursor(1, 9);
+
+    printk("pcb[5]:%d\n", pcb[5].status);
+   // vt100_move_cursor(1, 10);
+	
+    vt100_move_cursor(1, 6);
+	    printk("pcb[0]:0x%x\t", &pcb[0]);
+    printk("pcb[1]:0x%x\t", &pcb[1]);
+//    vt100_move_cursor(1, 6);    
+    printk("pcb[2]:0x%x\n", &pcb[2]);
+	 vt100_move_cursor(1, 7);
+//    vt100_move_cursor(1, 7);
+    printk("pcb[3]:0x%x\t", &pcb[3]);
+  //  vt100_move_cursor(1, 8);
+
+    printk("pcb[4]:0x%x\t", &pcb[4]);
+   // vt100_move_cursor(1, 9);
+
+    printk("pcb[5]:0x%x\n", &pcb[5]);
+   // vt100_move_cursor(1, 10);
+	 vt100_move_cursor(1, 8);
+	printk("current_running: 0x%x\n", current_running);
+   if(current_running == &pcb[1] || current_running == &pcb[1])
+	{
+		int asdfg;
+		vt100_move_cursor(1, 9);
+		printk("lock running\n");
+		for(asdfg = 0; asdfg < 10000000; asdfg ++);
+	}*/
+
 
 
     return;
