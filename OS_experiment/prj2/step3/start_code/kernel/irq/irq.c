@@ -9,7 +9,7 @@ static void irq_timer()
     // scheduler, time counter in here to do, emmmmmm maybe.
 do_scheduler();
 	
-	time_elapsed += 10000000; // ÔÝ¶¨Îª1000,0000
+	
     
     // reset cp0_count & cp0_compare
     /*
