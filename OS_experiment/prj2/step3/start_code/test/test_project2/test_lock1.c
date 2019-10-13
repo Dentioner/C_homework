@@ -33,12 +33,13 @@ void lock_task1(void)
                         is_init = TRUE;
                 }
 
+                disable_all_interrupt();
                 vt100_move_cursor(1, print_location);
                 printk("%s", blank);
 
                 vt100_move_cursor(1, print_location);
                 printk("> [TASK] Applying for a lock.\n");
-
+                open_all_interrupt();
                 do_scheduler();
 
 #ifdef SPIN_LOCK
@@ -50,17 +51,19 @@ void lock_task1(void)
 #endif
 
                 for (i = 0; i < 20; i++)
-                {
+                {       disable_all_interrupt();
                         vt100_move_cursor(1, print_location);
                         printk("> [TASK] Has acquired lock and running.(%d)\n", i);
+                        open_all_interrupt();
                         do_scheduler();
                 }
-
+                disable_all_interrupt();
                 vt100_move_cursor(1, print_location);
                 printk("%s", blank);
 
                 vt100_move_cursor(1, print_location);
                 printk("> [TASK] Has acquired lock and exited.\n");
+                open_all_interrupt();
 
 #ifdef SPIN_LOCK
                 spin_lock_release(&spin_lock);
@@ -91,12 +94,13 @@ void lock_task2(void)
 #endif
                         is_init = TRUE;
                 }
-
+                disable_all_interrupt();
                 vt100_move_cursor(1, print_location);
                 printk("%s", blank);
 
                 vt100_move_cursor(1, print_location);
                 printk("> [TASK] Applying for a lock.\n");
+                open_all_interrupt();
 
                 do_scheduler();
 
@@ -109,18 +113,21 @@ void lock_task2(void)
 #endif
 
                 for (i = 0; i < 20; i++)
-                {
+                {       
+                        disable_all_interrupt();
                         vt100_move_cursor(1, print_location);
                         printk("> [TASK] Has acquired lock and running.(%d)\n", i);
+                        open_all_interrupt();
                         do_scheduler();
                 }
-
+                disable_all_interrupt();
                 vt100_move_cursor(1, print_location);
                 printk("%s", blank);
 
                 vt100_move_cursor(1, print_location);
                 printk("> [TASK] Has acquired lock and exited.\n");
-
+                open_all_interrupt();
+                
 #ifdef SPIN_LOCK
                 spin_lock_release(&spin_lock);
 #endif

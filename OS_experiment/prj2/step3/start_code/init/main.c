@@ -324,7 +324,7 @@ void __attribute__((section(".entry_function"))) _start(void)
 */
 	// TODO Enable interrupt
 	open_all_interrupt();
-
+	reset_timer();
 /*	int index;
 	printk("test\n");
 	printk("status = 0x%x\n", get_cp0_status());

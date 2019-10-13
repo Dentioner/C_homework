@@ -57,7 +57,7 @@ END(open_all_interrupt)
 LEAF(reset_timer)
     mtc0    $0, CP0_COUNT
 #    li      k0, TIMER_INTERVAL
-    li      k0, 1500000
+    li      k0, 150000
     mtc0    k0, CP0_COMPARE
     jr      ra
 END(reset_timer)
