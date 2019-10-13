@@ -115,6 +115,7 @@ typedef struct pcb
     //uint32_t lock_address;
 
     priority_t priority;
+    uint32_t wake_up_time;
 
 } pcb_t;
 

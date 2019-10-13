@@ -14,13 +14,14 @@
 .endm
 
 .macro CLI
-
+    .set noat
     mfc0    k0, CP0_STATUS
     #andi    k0, k0, 0xfffffffe  # just let IE = 0
     #and     k0, 0xfffffffe
     li      k1, 0xfffffffe
     and     k0, k0, k1
     mtc0    k0, CP0_STATUS
+    .set at
 .endm
 
 LEAF(asm_start)
@@ -44,6 +45,25 @@ LEAF(get_cp0_status)
     jr      ra
 END(get_cp0_status)
 
+		    
+		    
+       
+		   
+
+	       
+		   
+       
+	      
+
+
+
+		 
+		     
+       
+		
+
+
+
 LEAF(disable_all_interrupt)
     CLI
     jr      ra
@@ -57,7 +77,7 @@ END(open_all_interrupt)
 LEAF(reset_timer)
     mtc0    $0, CP0_COUNT
 #    li      k0, TIMER_INTERVAL
-    li      k0, 1500000
+    li      k0, 150000
     mtc0    k0, CP0_COMPARE
     jr      ra
 END(reset_timer)
@@ -82,7 +102,7 @@ END(get_compare)
     # code with "#" is pseudo code
     .set noat # .set noat prevents the assembler from translating assembly code into binary sequences relying on the at/$1 register.
     lw    $26, current_running  #k0
-    addi k0, k0, \offset      #the reason of using '\':https://www.cnblogs.com/zjzsky/p/3534109.html
+    addiu k0, k0, \offset      #the reason of using '\':https://www.cnblogs.com/zjzsky/p/3534109.html
 #no sw $0 xxx,  because 0(k0) is $0 register
     sw    $1, 4(k0)    #at
     sw    $2, 8(k0)    #v0
@@ -148,7 +168,7 @@ END(get_compare)
 #no lw $0 xxx,  because 0(k0) is $0 register
     .set noat   # .set noat prevents the assembler from translating assembly code into binary sequences relying on the at/$1 register.
     lw    k0, current_running  #k0
-    addi  k0, k0, \offset     #the reason of using '\':https://www.cnblogs.com/zjzsky/p/3534109.html
+    addiu k0, k0, \offset     #the reason of using '\':https://www.cnblogs.com/zjzsky/p/3534109.html
 
     lw    $1, 4(k0)    #at
     lw    $2, 8(k0)    #v0
@@ -218,6 +238,7 @@ END(do_scheduler)
 .global exception_handler_begin
 .global exception_handler_end
 
+
 NESTED(exception_handler_entry, 0, sp)   
 exception_handler_begin:
     // TODO close interrupt
@@ -229,6 +250,11 @@ exception_handler_begin:
     
     #   save context
     SAVE_CONTEXT(USER)
+
+    #   test
+   # lw      k0, current_running
+   # lw      sp, 312(k0)
+
     
     #   jump to handle_xxx
     mfc0    k0, CP0_CAUSE           # read CP0_CAUSE register
@@ -261,12 +287,18 @@ NESTED(handle_int, 0, sp)
     mfc0    a0, CP0_STATUS
     mfc0    a1, CP0_CAUSE
     # void interrupt_helper(uint32_t status, uint32_t cause)
-    addi    sp, sp, -8
+    addiu    sp, sp, -8
     jal     interrupt_helper
-    addi    sp, sp, 8
+    addiu    sp, sp, 8
+ 
+
 
     
     # 2.restore the context
+	mtc0	zero, CP0_COUNT
+	li		k0, 150000
+	mtc0	k0, CP0_COMPARE	     
+ 
     RESTORE_CONTEXT(USER)
     
     # 3.open interrupt
@@ -278,23 +310,23 @@ END(handle_int)
 NESTED(handle_syscall, 0, sp)
     // system call handler
     # 1.jump to system_call_helper
-    add     a3, a2, $0
-    add     a2, a1, $0
-    add     a1, a0, $0
-    add     a0, v0, $0
+#    add     a3, a2, $0
+#    add     a2, a1, $0
+#    add     a1, a0, $0
+#    add     a0, v0, $0
     # void system_call_helper(int fn, int arg1, int arg2, int arg3)
-    addi    sp, sp, -16
+    addiu    sp, sp, -16
     jal     system_call_helper
-    addi    sp, sp, 16
+    addiu    sp, sp, 16
 
     
     # 2.restore the context
     RESTORE_CONTEXT(USER)
     
     # 3.open interrupt
-    mfc0    k0, CP0_EPC
-    addiu   k0, k0, 4
-    mtc0    k0, CP0_EPC # epc + 4
+#    mfc0    k0, CP0_EPC
+#    addiu   k0, k0, 4
+#    mtc0    k0, CP0_EPC # epc + 4
 
     STI
 
@@ -308,6 +340,10 @@ END(handle_syscall)
 
 NESTED(handle_other, 0, sp)
     // other exception handler
+cycle:
+	j	cycle
+	nop
+
 END(handle_other)
 
 

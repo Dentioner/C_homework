@@ -47,14 +47,21 @@ extern mutex_lock_t block_queue_array[NUM_MUTEX_LOCK];
 
 extern int num_lock_tasks;
 extern mutex_lock_t mutex_lock;
+extern queue_t sleep_queue;
+extern int num_timer_tasks;
+extern int num_sched2_tasks;
+
 static void init_pcb()
 {
 	int i, j;
 	for(i = 0; i < NUM_MAX_TASK; i++)
 	{
+		memset(pcb[i], 0 , sizeof(pcb_t));
+
+		
 		pcb[i].status = TASK_EXITED;
 		pcb[i].first_running = 1;
-		for( j = 0; j < 32; j++)
+		/*for( j = 0; j < 32; j++)
 		{
 			pcb[i].kernel_context.regs[j] = 0;
 			pcb[i].user_context.regs[j] = 0;
@@ -80,105 +87,166 @@ static void init_pcb()
 		pcb[i].prev = NULL;
 		pcb[i].next = NULL;
 
-		pcb[i].pid = 0;
+		pcb[i].pid = 0;*/
 
 		pcb[i].type = KERNEL_PROCESS;
 
-		pcb[i].cursor_x = 0;
-		pcb[i].cursor_y = 0;
+		//pcb[i].cursor_x = 0;
+		//pcb[i].cursor_y = 0;
 		
 		//for (int k = 0; k < NUM_MUTEX_LOCK; k++)
 		//	pcb[i].lock_address[k] = NULL;
 		//pcb[i].lock_address = NULL;
-		pcb[i].priority = P1;
+		//pcb[i].priority = P1;
+		//pcb[i].wake_up_time = 0;
 	}
 
-	for(i = 1; i < num_lock_tasks + 1 ; i++)
+		
+
+
+	for(i = 1, j = 0; i < num_timer_tasks + 1 ; i++, j++)
 	{//this is used to load 2 tasks on pcb
-		pcb[i].kernel_context.regs[29] = STACK_TOP - i * STACK_SIZE;	//sp
-		//pcb[i].kernel_context.regs[31] = lock_tasks[i - 1]->entry_point;			//ra
+		pcb[i].kernel_context.regs[29] = STACK_TOP - 2*i * STACK_SIZE;	//sp
+		//pcb[i].kernel_context.regs[31] = lock_tasks[j]->entry_point;			//ra
 		pcb[i].kernel_context.regs[31] = (uint32_t)handle_int + 0x14;			//ra
 		
 
-		pcb[i].kernel_stack_top = STACK_TOP - i * STACK_SIZE;
+		pcb[i].kernel_stack_top = STACK_TOP - 2*i * STACK_SIZE;;
 
-		pcb[i].type = lock_tasks[i - 1]->type;
+		pcb[i].type = timer_tasks[j]->type;
 		pcb[i].status = TASK_READY;
 		pcb[i].kernel_context.cp0_status = CP0_STATUS_INIT;
-//		pcb[i].kernel_context.cp0_epc = lock_tasks[i - 1]->entry_point;
+//		pcb[i].kernel_context.cp0_epc = lock_tasks[j]->entry_point;
 	
 	
 	//	pcb[i].user_context.regs[29] = pcb[i].kernel_context.regs[29];
 	//	pcb[i].user_context.regs[31] = pcb[i].kernel_context.regs[31];
 	//	pcb[i].user_stack_top = pcb[i].kernel_stack_top;
-		pcb[i].user_context.regs[29] = STACK_TOP - i * STACK_SIZE - STACK_SIZE/2;
-		pcb[i].user_context.regs[31] = lock_tasks[i - 1]->entry_point;
-		pcb[i].user_stack_top = STACK_TOP - i * STACK_SIZE - STACK_SIZE/2;
+		pcb[i].user_context.regs[29] = pcb[i].kernel_stack_top - STACK_SIZE;
+		pcb[i].user_context.regs[31] = timer_tasks[j]->entry_point;
+		pcb[i].user_stack_top = pcb[i].kernel_stack_top - STACK_SIZE;
 		pcb[i].user_context.cp0_status = CP0_STATUS_INIT;
-		pcb[i].user_context.cp0_epc = lock_tasks[i - 1]->entry_point; // because "eret" is after "RESTORE_CONTEXT(USER)"
+		pcb[i].user_context.cp0_epc = timer_tasks[j]->entry_point; // because "eret" is after "RESTORE_CONTEXT(USER)"
 
 		//queue_push(&ready_queue_p1, &pcb[i]);
 		queue_push(&ready_queue, &pcb[i]);
 	}
 
-	for(;i <num_lock_tasks + num_sched1_tasks + 1 ; i++)
+	for(j = 0;i <num_timer_tasks + num_sched2_tasks + 1 ; i++, j++)
 	{//this is used to load 3 tasks on pcb
-		pcb[i].kernel_context.regs[29] = STACK_TOP - i * STACK_SIZE;	//sp
-		//pcb[i].kernel_context.regs[31] = sched1_tasks[i - num_lock_tasks - 1]->entry_point;			//ra
+		pcb[i].kernel_context.regs[29] = STACK_TOP - 2*i * STACK_SIZE;	//sp
+		//pcb[i].kernel_context.regs[31] = sched1_tasks[j]->entry_point;			//ra
 		pcb[i].kernel_context.regs[31] = (uint32_t)handle_int + 0x14;			//ra
 		
 
-		pcb[i].kernel_stack_top = STACK_TOP - i * STACK_SIZE;
+		pcb[i].kernel_stack_top = STACK_TOP - 2*i * STACK_SIZE;
 
-		pcb[i].type = sched1_tasks[i - num_lock_tasks - 1]->type;
+		pcb[i].type = sched2_tasks[j]->type;
 		pcb[i].status = TASK_READY;
 
 		pcb[i].kernel_context.cp0_status = CP0_STATUS_INIT;
-//		pcb[i].kernel_context.cp0_epc = sched1_tasks[i - num_lock_tasks - 1]->entry_point;
+//		pcb[i].kernel_context.cp0_epc = sched1_tasks[j]->entry_point;
 		//pcb[i].user_context.regs[29] = pcb[i].kernel_context.regs[29];
 		//pcb[i].user_context.regs[31] = pcb[i].kernel_context.regs[31];
 		
 		//pcb[i].user_stack_top = pcb[i].kernel_stack_top;
-		pcb[i].user_context.regs[29] = STACK_TOP - i * STACK_SIZE - STACK_SIZE/2;
-		pcb[i].user_context.regs[31] = sched1_tasks[i - num_lock_tasks - 1]->entry_point;
-		pcb[i].user_stack_top = STACK_TOP - i * STACK_SIZE - STACK_SIZE/2;
+		pcb[i].user_context.regs[29] = pcb[i].kernel_stack_top - STACK_SIZE;
+		pcb[i].user_context.regs[31] = sched2_tasks[j]->entry_point;
+		pcb[i].user_stack_top = pcb[i].kernel_stack_top - STACK_SIZE;
 		pcb[i].user_context.cp0_status = CP0_STATUS_INIT;
-		pcb[i].user_context.cp0_epc = sched1_tasks[i - num_lock_tasks - 1]->entry_point;
+		pcb[i].user_context.cp0_epc = sched2_tasks[j]->entry_point;
 
 		//queue_push(&ready_queue_p1, &pcb[i]);
 		queue_push(&ready_queue, &pcb[i]);
 		
 	}
-/*
 
-	for(i = 1; i < num_sched1_tasks + 1 ; i++)
+
+	for(j = 0;i <num_timer_tasks + num_sched2_tasks + num_lock_tasks +1 ; i++, j++)
 	{//this is used to load 2 tasks on pcb
-		pcb[i].kernel_context.regs[29] = STACK_TOP - i * STACK_SIZE;	//sp
-		//pcb[i].kernel_context.regs[31] = lock_tasks[i - 1]->entry_point;			//ra
+		pcb[i].kernel_context.regs[29] = STACK_TOP - 2*i * STACK_SIZE;	//sp
+		//pcb[i].kernel_context.regs[31] = sched1_tasks[j]->entry_point;			//ra
 		pcb[i].kernel_context.regs[31] = (uint32_t)handle_int + 0x14;			//ra
 		
 
-		pcb[i].kernel_stack_top = STACK_TOP - i * STACK_SIZE;
+		pcb[i].kernel_stack_top = STACK_TOP - 2*i * STACK_SIZE;
 
-		pcb[i].type = sched1_tasks[i - 1]->type;
+		pcb[i].type = lock_tasks[j]->type;
 		pcb[i].status = TASK_READY;
+
 		pcb[i].kernel_context.cp0_status = CP0_STATUS_INIT;
-		pcb[i].kernel_context.cp0_epc = sched1_tasks[i - 1]->entry_point;
+//		pcb[i].kernel_context.cp0_epc = sched1_tasks[j]->entry_point;
+		//pcb[i].user_context.regs[29] = pcb[i].kernel_context.regs[29];
+		//pcb[i].user_context.regs[31] = pcb[i].kernel_context.regs[31];
+		
+		//pcb[i].user_stack_top = pcb[i].kernel_stack_top;
+		pcb[i].user_context.regs[29] = pcb[i].kernel_stack_top - STACK_SIZE;
+		pcb[i].user_context.regs[31] = lock_tasks[j]->entry_point;
+		pcb[i].user_stack_top = pcb[i].kernel_stack_top - STACK_SIZE;
+		pcb[i].user_context.cp0_status = CP0_STATUS_INIT;
+		pcb[i].user_context.cp0_epc = lock_tasks[j]->entry_point;
+
+		//queue_push(&ready_queue_p1, &pcb[i]);
+		queue_push(&ready_queue, &pcb[i]);
+		
+	}
+
+
+/*
+
+	for(i = 1; i < num_lock_tasks + 1 ; i++)
+	{//this is used to load 2 tasks on pcb
+
+
+				
+
+
+		pcb[i].kernel_context.regs[29] = STACK_TOP - 2*i * STACK_SIZE;	//sp
+
+	
+
+		//pcb[i].kernel_context.regs[31] = lock_tasks[j]->entry_point;			//ra
+		pcb[i].kernel_context.regs[31] = (uint32_t)handle_int + 0x14;			//ra
+		
+
+
+
+		pcb[i].kernel_stack_top = STACK_TOP - 2*i * STACK_SIZE;
+
+
+		pcb[i].type = lock_tasks[i - 1]->type;
+		
+
+		pcb[i].status = TASK_READY;
+
+	
+
+		pcb[i].kernel_context.cp0_status = CP0_STATUS_INIT;
+//		pcb[i].kernel_context.cp0_epc = lock_tasks[j]->entry_point;
 	
 	
 	//	pcb[i].user_context.regs[29] = pcb[i].kernel_context.regs[29];
 	//	pcb[i].user_context.regs[31] = pcb[i].kernel_context.regs[31];
 	//	pcb[i].user_stack_top = pcb[i].kernel_stack_top;
-		pcb[i].user_context.regs[29] = STACK_TOP - i * STACK_SIZE - STACK_SIZE/2;
-		pcb[i].user_context.regs[31] = sched1_tasks[i - 1]->entry_point;
-		pcb[i].user_stack_top = STACK_TOP - i * STACK_SIZE - STACK_SIZE/2;
+	//	pcb[i].user_context.regs[29] = STACK_TOP - i * STACK_SIZE - STACK_SIZE/2;
+		pcb[i].user_context.regs[29] = pcb[i].kernel_stack_top - STACK_SIZE;
+		pcb[i].user_context.regs[31] = lock_tasks[i - 1]->entry_point;
+
+		
+		
+		//pcb[i].user_stack_top = STACK_TOP - i * STACK_SIZE - STACK_SIZE/2;
+		pcb[i].user_stack_top = pcb[i].kernel_stack_top - STACK_SIZE;
 		pcb[i].user_context.cp0_status = CP0_STATUS_INIT;
-		pcb[i].user_context.cp0_epc = sched1_tasks[i - 1]->entry_point; // because "eret" is after "RESTORE_CONTEXT(USER)"
+		pcb[i].user_context.cp0_epc = lock_tasks[i - 1]->entry_point; // because "eret" is after "RESTORE_CONTEXT(USER)"
+					
 
 		//queue_push(&ready_queue_p1, &pcb[i]);
 		queue_push(&ready_queue, &pcb[i]);
+		
 	}
+
 */
+
 	// let pcb[0] become the first process
 	
 	// init_pcb() works accorrding to the definition style of pcb structure 
@@ -215,7 +283,10 @@ static void init_pcb()
 	//	what about pcb[0].kernel_context.cp0_cause ?
 
 	current_running = &pcb[0];
-	
+
+
+//	printk("test. i = %d\n", i);
+
 	return;
 }
 
@@ -235,7 +306,9 @@ static void init_queue()
 	
 
 
-	do_mutex_lock_init(&mutex_lock);
+	//do_mutex_lock_init(&mutex_lock);
+
+	queue_init(&sleep_queue);
 	return;
 }
 
@@ -332,6 +405,9 @@ void __attribute__((section(".entry_function"))) _start(void)
 
 	// init Process Control Block (-_-!)
 	init_queue();
+	
+
+
 	init_pcb();
 	printk("> [INIT] PCB initialization succeeded.\n");
 
@@ -344,9 +420,12 @@ void __attribute__((section(".entry_function"))) _start(void)
         printk("count = %u\n", get_count());
         printk("compare = %u\n", get_compare());
 */
+
+//	printk("test. I'm here.\n");
 	// TODO Enable interrupt
 	open_all_interrupt();
 
+//	printk("test.\n");
 /*	int index;
 	printk("test\n");
 	printk("status = 0x%x\n", get_cp0_status());

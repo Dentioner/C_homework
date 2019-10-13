@@ -9,10 +9,10 @@ LEAF(invoke_syscall)
     // TODO syscall entry
 # syscall also use a0~a3 to pass parameters
 # so we should modify a0~a3
-    add		v0, a0, $0		# v0 <= a0 
-    add		a0, a1, $0		# a0 <= a1
-    add		a1, a2, $0		# a1 <= a2
-    add		a2, a3, $0      # a2 <= a3
+#    add		v0, a0, $0		# v0 <= a0 
+#    add		a0, a1, $0		# a0 <= a1
+#    add		a1, a2, $0		# a1 <= a2
+#    add		a2, a3, $0      # a2 <= a3
 
     syscall
 

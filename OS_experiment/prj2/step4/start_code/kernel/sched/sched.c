@@ -33,10 +33,41 @@ queue_t ready_queue_p3;
 mutex_lock_t block_queue_array[NUM_MUTEX_LOCK]; // part2 mutex lock
 extern mutex_lock_t mutex_lock;
 
+queue_t sleep_queue; // part4
+
 pid_t total_pid = 1; // this is used to init a new pcb and give it a pid
 
 static void check_sleeping()
 {
+    pcb_t *tmp_pcb, *output_pcb;
+    uint32_t current_time = get_timer();
+    output_pcb = NULL;
+    tmp_pcb = (pcb_t *)sleep_queue.head;
+
+    while(tmp_pcb != NULL)
+    {
+        if(current_time >= tmp_pcb->wake_up_time)
+        {
+            output_pcb = tmp_pcb;
+            tmp_pcb = (pcb_t *)queue_remove(&sleep_queue, output_pcb);
+            //TODO: here need to give a priority
+            output_pcb->status = TASK_READY;
+            output_pcb->wake_up_time = 0;
+            queue_push(&ready_queue, output_pcb);
+
+
+		//test
+//		printk("check sleep done.\n");
+//		while(1);
+
+        }
+        else
+        {
+            tmp_pcb = tmp_pcb->next;
+        }
+        
+    }
+
 }
 
 /*
@@ -74,6 +105,7 @@ void switch_pcb()
     // code above is part1
     // the following is part2
     
+	check_sleeping();
     if(current_running != NULL && current_running->status == TASK_RUNNING)
     {
         current_running->status = TASK_READY;
@@ -108,9 +140,9 @@ void switch_pcb()
     // because queue is FIFO, so the pcb that current_running pointed earlier
     // will not be pushed out firstly
 
-
+/*
     //test.................
-  /*  vt100_move_cursor(1, 5);
+    vt100_move_cursor(1, 5);
     printk("pcb[1]:%d\t", pcb[1].status);
 //    vt100_move_cursor(1, 6);    
     printk("pcb[2]:%d\t", pcb[2].status);
@@ -118,30 +150,43 @@ void switch_pcb()
     printk("pcb[3]:%d\t", pcb[3].status);
   //  vt100_move_cursor(1, 8);
 
-    printk("pcb[4]:%d\t", pcb[4].status);
+    printk("pcb[4]:%d\n", pcb[4].status);
    // vt100_move_cursor(1, 9);
 
-    printk("pcb[5]:%d\n", pcb[5].status);
-   // vt100_move_cursor(1, 10);
-	
+
+
     vt100_move_cursor(1, 6);
+    printk("pcb[5]:%d\t", pcb[5].status);
+   // vt100_move_cursor(1, 10);
+	printk("pcb[6]:%d\t", pcb[6].status);
+	printk("pcb[7]:%d\t", pcb[7].status);
+	printk("pcb[8]:%d\n", pcb[8].status);
+
+    
+    vt100_move_cursor(1, 7);
 	    printk("pcb[0]:0x%x\t", &pcb[0]);
     printk("pcb[1]:0x%x\t", &pcb[1]);
-//    vt100_move_cursor(1, 6);    
-    printk("pcb[2]:0x%x\n", &pcb[2]);
-	 vt100_move_cursor(1, 7);
-//    vt100_move_cursor(1, 7);
-    printk("pcb[3]:0x%x\t", &pcb[3]);
-  //  vt100_move_cursor(1, 8);
+   
+    printk("pcb[2]:0x%x\t", &pcb[2]);
 
+    printk("pcb[3]:0x%x\n", &pcb[3]);
+
+vt100_move_cursor(1, 8);
     printk("pcb[4]:0x%x\t", &pcb[4]);
-   // vt100_move_cursor(1, 9);
 
-    printk("pcb[5]:0x%x\n", &pcb[5]);
-   // vt100_move_cursor(1, 10);
-	 vt100_move_cursor(1, 8);
+
+    printk("pcb[5]:0x%x\t", &pcb[5]);
+	printk("pcb[6]:0x%x\t", &pcb[6]);
+	printk("pcb[7]:0x%x\n", &pcb[7]);
+
+ vt100_move_cursor(1, 9);
+
+
+	
 	printk("current_running: 0x%x\n", current_running);
-   if(current_running == &pcb[1] || current_running == &pcb[1])
+  */
+
+/* if(current_running == &pcb[1] || current_running == &pcb[1])
 	{
 		int asdfg;
 		vt100_move_cursor(1, 9);
@@ -209,7 +254,10 @@ void scheduler(void)
 void do_sleep(uint32_t sleep_time)
 {
     // TODO sleep(seconds)
-    
+    current_running->status = TASK_SLEEPING;
+    current_running->wake_up_time = get_timer() + sleep_time;
+    queue_push(&sleep_queue, current_running);
+    do_scheduler();
 }
 
 
@@ -219,7 +267,13 @@ void do_block(queue_t *queue)
     // block the current_running task into the queue
     current_running->status = TASK_BLOCKED;
     queue_push(queue, current_running);
+
+//	printk("test. before do_scheduler.\n");
+//	while(1);
+
     do_scheduler();
+	
+
     do_mutex_lock_acquire(&mutex_lock);
 }
 
@@ -228,11 +282,13 @@ void do_unblock_one(queue_t *queue)
     // unblock the head task from the queue
     pcb_t * pointer = NULL;
 
-    pointer = (pcb_t *)queue_dequeue(queue);
 
-    pointer->status = TASK_READY;
-    queue_push(&ready_queue, pointer);
-
+    if(!queue_is_empty(queue))
+    {    
+        pointer = (pcb_t *)queue_dequeue(queue);
+        pointer->status = TASK_READY;
+        queue_push(&ready_queue, pointer);
+    }
 }
 
 void do_unblock_all(queue_t *queue)
