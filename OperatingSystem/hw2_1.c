@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include<sys/time.h>
-
+#include<sys/syscall.h>
 
 int main()
 {
