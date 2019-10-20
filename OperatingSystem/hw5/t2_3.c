@@ -40,9 +40,13 @@ void* even(void * foo)
 		//data[index] = index_even;
 		//index++;
 		//index_even += 2;
-		__sync_fetch_and_add(&(data[index]), index_even);	
-		__sync_fetch_and_add(&index, 1);	
-		__sync_fetch_and_add(&index_even, 2);	
+		
+		//__sync_fetch_and_add(&(data[index]), index_even);	
+		//__sync_fetch_and_add(&index, 1);	
+		//__sync_fetch_and_add(&index_even, 2);	
+		data[__sync_fetch_and_add(&index, 1)] = index_even;
+		index_even += 2;
+	
 	}
 }
 //thread2
@@ -56,9 +60,12 @@ void* odd(void* foo)
 		//index++;	
 		//index_odd += 2;
 		
-		__sync_fetch_and_add(&(data[index]), index_odd + 1);	
-		__sync_fetch_and_add(&index, 1);	
-		__sync_fetch_and_add(&index_odd, 2);
+	//	__sync_fetch_and_add(&(data[index]), index_odd + 1);	
+	//	__sync_fetch_and_add(&index, 1);	
+	//	__sync_fetch_and_add(&index_odd, 2);
+	
+		data[__sync_fetch_and_add(&index, 1)] = index_odd + 1;
+		index_odd += 2;
 	}
 }
 int main()
@@ -71,6 +78,8 @@ int main()
 	//long time_ans;
 	clock_t start_time, end_time;
 	double time_ans;	
+//	int zero = 0;
+
 
 	data[MAX-1] = 0;
 
@@ -106,8 +115,11 @@ int main()
 				max_sub = tmp_sub;
 			}
 		}
+//		if( data[i] == 0)
+//			zero++;
 	}
 	printf("sum = %lu, max_sub = %lu\n", sum, max_sub);
+//	printf("zero = %d\n", zero);
 	return 0;
 
 }
