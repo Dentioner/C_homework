@@ -85,6 +85,6 @@ void sys_clear(int line1, int line2);
 
 void mutex_lock_init(mutex_lock_t *);
 void mutex_lock_acquire(mutex_lock_t *);
-void mutex_lock_release(mutex_lock_t *, pcb_t *);
+void mutex_lock_release(mutex_lock_t *, pcb_t*);
 
 #endif

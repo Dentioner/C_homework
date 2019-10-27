@@ -57,6 +57,6 @@ void spin_lock_release(spin_lock_t *lock);
 
 void do_mutex_lock_init(mutex_lock_t *lock);
 void do_mutex_lock_acquire(mutex_lock_t *lock);
-void do_mutex_lock_release(mutex_lock_t *lock, pcb_t* process);
+void do_mutex_lock_release(mutex_lock_t *lock, pcb_t *process);
 
 #endif

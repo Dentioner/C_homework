@@ -130,10 +130,12 @@ void screen_clear(int line1, int line2)
     {
         for (j = 0; j < SCREEN_WIDTH; j++)
         {
+        //    new_screen[i * SCREEN_WIDTH + j] = 0;
             new_screen[i * SCREEN_WIDTH + j] = ' ';
-            //new_screen[i * SCREEN_WIDTH + j] = 0;
             old_screen[i * SCREEN_WIDTH + j] = 0;
-        }
+        	
+            //old_screen[i * SCREEN_WIDTH + j] = ' ';
+	}
     }
 
     screen_cursor_x = 0;

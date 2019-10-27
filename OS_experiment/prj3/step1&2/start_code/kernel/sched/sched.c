@@ -119,7 +119,6 @@ void queue_sort(queue_t *queue)
         if(temp_array[i]->status == TASK_READY || temp_array[i]->status == TASK_RUNNING)
             queue_push(queue, temp_array[i]);
     }
-
     return;
 }
 
@@ -229,6 +228,18 @@ vt100_move_cursor(1, 10);
   	printk("tail:0x%x\n", ready_queue.tail);
   	
 */
+
+vt100_move_cursor(1, 6);
+ 	printk("pcb[0]:0x%x\t", &pcb[0]);
+    	printk("pcb[1]:0x%x\t", &pcb[1]);
+   
+    	printk("pcb[2]:0x%x\n", &pcb[2]);
+vt100_move_cursor(1, 7);
+	printk("current_running: 0x%x\n", current_running);
+vt100_move_cursor(1, 8);
+	printk("0:%u\t", pcb[0].running_counter);
+	printk("1:%u\t", pcb[1].running_counter);
+	printk("2:%u\t", pcb[2].running_counter);
 
 /* if(current_running == &pcb[1] || current_running == &pcb[1])
 	{
@@ -425,9 +436,10 @@ void do_spawn(task_info_t *task)
         printk("ERROR: not enough empty pcb.\n");
         return;
     }
-    memset(pcb[index1], 0 , sizeof(pcb_t));
 
 
+//memset(pcb[index1], 0 , sizeof(pcb_t));
+	
     pcb[index1].kernel_context.regs[29] = STACK_TOP - 2*index1 * STACK_SIZE;	//sp
     //pcb[i].kernel_context.regs[31] = lock_tasks[j]->entry_point;			//ra
     pcb[index1].kernel_context.regs[31] = (uint32_t)handle_int + 0x14;			//ra
@@ -472,9 +484,9 @@ void resource_release(int index_of_pcb_array)
     // release lock
     
     if(pcb_pointer->target_lock_id[0] == 2)
-        do_mutex_lock_release(&lock1, pcb_pointer);
+        do_mutex_lock_release(&lock1);
     if(pcb_pointer->target_lock_id[1] == 2)
-        do_mutex_lock_release(&lock2, pcb_pointer);
+        do_mutex_lock_release(&lock2);
 
 
     // release wait_queue
@@ -494,7 +506,8 @@ void resource_release(int index_of_pcb_array)
 
 
 
-}*/
+}
+*/
 
 void do_kill(pid_t pid)
 {
@@ -566,7 +579,7 @@ void do_exit()
 
     if(index1 == NUM_MAX_TASK)
     {
-        printk("In do_exit(). ERROR: process not exists.\n");
+        printk("In do_wait(). ERROR: process not exists.\n");
         while(1);
     }
 
@@ -599,7 +612,7 @@ void do_exit()
     current_running->user_stack_top = pcb[index1].kernel_stack_top - STACK_SIZE;
 
 
-    //do_scheduler(); // need it?
+    do_scheduler(); // need it?
 }
 
 void do_wait(pid_t pid)

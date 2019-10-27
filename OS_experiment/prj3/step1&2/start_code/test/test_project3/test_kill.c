@@ -31,16 +31,18 @@ void ready_to_exit_task()
     // sys_spawn(&task1);
     // sys_spawn(&task2);
 
-    for (i = 0; i < 500; i++)
+    for (i = 0; i < 4000; i++)
     {
         sys_move_cursor(0, print_location);
         printf("> [TASK] I am task with pid %d, I have acquired two mutex lock. (%d)", current_running->pid, i++);
     }
     sys_exit(); // test exit
 
-
+	//while(1);//test for using kill() to manually exit this function
     
 }
+
+
 // pid = 3
 void wait_lock_task()
 {
