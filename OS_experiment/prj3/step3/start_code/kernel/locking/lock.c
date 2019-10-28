@@ -8,6 +8,7 @@
 //extern pcb_t* current_running;
 extern mutex_lock_t lock1;
 extern mutex_lock_t lock2;
+extern mutex_lock_t lock3;
 void spin_lock_init(spin_lock_t *lock)
 {
     lock->status = UNLOCKED;
@@ -55,6 +56,8 @@ void do_mutex_lock_acquire(mutex_lock_t *lock)
             do_mutex_lock_release(&lock1, current_running);
         if(current_running->target_lock_id[1] == GET_LOCK)
             do_mutex_lock_release(&lock2, current_running);
+        if(current_running->target_lock_id[2] == GET_LOCK)
+            do_mutex_lock_release(&lock3, current_running);
 
         current_running->target_lock_id[lock->lock_self_id] = NOT_GET_LOCK;
         do_block(&(lock->block_queue));

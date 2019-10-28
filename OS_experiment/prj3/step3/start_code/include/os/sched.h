@@ -34,7 +34,7 @@
 
 #define NUM_MAX_TASK 16
 
-#define NUM_MAX_LOCK 2
+#define NUM_MAX_LOCK 3
 
 #define STACK_TOP   0xa0f00000
 #define STACK_SIZE  0x4000 //2KB 

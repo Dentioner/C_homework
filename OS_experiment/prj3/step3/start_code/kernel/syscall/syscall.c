@@ -125,6 +125,16 @@ void sys_clear(int line1, int line2)
     invoke_syscall(SYSCALL_CLEAR, line1, line2, IGNORE);
 }
 
+void barrier_init(barrier_t *barrier, int num_task)
+{
+    invoke_syscall(SYSCALL_BARRIER_INIT, (int)barrier, num_task, IGNORE);
+}
+
+void barrier_wait(barrier_t *barrier)
+{
+    invoke_syscall(SYSCALL_BARRIER_WAIT, (int)barrier, IGNORE, IGNORE);
+}
+
 void mutex_lock_init(mutex_lock_t *lock)
 {
     invoke_syscall(SYSCALL_MUTEX_LOCK_INIT, (int)lock, IGNORE, IGNORE);

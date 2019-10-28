@@ -34,6 +34,7 @@ mutex_lock_t block_queue_array[NUM_MUTEX_LOCK]; // part2 mutex lock
 // extern mutex_lock_t mutex_lock;
 extern mutex_lock_t lock1;
 extern mutex_lock_t lock2;
+extern mutex_lock_t lock3;
 
 extern uint32_t current_line;
 extern uint32_t current_start_point;
@@ -358,15 +359,20 @@ void do_block(queue_t *queue)
 
     do_scheduler();
 	
-    if(current_running->target_lock_id[0] == 3)
+    if(current_running->target_lock_id[0] == NOT_GET_LOCK)
     {
-        current_running->target_lock_id[0] == 1;
+        current_running->target_lock_id[0] == WANT_LOCK;
         do_mutex_lock_acquire(&lock1);
     }
-    else if(current_running->target_lock_id[1] == 3)
+    else if(current_running->target_lock_id[1] == NOT_GET_LOCK)
     {
-        current_running->target_lock_id[1] == 1;
+        current_running->target_lock_id[1] == WANT_LOCK;
         do_mutex_lock_acquire(&lock2);
+    }
+    else if(current_running->target_lock_id[2] == NOT_GET_LOCK)
+    {
+        current_running->target_lock_id[2] == WANT_LOCK;
+        do_mutex_lock_acquire(&lock3);
     }
 //    do_mutex_lock_acquire(&mutex_lock);
 
@@ -572,7 +578,8 @@ void do_kill(pid_t pid)
         do_mutex_lock_release(&lock1, tmp_pointer);
     if(tmp_pointer->target_lock_id[1] == GET_LOCK)
         do_mutex_lock_release(&lock2, tmp_pointer);
-
+    if(tmp_pointer->target_lock_id[2] == GET_LOCK)
+        do_mutex_lock_release(&lock3, tmp_pointer);
 
     // release wait_queue
     do_unblock_all(&(tmp_pointer->wait_queue));
@@ -623,7 +630,8 @@ void do_exit()
         do_mutex_lock_release(&lock1, current_running);
     if(current_running->target_lock_id[1] == GET_LOCK)
         do_mutex_lock_release(&lock2, current_running);
-
+    if(current_running->target_lock_id[2] == GET_LOCK)
+        do_mutex_lock_release(&lock3, current_running);
 
     // release wait_queue
     do_unblock_all(&(current_running->wait_queue));

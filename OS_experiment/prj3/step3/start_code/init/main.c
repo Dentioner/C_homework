@@ -233,6 +233,9 @@ static void init_syscall(void)
 	syscall[SYSCALL_REFLUSH] = (int (*)())&screen_reflush;
 	syscall[SYSCALL_CLEAR] = (int (*)())&screen_clear;
 
+	syscall[SYSCALL_BARRIER_INIT] = (int (*)())&do_barrier_init;
+	syscall[SYSCALL_BARRIER_WAIT] = (int (*)())&do_barrier_wait;
+
 	syscall[SYSCALL_MUTEX_LOCK_INIT] = (int (*)())&do_mutex_lock_init;
 	syscall[SYSCALL_MUTEX_LOCK_ACQUIRE] = (int (*)())&do_mutex_lock_acquire;
 	syscall[SYSCALL_MUTEX_LOCK_RELEASE] = (int (*)())&do_mutex_lock_release;

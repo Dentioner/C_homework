@@ -64,6 +64,9 @@
 #define SYSCALL_REFLUSH 23
 #define SYSCALL_CLEAR 24
 
+#define SYSCALL_BARRIER_INIT 25
+#define SYSCALL_BARRIER_WAIT 26
+
 #define SYSCALL_MUTEX_LOCK_INIT 30
 #define SYSCALL_MUTEX_LOCK_ACQUIRE 31
 #define SYSCALL_MUTEX_LOCK_RELEASE 32
@@ -100,6 +103,9 @@ void sys_write(char *);
 void sys_move_cursor(int, int);
 void sys_reflush();
 void sys_clear(int line1, int line2);
+
+void barrier_init(barrier_t *, int);
+void barrier_wait(barrier_t *);
 
 void mutex_lock_init(mutex_lock_t *);
 void mutex_lock_acquire(mutex_lock_t *);
