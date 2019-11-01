@@ -42,40 +42,6 @@ queue_t sleep_queue; // part4
 
 pid_t total_pid = 2; // this is used to init a new pcb and give it a pid
 
-static void check_sleeping()
-{
-    pcb_t *tmp_pcb, *output_pcb;
-    uint32_t current_time = get_timer();
-    output_pcb = NULL;
-    tmp_pcb = (pcb_t *)sleep_queue.head;
-
-    while(tmp_pcb != NULL)
-    {
-        if(current_time >= tmp_pcb->wake_up_time)
-        {
-            output_pcb = tmp_pcb;
-            tmp_pcb = (pcb_t *)queue_remove(&sleep_queue, output_pcb);
-            //TODO: here need to give a priority
-            output_pcb->status = TASK_READY;
-            output_pcb->wake_up_time = 0;
-            queue_push(&ready_queue, output_pcb);
-
-
-		//test
-//		printk("check sleep done.\n");
-//		while(1);
-
-        }
-        else
-        {
-            tmp_pcb = tmp_pcb->next;
-        }
-        
-    }
-
-}
-
-
 void quick_sort(pcb_t* s[], int l, int r)
 {
 	if (l < r)
@@ -120,6 +86,42 @@ void queue_sort(queue_t *queue)
             queue_push(queue, temp_array[i]);
     }
     return;
+}
+
+
+
+static void check_sleeping()
+{
+    pcb_t *tmp_pcb, *output_pcb;
+    uint32_t current_time = get_timer();
+    output_pcb = NULL;
+    tmp_pcb = (pcb_t *)sleep_queue.head;
+
+    while(tmp_pcb != NULL)
+    {
+        if(current_time >= tmp_pcb->wake_up_time)
+        {
+            output_pcb = tmp_pcb;
+            tmp_pcb = (pcb_t *)queue_remove(&sleep_queue, output_pcb);
+            //TODO: here need to give a priority
+            output_pcb->status = TASK_READY;
+            output_pcb->wake_up_time = 0;
+            queue_push(&ready_queue, output_pcb);
+            queue_sort(&ready_queue); //test
+
+
+		//test
+//		printk("check sleep done.\n");
+//		while(1);
+
+        }
+        else
+        {
+            tmp_pcb = tmp_pcb->next;
+        }
+        
+    }
+
 }
 
 
@@ -398,6 +400,7 @@ void do_unblock_one(queue_t *queue)
         pointer = (pcb_t *)queue_dequeue(queue);
         pointer->status = TASK_READY;
         queue_push(&ready_queue, pointer);
+        queue_sort(&ready_queue); //test
     }
 }
 

@@ -38,36 +38,29 @@ int strcmp(char *str1, char *str2)
 	{
 	};
 
-	return (*str1) - (*str2);
-}
-
-int memcmp(char *str1, char *str2, uint32_t size)
-{
-	int i;
-
-	for (i = 0; i < size; i++)
+	if (*str1 == '\0' && *str2 == '\0')
 	{
-		if (str1[i] > str2[i])
-		{
-			return 1;
-		}
-		else if (str1[i] < str2[i])
-		{
-			return -1;
-		}
-	}
-	return 0;
-}
-
-void strcpy(char *dest, char *src)
-{
-	int l = strlen(src);
-	int i;
-
-	for (i = 0; i < l; i++)
-	{
-		dest[i] = src[i];
+		return 0;
 	}
 
-	dest[i] = '\0';
+	if (*str1 == '\0')
+	{
+		return -1;
+	}
+
+	return 1;
+}
+
+char *strcpy(char *dest, char *src)
+{
+	char *tmp = dest;
+
+	while (*src)
+	{
+		*dest++ = *src++;
+	}
+
+	*dest = '\0';
+
+	return tmp;
 }
