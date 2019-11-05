@@ -21,7 +21,7 @@ typedef struct mailbox
     int box_index_write;// queue_rear
     int buffer_counter;// queue_counter
     // buffer_counter is the number of messages, not the byte length of messages.
-    int used;
+    //int used;
 } mailbox_t;
 
 

@@ -37,6 +37,7 @@ void do_barrier_wait(barrier_t *barrier)
         }
     
         current_running->status = TASK_BLOCKED;
+        current_running->block_in_queue = &(barrier->barrier_queue); // test 
         queue_push(&(barrier->barrier_queue), current_running);
 
         do_scheduler(); //need it?

@@ -106,6 +106,9 @@ static void check_sleeping()
             //TODO: here need to give a priority
             output_pcb->status = TASK_READY;
             output_pcb->wake_up_time = 0;
+
+            //output_pcb->block_in_queue = NULL; //test
+
             queue_push(&ready_queue, output_pcb);
             queue_sort(&ready_queue); //test
 
@@ -342,6 +345,7 @@ void do_sleep(uint32_t sleep_time)
     // TODO sleep(seconds)
     current_running->status = TASK_SLEEPING;
     current_running->wake_up_time = get_timer() + sleep_time;
+    //current_running->block_in_queue = &sleep_queue;
     queue_push(&sleep_queue, current_running);
     do_scheduler();
 }
@@ -353,6 +357,7 @@ void do_block(queue_t *queue)
     int index1;
     // block the current_running task into the queue
     current_running->status = TASK_BLOCKED;
+    current_running->block_in_queue = queue;
     queue_push(queue, current_running);
 
 //	printk("test. before do_scheduler.\n");
@@ -399,6 +404,7 @@ void do_unblock_one(queue_t *queue)
     {    
         pointer = (pcb_t *)queue_dequeue(queue);
         pointer->status = TASK_READY;
+        pointer->block_in_queue = NULL; //test
         queue_push(&ready_queue, pointer);
         queue_sort(&ready_queue); //test
     }
@@ -513,6 +519,7 @@ void do_spawn(task_info_t *task)
     pcb[index1].running_counter = pcb[0].running_counter;
     pcb[index1].pid = total_pid;
     
+    pcb[index1].block_in_queue = NULL;
     //queue_push(&ready_queue_p1, &pcb[i]);
     queue_push(&ready_queue, &pcb[index1]);
     total_pid++;
@@ -608,6 +615,7 @@ void do_kill(pid_t pid)
     if(tmp_pointer->target_lock_id[2] == GET_LOCK)
         do_mutex_lock_release(&lock3, tmp_pointer);*/
     
+    
     for(index2 = 0; index2 < NUM_MAX_LOCK; index2++)
     {
         if(tmp_pointer->target_lock_id[index2] == GET_LOCK)
@@ -626,7 +634,8 @@ void do_kill(pid_t pid)
         queue_remove(&ready_queue, tmp_pointer);
     }
     else if(tmp_pointer->status == TASK_BLOCKED)
-    {
+    {   
+        /*
         for(index3 = 0; index3 < NUM_MAX_LOCK; index3++)
         {
             if(search_queue(&lock_array[index3].block_queue, tmp_pointer))
@@ -635,7 +644,8 @@ void do_kill(pid_t pid)
 
             }
         }
-	
+	    
+
         for(index3 = 0; index3 < NUM_MAX_TASK; index3++)
         {
             if(search_queue(&pcb[index3].wait_queue, tmp_pointer))
@@ -643,6 +653,13 @@ void do_kill(pid_t pid)
                 queue_remove(&pcb[index3].wait_queue, tmp_pointer);
             }
         }
+        */
+
+        if(tmp_pointer->block_in_queue != NULL)
+        {
+            queue_remove(tmp_pointer->block_in_queue, tmp_pointer);
+        }
+
     }
     else if(tmp_pointer->status == TASK_SLEEPING)
     {
@@ -737,6 +754,7 @@ void do_wait(pid_t pid)
         while(1);
     }
 
+    current_running->block_in_queue = &(tmp_pointer->wait_queue);
     queue_push(&(tmp_pointer->wait_queue), current_running);
 
     do_scheduler(); // need it?

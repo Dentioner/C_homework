@@ -132,6 +132,8 @@ typedef struct pcb
     queue_t wait_queue;
     pid_t waiting_pid;
 
+    queue_t *block_in_queue;
+
 } pcb_t;
 
 /* task information, used to init PCB */

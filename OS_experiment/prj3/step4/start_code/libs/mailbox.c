@@ -22,7 +22,7 @@ void mbox_init()
 	mboxs[index1].msg_buffer[0] = '\0';
 	mboxs[index1].box_index_read = 0;
     mboxs[index1].box_index_write = 0;
-	mboxs[index1].used = 0;
+	//mboxs[index1].used = 0;
     mboxs[index1].buffer_counter = 0;
 	
 	condition_init(&mboxs[index1].box_not_full);
@@ -55,7 +55,7 @@ void release_mailbox(mailbox_t * box)
     //box->box_index = 0;
     box->box_index_read = 0;
     box->box_index_write = 0;
-    box->used = 0;
+    //box->used = 0;
     box->buffer_counter = 0;
     //bzero(box, sizeof(mailbox_t));
     //condition_init(&box->box_not_full);
@@ -81,7 +81,8 @@ mailbox_t *mbox_open(char *name)
 // do not find an exists mailbox that has the same name
     for(index1 = 0; index1 < MAX_NUM_BOX; index1++)
     {
-        if(!mboxs[index1].used)
+        //if(!mboxs[index1].used)
+        if(!mboxs[index1].ref_counter) 
         {
             break;
         }
@@ -89,7 +90,7 @@ mailbox_t *mbox_open(char *name)
 
     if(index1 < MAX_NUM_BOX)// find an idle mailbox
     {
-        mboxs[index1].used = 1;
+        //mboxs[index1].used = 1;
         mboxs[index1].ref_counter++;
         //memcpy(mboxs[index1].box_name, name, sizeof(*name)); 
         strcpy(mboxs[index1].box_name, name);

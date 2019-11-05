@@ -54,6 +54,7 @@ void do_semaphore_down(semaphore_t *s) // P(sv)
     if(s->value < 0)
     {
         current_running->status = TASK_BLOCKED;
+        current_running->block_in_queue = &(s->semaphore_queue); // test 
         queue_push(&(s->semaphore_queue), current_running);
     }
 

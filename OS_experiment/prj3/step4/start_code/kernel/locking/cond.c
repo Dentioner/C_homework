@@ -31,6 +31,7 @@ void do_condition_wait(mutex_lock_t *lock, condition_t *condition)
 
     current_running->target_lock_id[lock->lock_self_id] = NOT_GET_LOCK;
     current_running->status = TASK_BLOCKED;
+    current_running->block_in_queue = &(condition->condition_queue);
     queue_push(&(condition->condition_queue), current_running);
 
     do_scheduler(); //need it?
