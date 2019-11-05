@@ -57,5 +57,5 @@ void do_semaphore_down(semaphore_t *s) // P(sv)
         queue_push(&(s->semaphore_queue), current_running);
     }
 
-    do_scheduler();
+    // do_scheduler();
 }
