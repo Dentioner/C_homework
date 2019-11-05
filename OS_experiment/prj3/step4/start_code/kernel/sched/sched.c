@@ -618,7 +618,7 @@ void do_kill(pid_t pid)
     do_unblock_all(&(tmp_pointer->wait_queue));
 
     // change status
-    tmp_pointer->status = TASK_EXITED;
+    //tmp_pointer->status = TASK_EXITED;
 
     // pop from the ready_queue
     if(tmp_pointer->status == TASK_READY || tmp_pointer->status == TASK_RUNNING)
@@ -654,8 +654,8 @@ void do_kill(pid_t pid)
     tmp_pointer->user_context.regs[29] = pcb[index1].kernel_stack_top - STACK_SIZE;
     tmp_pointer->user_stack_top = pcb[index1].kernel_stack_top - STACK_SIZE;
 
-
-
+    //change status
+    tmp_pointer->status = TASK_EXITED;
 
     do_scheduler(); // need it?
 }
