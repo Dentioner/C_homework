@@ -2,11 +2,11 @@
 #include<mpi.h>
 #include<stdlib.h>
 #include<time.h>
-#define m 3
-#define p 4
+#define m 5
+#define p 5
 #define n 5
 
-int main()
+int main(int argc, char** argv)
 {
     int *A, *B, *C;
     int i, j ,k;
@@ -29,7 +29,7 @@ int main()
         {
             for (j = 0; j < p; j++)
             {
-                A[i][j] = rand()%20;
+                A[i*m+j] = rand()%20;
             }
         }
 
@@ -37,7 +37,7 @@ int main()
         {
             for (j = 0; j < n; j++)
             {
-                B[i][j] = rand()%20;
+                B[i*p+j] = rand()%20;
             }
         }
 
@@ -85,5 +85,43 @@ int main()
     
     
     MPI_Finalize();
+
+        printf("A:\n");
+	int index1, index2;
+    for (index1 = 0, index2 = 0; index1 < m*p; index1++, index2++)
+	{
+			
+		printf("%d\t", A[index1]);
+		if(index2 == p - 1)
+		{
+			printf("\n");
+			index2 = -1;
+		}
+	}
+
+    printf("B:\n");
+    for (index1 = 0, index2 = 0; index1 < p*n; index1++, index2++)
+	{
+			
+		printf("%d\t", B[index1]);
+		if(index2 == n - 1)
+		{
+			printf("\n");
+			index2 = -1;
+		}
+	}
+
+    printf("C:\n");
+	for (index1 = 0, index2 = 0; index1 < m*n; index1++, index2++)
+	{
+			
+		printf("%d\t", C[index1]);
+		if(index2 == n - 1)	
+		{
+			printf("\n");
+			index2 = -1;
+		}
+	}
+    
     return 0;
 }
