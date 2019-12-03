@@ -76,6 +76,9 @@ int page_fault_handler(uint32_t tmp_vpn)
     page_table[index1].ctrl |= PTE_V;
     page_table[index1 + 1].ctrl |= PTE_V;
 
+    page_table[index1].ctrl |= PTE_R;
+    page_table[index1 + 1].ctrl |= PTE_R;
+
     page_table[index1].pte_pid = current_running->pid;
     page_table[index1 + 1].pte_pid = current_running->pid;
     

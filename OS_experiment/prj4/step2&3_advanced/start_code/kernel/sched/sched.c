@@ -567,8 +567,8 @@ void do_kill(pid_t pid)
     {
         if(page_table[index3].pte_pid == pid)
         {
-            (page_table[index3].ctrl) & (~PTE_V); // valid = 0;
-            (page_table[index3].ctrl) & (~PTE_R); // reference = 0;
+            (page_table[index3].ctrl) &= (~PTE_V); // valid = 0;
+            (page_table[index3].ctrl) &= (~PTE_R); // reference = 0;
             
             page_table[index3].pte_pid = 0;
 
@@ -656,8 +656,8 @@ void do_exit()
     {
         if(page_table[index3].pte_pid == current_running->pid)
         {
-            (page_table[index3].ctrl) & (~PTE_V); // valid = 0;
-            (page_table[index3].ctrl) & (~PTE_R); // reference = 0;
+            (page_table[index3].ctrl) &= (~PTE_V); // valid = 0;
+            (page_table[index3].ctrl) &= (~PTE_R); // reference = 0;
             page_table[index3].pte_pid = 0;
             
         }
