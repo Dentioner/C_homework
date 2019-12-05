@@ -1,0 +1,16 @@
+ Performance counter stats for './test_fast':
+
+              0.55 msec task-clock:u              #    0.706 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+                54      page-faults:u             #    0.097 M/sec                  
+           631,107      cycles:u                  #    1.139 GHz                    
+           768,708      instructions:u            #    1.22  insn per cycle         
+           147,839      branches:u                #  266.844 M/sec                  
+             3,991      branch-misses:u           #    2.70% of all branches        
+
+       0.000785072 seconds time elapsed
+
+       0.000000000 seconds user
+       0.000831000 seconds sys
+

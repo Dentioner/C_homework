@@ -1,0 +1,17 @@
+ Performance counter stats for './bubble':
+
+              0.62 msec task-clock:u              #    0.695 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+                51      page-faults:u             #    0.082 M/sec                  
+           780,430      cycles:u                  #    1.257 GHz                    
+         2,011,746      instructions:u            #    2.58  insn per cycle         
+           145,040      branches:u                #  233.555 M/sec                  
+             3,909      branch-misses:u           #    2.70% of all branches        
+
+       0.000893757 seconds time elapsed
+
+       0.000000000 seconds user
+       0.000915000 seconds sys
+
+
