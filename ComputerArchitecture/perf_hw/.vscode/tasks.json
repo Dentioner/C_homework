@@ -8,7 +8,7 @@
             "type": "shell",
             "command": "g++",
             "args": [
-                "-g","test_bubble.c"
+                "-g","test_shell.c"
             ],
             "group": {
                 "kind": "build",
