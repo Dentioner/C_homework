@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "irq.h": "c",
+        "time.h": "c"
+    }
+}

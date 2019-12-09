@@ -8,6 +8,13 @@ queue_t recv_block_queue;
 uint32_t recv_flag[PNUM] = {0};
 uint32_t ch_flag;
 uint32_t mac_cnt = 0;
+
+int send_num = PNUM;
+int recv_num = PNUM;
+
+int recv_num_now = 0;
+desc_t *tmp_recv = &rx_desc_list[0];
+
 uint32_t reg_read_32(uint32_t addr)
 {
     return *((uint32_t *)addr);
@@ -88,8 +95,69 @@ void irq_enable(int IRQn)
 {
 }
 
-void mac_recv_handle(mac_t *test_mac)
+// WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// this function is not in kernel
+void mac_recv_handle(mac_t *test_mac)  
 {
+    //desc_t *tmp_recv = (desc_t*)test_mac->rd;
+    tmp_recv = (desc_t*)test_mac->rd;
+    
+    uint32_t daddr = test_mac->daddr;
+    uint32_t * tmp_data;
+
+    int index1;
+
+    recv_num_now = 0;
+    while(recv_num_now < recv_num)
+    {
+        if(!(tmp_recv->tdes0 & DESC_OWN)) // OWN = 0, received a package
+        {
+            if(tmp_recv->tdes0 & RECV_ERROR)
+            {
+                printf("RECV ERROR.\n");
+                while(1);
+            }
+
+            sys_move_cursor(1, 3);
+            printf("%d recv buffer, r_desc = 0x%x:\n", recv_num_now, tmp_recv->tdes0);
+
+            tmp_data = (uint32_t *)(daddr + recv_num_now*0x400);
+            if((tmp_data[0]!=0xb57b5500) || (tmp_data[1]!= 0x5a70f77d) || (tmp_data[2]!= 0x0e42d30f)) // this means the package is not from pktRxTx to our kernel
+            {
+                // re-fetch another package
+                //tmp_recv->tdes0 |= DESC_OWN;
+                tmp_recv->tdes0 = DESC_OWN;
+            
+            }
+
+            else
+            {
+                for(index1 = 0; index1 < PSIZE; index1++)
+                {
+                    printf("%x  ", tmp_data[index1]);
+                }
+
+                tmp_recv = (desc_t *)((tmp_recv->tdes3) | GET_UNMAPPED_VADDR);
+                recv_num_now++;
+            }
+        }
+
+        else // wait this package
+        {
+            sys_move_cursor(1, 3);
+            printf("[RECV TASK]still waiting recv %dth package.\n", recv_num_now);
+            
+            reg_write_32(DMA_BASE_ADDR + 0xc, (((uint32_t)tmp_recv) & GET_UNMAPPED_PADDR)); // let MAC re-start receiving from this desc instead of 1st desc.
+            reg_write_32(DMA_BASE_ADDR + DmaRPD, 1); // let MAC receive one more package
+            sys_wait_recv_package();
+
+        }
+        
+    }
+
+    sys_move_cursor(1, 2);
+    printf("recv valid %d packages!:", recv_num_now);
+
 }
 
 static uint32_t printk_recv_buffer(uint32_t recv_buffer)
@@ -133,7 +201,7 @@ uint32_t do_net_recv(uint32_t rd, uint32_t rd_phy, uint32_t daddr)
 {
     int index1, index2, index3, index4;
     desc_t * tmp_recv = (desc_t *)rd;
-    int recv_num = PNUM;
+
     uint32_t * tmp_data;
     
 
@@ -185,106 +253,29 @@ uint32_t do_net_recv(uint32_t rd, uint32_t rd_phy, uint32_t daddr)
             printk("%d recv buffer, r_desc = 0x%x:\n", index3, tmp_recv->tdes0);
             
             tmp_data = (uint32_t *)(daddr + index2*0x400);
-            if((tmp_data[0]!=0xb57b5500) || (tmp_data[1]!= 0x5a70f77d) || (tmp_data[2]!= 0x0e42d30f)) // this means the package is not from pktRxTx to our kernel
+            for(index4 = 0; index4 < PSIZE; index4++)
             {
-                // re-fetch another package
-                tmp_recv->tdes0 = DESC_OWN;
+                printk("%x  ", tmp_data[index4]);
             }
-            else
-            {
-                for(index4 = 0; index4 < PSIZE; index4++)
-                {
-                    printk("%x  ", tmp_data[index4]);
-                }
 
-                index3++;
-            }
+            index3++;
         }
 
         if(index3 >= recv_num) // received all the packages
         {
-            tmp_recv->tdes0 = DESC_OWN;
             break;
         }
         else
         {
-            tmp_recv->tdes0 = DESC_OWN;
             tmp_recv = (desc_t *)((tmp_recv->tdes3) | GET_UNMAPPED_VADDR);
             index2 = (index2 + 1)%PNUM;
         }
         
     }
-*/
 
-    for(index2 = 0; index2 < recv_num;)
-    {
-        //test
-        vt100_move_cursor(1, 8);
-        printk("%d:%x, %x, %x, %x", index2, tmp_recv->tdes0, tmp_recv->tdes1, tmp_recv->tdes2, tmp_recv->tdes3);
-
-        if(!(tmp_recv->tdes0 & DESC_OWN)) // OWN = 0, received a package
-        {
-            if(tmp_recv->tdes0 & RECV_ERROR)
-            {
-                printk("RECV ERROR.\n");
-                while(1);
-            }
-            
-            vt100_move_cursor(1, 3);
-            printk("%d recv buffer, r_desc = 0x%x:\n", index2, tmp_recv->tdes0);
-
-            
-            
-            tmp_data = (uint32_t *)(daddr + index2*0x400);
-
-/*
-            if((tmp_data[0]!=0xb57b5500) || (tmp_data[1]!= 0x5a70f77d) || (tmp_data[2]!= 0x0e42d30f)) // this means the package is not from pktRxTx to our kernel
-            {
-
-                //test
-                vt100_move_cursor(1, 9);
-                printk("%d:%x, %x, %x, %x\n", index2, tmp_recv->tdes0, tmp_recv->tdes1, tmp_recv->tdes2, tmp_recv->tdes3);
-                printk("%x, %x, %x", tmp_data[0], tmp_data[1], tmp_data[2]);
-                // re-fetch another package
-                tmp_recv->tdes0 = DESC_OWN;
-                reg_write_32(DMA_BASE_ADDR + DmaRPD, 1);
-            }
-            else
-            {
-                for(index4 = 0; index4 < PSIZE; index4++)
-                {
-                    printk("%x  ", tmp_data[index4]);
-                }
-
-                index2++;
-                tmp_recv->tdes0 = DESC_OWN;
-                tmp_recv = (desc_t *)((tmp_recv->tdes3) | GET_UNMAPPED_VADDR); 
-            }*/
-                
-                for(index4 = 0; index4 < PSIZE; index4++)
-                {
-                    printk("%x  ", tmp_data[index4]);
-                }
-
-                if((tmp_data[0]==0xb57b5500) && (tmp_data[1]== 0x5a70f77d) && (tmp_data[2]== 0x0e42d30f)) // this means the package is not from pktRxTx to our kernel
-                {       
-
-                    //test
-                    vt100_move_cursor(1, 9);
-                    printk("%d:%x, %x, %x, %x\n", index2, tmp_recv->tdes0, tmp_recv->tdes1, tmp_recv->tdes2, tmp_recv->tdes3);
-                    printk("%x, %x, %x", tmp_data[0], tmp_data[1], tmp_data[2]);
-                }
-                index2++;
-                tmp_recv->tdes0 = DESC_OWN;
-                tmp_recv = (desc_t *)((tmp_recv->tdes3) | GET_UNMAPPED_VADDR); 
-
-
-        }
-
-    }
     vt100_move_cursor(1, 2);
     printk("recv valid %d packages!:", index3);
-
+    */
     return 0;
 }
 
@@ -292,7 +283,7 @@ void do_net_send(uint32_t td, uint32_t td_phy)
 {
     int index1, index2, index3, index4;
     desc_t * tmp_send;
-    int send_num = PNUM;
+
 
     reg_write_32(DMA_BASE_ADDR + 0x10, td_phy);
 
@@ -350,4 +341,10 @@ void do_init_mac(void)
 
 void do_wait_recv_package(void)
 {
+    //do_block(&recv_block_queue);
+    current_running->status = TASK_BLOCKED;
+    current_running->block_in_queue = &recv_block_queue;
+    queue_push(&recv_block_queue, current_running);
+    do_scheduler();
+
 }

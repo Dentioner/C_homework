@@ -237,7 +237,7 @@ static void init_exception() // init the interrupt system
 	memcpy(BEV0_EBASE + BEV0_OFFSET, exception_handler_begin, exception_handler_end - exception_handler_begin);
 //	memcpy(BEV1_EBASE + BEV1_OFFSET, exception_handler_begin, exception_handler_end - exception_handler_begin);
 
-	//memcpy(BEV0_EBASE, TLBexception_handler_begin, TLBexception_handler_end - TLBexception_handler_begin);
+	memcpy(BEV0_EBASE, TLBexception_handler_begin, TLBexception_handler_end - TLBexception_handler_begin);
 	
 //	printk("test: step3 finished\n");
 	// 4. reset CP0_COMPARE & CP0_COUNT & CP0_STATUS register
@@ -301,7 +301,8 @@ static void init_syscall(void)
 	syscall[SYSCALL_NET_RECV] = (int (*)())&do_net_recv;
 	syscall[SYSCALL_NET_SEND] = (int (*)())&do_net_send;
 	syscall[SYSCALL_INIT_MAC] = (int (*)())&do_init_mac;
-
+	
+	syscall[SYSCALL_WAIT_RECV_PACKAGE] = (int (*)())&do_wait_recv_package;
 	
 	
 
@@ -341,7 +342,7 @@ void __attribute__((section(".entry_function"))) _start(void)
 	init_queue();
 	
 
-	printk("test..\n");
+
 	init_pcb();
 	printk("> [INIT] PCB initialization succeeded.\n");
 

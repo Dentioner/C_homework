@@ -109,5 +109,7 @@ desc_t rx_desc_list[PNUM];
 uint32_t send_package[PNUM][PSIZE];
 uint32_t recv_package[PNUM][PSIZE];
 
-#endif
+extern int recv_num_now;
+extern desc_t * tmp_recv;
 
+#endif

@@ -64,8 +64,8 @@ static void mac_send_desc_init(mac_t *mac)
 
 
 
-    //mac->psize = PSIZE;
-    //mac->pnum = PNUM;
+//    mac->psize = PSIZE;
+//    mac->pnum = PNUM;
 //    mac->mac_addr = 
 //    mac->dma_addr =
     mac->saddr = (uint32_t)&(send_package[0]);
@@ -120,8 +120,8 @@ static void mac_recv_desc_init(mac_t *mac)
     rx_desc_list[PNUM-1].tdes3 = ((uint32_t)&(rx_desc_list[0])) & GET_UNMAPPED_PADDR;
 
 
-    //mac->psize = PSIZE;
-    //mac->pnum = PNUM;
+//    mac->psize = PSIZE;
+//    mac->pnum = PNUM;
 //    mac->mac_addr = 
 //    mac->dma_addr =
 //    mac->saddr = 
@@ -226,7 +226,6 @@ void mac_recv_task()
         printf("[MAC RECV TASK]     net recv is fault!                       ");
     }
 
-    //mac_recv_desc_init(&test_mac);
     sys_exit();
 }
 
@@ -240,4 +239,3 @@ void mac_init_task()
     printf("> [MAC INIT TASK] MAC initialization succeeded.           \n");
     sys_exit();
 }
-

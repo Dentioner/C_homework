@@ -6,7 +6,6 @@
 #include "sched.h"
 #include "test4.h"
 
-queue_t recv_block_queue;
 desc_t *send_desc;
 desc_t *receive_desc;
 uint32_t cnt = 1; //record the time of iqr_mac
@@ -18,7 +17,6 @@ uint32_t buffer[PSIZE] = {0xffffffff, 0x5500ffff, 0xf77db57d, 0x00450008, 0x0000
  * If the Dma status register is read then all the interrupts gets cleared
  * @param[in] pointer to synopGMACdevice.
  * \return returns void.
- * you will use it in task3
  */
 void clear_interrupt()
 {
@@ -29,109 +27,10 @@ void clear_interrupt()
 
 static void mac_send_desc_init(mac_t *mac)
 {
-    int index1, index2;
-
-    for (index1 = 0; index1 < PNUM -1; index1++)
-    {
-
-        for (index2 = 0; index2 < PSIZE; index2++)
-        {
-            send_package[index1][index2] = 0;
-        }
-        
-        tx_desc_list[index1].tdes0 = 0;
-        // let [24] = 1, [10:0] = sizeof(buffer1)
-        tx_desc_list[index1].tdes1 = TX_HAS_LINK | BUFFER_SIZE;
-        // save addr of buffer1
-        tx_desc_list[index1].tdes2 = ((uint32_t)&(send_package[index1])) & GET_UNMAPPED_PADDR;
-        // save the addr of next link node
-        tx_desc_list[index1].tdes3 = ((uint32_t)&(tx_desc_list[index1+ 1])) & GET_UNMAPPED_PADDR;
-    
-
-    }
-
-    for (index2 = 0; index2 < PSIZE; index2++)
-    {
-        send_package[PNUM -1][index2] = 0;
-    }
-
-    tx_desc_list[PNUM -1].tdes0 = 0;
-    
-    tx_desc_list[PNUM -1].tdes1 = TX_HAS_LINK | BUFFER_SIZE | TX_LINK_END;
-    tx_desc_list[PNUM -1].tdes2 = ((uint32_t)&(send_package[PNUM-1])) & GET_UNMAPPED_PADDR;
-    tx_desc_list[PNUM -1].tdes3 = ((uint32_t)&(tx_desc_list[0])) & GET_UNMAPPED_PADDR;
-
-
-
-
-    //mac->psize = PSIZE;
-    //mac->pnum = PNUM;
-//    mac->mac_addr = 
-//    mac->dma_addr =
-    mac->saddr = (uint32_t)&(send_package[0]);
-//    mac->daddr = 
-    mac->saddr_phy = ((uint32_t)&send_package[0]) & GET_UNMAPPED_PADDR;
-//    mac->daddr_phy =
-    mac->td = (uint32_t)&(tx_desc_list[0]);
-//    mac->rd = 
-    mac->td_phy = ((uint32_t)&(tx_desc_list[0])) & GET_UNMAPPED_PADDR;
-//    mac->rd_phy = 
-
-    for (index1 = 0; index1 < PNUM; index1++)
-    {
-        for(index2 = 0; index2 < PSIZE; index2++)
-        {
-            send_package[index1][index2] = buffer[index2];
-        }
-    }
-    
 }
 
 static void mac_recv_desc_init(mac_t *mac)
 {
-    int index1, index2;
-
-    for (index1 = 0; index1 < PNUM -1; index1++)
-    {
-        for(index2 = 0; index2 < PSIZE; index2 ++)
-        {
-            recv_package[index1][index2] = 0;
-        }
-
-        rx_desc_list[index1].tdes0 = 0;
-        // let [24] = 1, [10:0] = sizeof(buffer1)
-        rx_desc_list[index1].tdes1 = RX_HAS_LINK | BUFFER_SIZE;
-        // save addr of buffer1
-        rx_desc_list[index1].tdes2 = ((uint32_t)&(recv_package[index1])) & GET_UNMAPPED_PADDR;
-        // save the addr of next link node
-        rx_desc_list[index1].tdes3 = ((uint32_t)&(rx_desc_list[index1+ 1])) & GET_UNMAPPED_PADDR;
-        
-
-    }
-
-    for(index2 = 0; index2 < PSIZE; index2 ++)
-    {
-        recv_package[PNUM-1][index2] = 0;
-    }
-
-    rx_desc_list[PNUM-1].tdes0 = 0;
-    rx_desc_list[PNUM-1].tdes1 = RX_HAS_LINK | RX_LINK_END | BUFFER_SIZE;
-    rx_desc_list[PNUM-1].tdes2 = ((uint32_t)&(recv_package[PNUM-1])) & GET_UNMAPPED_PADDR;
-    rx_desc_list[PNUM-1].tdes3 = ((uint32_t)&(rx_desc_list[0])) & GET_UNMAPPED_PADDR;
-
-
-    //mac->psize = PSIZE;
-    //mac->pnum = PNUM;
-//    mac->mac_addr = 
-//    mac->dma_addr =
-//    mac->saddr = 
-    mac->daddr = (uint32_t)&(recv_package[0]);
-//    mac->saddr_phy = 
-    mac->daddr_phy = ((uint32_t)&(recv_package[0])) & GET_UNMAPPED_PADDR;
-//    mac->td = 
-    mac->rd = (uint32_t)&(rx_desc_list[0]);
-//    mac->td_phy = 
-    mac->rd_phy = ((uint32_t)&(rx_desc_list[0])) & GET_UNMAPPED_PADDR;
 }
 
 static void mii_dul_force(mac_t *mac)
@@ -172,9 +71,9 @@ void mac_send_task()
 
     mii_dul_force(&test_mac);
 
-    // register_irq_handler(LS1C_MAC_IRQ, mac_irq_handle);
+    register_irq_handler(LS1C_MAC_IRQ, mac_irq_handle);
 
-    // irq_enable(LS1C_MAC_IRQ);
+    irq_enable(LS1C_MAC_IRQ);
     sys_move_cursor(1, print_location);
     printf("> [MAC SEND TASK] start send package.               \n");
 
@@ -190,7 +89,7 @@ void mac_send_task()
     }
     sys_exit();
 }
-uint32_t ch_flag;
+
 void mac_recv_task()
 {
 
@@ -215,18 +114,25 @@ void mac_recv_task()
     sys_move_cursor(1, print_location);
     printf("[MAC RECV TASK] start recv:                    ");
     ret = sys_net_recv(test_mac.rd, test_mac.rd_phy, test_mac.daddr);
-    if (ret == 0)
+
+    ch_flag = 0;
+    for (i = 0; i < PNUM; i++)
     {
-        sys_move_cursor(1, print_location);
-        printf("[MAC RECV TASK]     net recv is ok!                          ");
-    }
-    else
-    {
-        sys_move_cursor(1, print_location);
-        printf("[MAC RECV TASK]     net recv is fault!                       ");
+        recv_flag[i] = 0;
     }
 
-    //mac_recv_desc_init(&test_mac);
+    uint32_t cnt = 0;
+    uint32_t *Recv_desc;
+    Recv_desc = (uint32_t *)(test_mac.rd + (PNUM - 1) * 16);
+    //printf("(test_mac.rd 0x%x ,Recv_desc=0x%x,REDS0 0X%x\n", test_mac.rd, Recv_desc, *(Recv_desc));
+    if (((*Recv_desc) & 0x80000000) == 0x80000000)
+    {
+        sys_move_cursor(1, print_location);
+        printf("> [MAC RECV TASK] waiting receive package.\n");
+        sys_wait_recv_package();
+    }
+    mac_recv_handle(&test_mac);
+
     sys_exit();
 }
 
@@ -240,4 +146,3 @@ void mac_init_task()
     printf("> [MAC INIT TASK] MAC initialization succeeded.           \n");
     sys_exit();
 }
-
