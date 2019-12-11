@@ -182,3 +182,9 @@ void sys_wait_recv_package(void)
 {
     invoke_syscall(SYSCALL_WAIT_RECV_PACKAGE, IGNORE, IGNORE, IGNORE);
 }
+
+
+void sys_print_buffer(void)
+{
+    invoke_syscall(SYSCALL_PRINT_BUFFER, IGNORE, IGNORE, IGNORE);
+}

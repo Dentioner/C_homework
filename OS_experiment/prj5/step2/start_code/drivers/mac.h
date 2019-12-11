@@ -102,7 +102,7 @@ void do_init_mac(void);
 void do_wait_recv_package(void);
 void mac_irq_handle(void);
 void mac_recv_handle(mac_t *test_mac);
-
+void do_print_buffer(void);
 
 desc_t tx_desc_list[PNUM];
 desc_t rx_desc_list[PNUM];

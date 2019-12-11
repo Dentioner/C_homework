@@ -304,6 +304,7 @@ static void init_syscall(void)
 	
 	syscall[SYSCALL_WAIT_RECV_PACKAGE] = (int (*)())&do_wait_recv_package;
 	
+	syscall[SYSCALL_PRINT_BUFFER] = (int (*)())&do_print_buffer;
 	
 
 

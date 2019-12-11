@@ -79,6 +79,8 @@
 #define SYSCALL_WAIT_RECV_PACKAGE 43
 
 
+#define SYSCALL_PRINT_BUFFER 63
+
 
 /* syscall function pointer */
 int (*syscall[NUM_SYSCALLS])(); // this is an array of function pointer
@@ -125,6 +127,8 @@ void sys_net_send(uint32_t td, uint32_t td_phy);
 void sys_init_mac(void);
 
 void sys_wait_recv_package(void);
+
+void sys_print_buffer(void);
 
 
 

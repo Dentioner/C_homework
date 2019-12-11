@@ -272,17 +272,7 @@ void mac_recv_task()
 
     
 
-    for(index1 = 0; index1 < PNUM; index1++)
-    {
-        sys_move_cursor(1, 3);
-        printf("%d recv buffer, r_desc = 0x%x:\n", index1, task2_rdes0[index1]);
-
-        sys_move_cursor(1, 4);
-        for(index2 = 0; index2 < PSIZE; index2++)
-        {
-            printf("%x ", task2_print_buffer[index1][index2]);
-        }
-    }
+    sys_print_buffer();
 
     sys_exit();
 }

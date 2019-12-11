@@ -344,3 +344,19 @@ void do_wait_recv_package(void)
     do_scheduler();*/
 
 }
+
+void do_print_buffer()
+{
+    int index1, index2;
+    for(index1 = 0; index1 < PNUM; index1++)
+    {
+        vt100_move_cursor(1, 3);
+        printk("%d recv buffer, r_desc = 0x%x:\n", index1, task2_rdes0[index1]);
+
+        vt100_move_cursor(1, 4);
+        for(index2 = 0; index2 < PSIZE; index2++)
+        {
+            printk("%x ", task2_print_buffer[index1][index2]);
+        }
+    }
+}
