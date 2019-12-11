@@ -105,42 +105,55 @@ void mac_recv_handle(mac_t *test_mac)
     uint32_t daddr = test_mac->daddr;
     uint32_t * tmp_data;
 
+    int index1;
 
-    int index1, index2;
-
-    
-    //while(recv_num_now < recv_num)
-    for(index2 = 0; index2 < PNUM; index2++)
+    recv_num_now = 0;
+    while(recv_num_now < recv_num)
     {
         if(!(tmp_recv->tdes0 & DESC_OWN)) // OWN = 0, received a package
         {
-            /*if(tmp_recv->tdes0 & RECV_ERROR)
+            if(tmp_recv->tdes0 & RECV_ERROR)
             {
                 printf("RECV ERROR.\n");
                 while(1);
-            }*/
+            }
 
+            sys_move_cursor(1, 3);
+            printf("%d recv buffer, r_desc = 0x%x:\n", recv_num_now, (tmp_recv->tdes0));
+
+            tmp_data = (uint32_t *)(daddr + recv_num_now*0x400);
+            if((tmp_data[0]!=0xb57b5500) || (tmp_data[1]!= 0x5a70f77d) || (tmp_data[2]!= 0x0e42d30f)) // this means the package is not from pktRxTx to our kernel
+            {
+                // re-fetch another package
+                //tmp_recv->tdes0 |= DESC_OWN;
+                tmp_recv->tdes0 = DESC_OWN;
             
-            tmp_data = (uint32_t *)(daddr + index2*0x400);
-            //if((tmp_data[0]==0x84541b10) && (tmp_data[1]== 0xe290d683) && (tmp_data[2]== 0xd0cd15ba))
-            if((tmp_data[0]==0xb57b5500) && (tmp_data[1]== 0x5a70f77d) && (tmp_data[2]== 0x0e42d30f)) // this means the package is  from pktRxTx to our kernel
+            }
+
+            else
             {
                 sys_move_cursor(1, 4);
                 for(index1 = 0; index1 < PSIZE; index1++)
                 {
                     //if(tmp_data[index1] != 0)
-                    //printf("%x  ", tmp_data[index1]);
-                    task2_print_buffer[recv_num_now][index1] = tmp_data[index1];
+                        printf("%x  ", tmp_data[index1]);
                 }
-                task2_rdes0[recv_num_now] = tmp_recv->tdes0;
-                
+
+                tmp_recv = (desc_t *)((tmp_recv->tdes3) | GET_UNMAPPED_VADDR);
                 recv_num_now++;
             }
         }
 
-        
-        tmp_recv = (desc_t *)((tmp_recv->tdes3) | GET_UNMAPPED_VADDR);
-                
+        else // wait this package
+        {
+            sys_move_cursor(1, 3);
+            printf("[RECV TASK]still waiting recv %dth package.\n", recv_num_now);
+            
+            reg_write_32(DMA_BASE_ADDR + 0xc, (((uint32_t)tmp_recv) & GET_UNMAPPED_PADDR)); // let MAC re-start receiving from this desc instead of 1st desc.
+            reg_write_32(DMA_BASE_ADDR + DmaRPD, 1); // let MAC receive one more package
+            sys_wait_recv_package();
+
+        }
         
     }
 
@@ -155,7 +168,7 @@ static uint32_t printk_recv_buffer(uint32_t recv_buffer)
 
 void set_sram_ctr()
 {
-    *((volatile unsigned int *)0xbfd00420) = 0x8000; /* ä½¿èƒ½GMAC0 */
+    *((volatile unsigned int *)0xbfd00420) = 0x8000; /* Ê¹ÄÜGMAC0 */
 }
 static void s_reset(mac_t *mac) //reset mac regs
 {
@@ -228,7 +241,7 @@ uint32_t do_net_recv(uint32_t rd, uint32_t rd_phy, uint32_t daddr)
     index2 = 0;
     index3 = 0;
     /*
-    while(1) // è½®è¯¢
+    while(1) // ÂÖÑ¯
     {
         if(!(tmp_recv->tdes0 & DESC_OWN)) // OWN = 0, received a package
         {
@@ -322,7 +335,7 @@ void do_init_mac(void)
     test_mac.psize = PSIZE * 4; // 64bytes
     test_mac.pnum = PNUM;       // pnum
 
-    set_sram_ctr(); /* ä½¿èƒ½GMAC0 */
+    set_sram_ctr(); /* Ê¹ÄÜGMAC0 */
     s_reset(&test_mac);
     disable_interrupt_all(&test_mac);
     set_mac_addr(&test_mac);
@@ -330,33 +343,17 @@ void do_init_mac(void)
 
 void do_wait_recv_package(void)
 {
-    do_block(&recv_block_queue);
-    /*int i;
+    //do_block(&recv_block_queue);
+    int i;
     for (i = 0; i < PNUM; i++)
     {
         if(rx_desc_list[i].tdes0 & 0x80000000)
             break;
     }
-    //printk("index = %d\n", i);
+    printk("index = %d\n", i);
     current_running->status = TASK_BLOCKED;
     current_running->block_in_queue = &recv_block_queue;
     queue_push(&recv_block_queue, current_running);
-    do_scheduler();*/
+    do_scheduler();
 
-}
-
-void do_print_buffer()
-{
-    int index1, index2;
-    for(index1 = 0; index1 < PNUM; index1++)
-    {
-        vt100_move_cursor(1, 3);
-        printk("%d recv buffer, r_desc = 0x%x:\n", index1, task2_rdes0[index1]);
-
-        vt100_move_cursor(1, 4);
-        for(index2 = 0; index2 < PSIZE; index2++)
-        {
-            printk("%x ", task2_print_buffer[index1][index2]);
-        }
-    }
 }

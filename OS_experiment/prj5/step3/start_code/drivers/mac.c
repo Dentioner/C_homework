@@ -89,10 +89,62 @@ static uint32_t printf_recv_buffer(uint32_t recv_buffer)
 }
 void mac_irq_handle(void)
 {
+    /*
+    if(!queue_is_empty(&recv_block_queue))
+    {
+        do_unblock_one(&recv_block_queue);
+    }
+*/
+
+
+/*******************************debug*****************************************/
+    printk("In mac_irq.");
+    while(1);
+
+/*******************************debug*****************************************/
+
+
+
+    if((!queue_is_empty(&recv_block_queue)))
+    {
+        //if(!(tmp_recv->tdes0 & DESC_OWN))
+        //{
+            do_unblock_one(&recv_block_queue);
+        //}
+        /*
+        else
+        {
+            int index1;
+            vt100_move_cursor(1, 2);
+            for(index1 = 0; index1< PNUM; index1++)
+            {
+                if(rx_desc_list[index1].tdes0 & DESC_OWN)
+                    break;
+            }
+            printk("[RECV TASK]still waiting recv %dth package.\n", index1);
+            
+        }
+        */
+    }
+
+    clear_interrupt();
+}
+
+/*void register_irq_handler(int IRQn, irq_handler_t func)
+{
+
+}*/
+
+void clear_interrupt()
+{
+    uint32_t data;
+    data = reg_read_32(0xbfe11000 + DmaStatus);
+    reg_write_32(0xbfe11000 + DmaStatus, data);
 }
 
 void irq_enable(int IRQn)
 {
+    reg_write_32(INT1_EN_ADDR, 0x8);
 }
 
 // WARNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -108,7 +160,17 @@ void mac_recv_handle(mac_t *test_mac)
 
     int index1, index2;
 
-    
+
+/*******************************debug*****************************************/
+    printf("debug:In recv handler.\n");
+    while(1);
+
+/*******************************debug*****************************************/    
+
+
+
+
+
     //while(recv_num_now < recv_num)
     for(index2 = 0; index2 < PNUM; index2++)
     {
@@ -228,7 +290,7 @@ uint32_t do_net_recv(uint32_t rd, uint32_t rd_phy, uint32_t daddr)
     index2 = 0;
     index3 = 0;
     /*
-    while(1) // 轮询
+    while(1) //轮询
     {
         if(!(tmp_recv->tdes0 & DESC_OWN)) // OWN = 0, received a package
         {
@@ -326,6 +388,10 @@ void do_init_mac(void)
     s_reset(&test_mac);
     disable_interrupt_all(&test_mac);
     set_mac_addr(&test_mac);
+
+    reg_write_32(INT1_CLR_ADDR, 0xffffffff);
+    reg_write_32(INT1_POL_ADDR, 0xffffffff);
+    reg_write_32(INT1_EDGE_ADDR, 0);
 }
 
 void do_wait_recv_package(void)
