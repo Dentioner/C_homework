@@ -114,14 +114,14 @@ void mac_recv_handle(mac_t *test_mac)
     {
         if(!(tmp_recv->tdes0 & DESC_OWN)) // OWN = 0, received a package
         {
-            if(tmp_recv->tdes0 & RECV_ERROR)
+            /*if(tmp_recv->tdes0 & RECV_ERROR)
             {
                 printf("RECV ERROR.\n");
                 while(1);
-            }
+            }*/
 
             
-            tmp_data = (uint32_t *)(daddr + recv_num_now*0x400);
+            tmp_data = (uint32_t *)(daddr + index2*0x400);
             
             if((tmp_data[0]==0xb57b5500) && (tmp_data[1]== 0x5a70f77d) && (tmp_data[2]== 0x0e42d30f)) // this means the package is  from pktRxTx to our kernel
             {
@@ -330,17 +330,17 @@ void do_init_mac(void)
 
 void do_wait_recv_package(void)
 {
-    //do_block(&recv_block_queue);
-    int i;
+    do_block(&recv_block_queue);
+    /*int i;
     for (i = 0; i < PNUM; i++)
     {
         if(rx_desc_list[i].tdes0 & 0x80000000)
             break;
     }
-    printk("index = %d\n", i);
+    //printk("index = %d\n", i);
     current_running->status = TASK_BLOCKED;
     current_running->block_in_queue = &recv_block_queue;
     queue_push(&recv_block_queue, current_running);
-    do_scheduler();
+    do_scheduler();*/
 
 }

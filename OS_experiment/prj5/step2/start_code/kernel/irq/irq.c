@@ -27,9 +27,24 @@ do_scheduler();
 //    do_scheduler();
 //  	screen_reflush();  
 
-    if((!queue_is_empty(&recv_block_queue)) && (!(tmp_recv->tdes0 & DESC_OWN)))
+    if((!queue_is_empty(&recv_block_queue)))
     {
-        do_unblock_one(&recv_block_queue);
+        if(!(tmp_recv->tdes0 & DESC_OWN))
+        {
+            do_unblock_one(&recv_block_queue);
+        }
+        else
+        {
+            int index1;
+            vt100_move_cursor(1, 2);
+            for(index1 = 0; index1< PNUM; index1++)
+            {
+                if(rx_desc_list[index1].tdes0 & DESC_OWN)
+                    break;
+            }
+            printk("[RECV TASK]still waiting recv %dth package.\n", index1);
+            
+        }
     }
     
 }

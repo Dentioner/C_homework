@@ -200,7 +200,7 @@ void mac_recv_task()
     uint32_t ret;
     uint32_t print_location = 1;
 
-    int index1, index2;
+    int index1, index2, index3;
 
     recv_num_now = 0; // step2 
 
@@ -252,10 +252,15 @@ void mac_recv_task()
         //if (((*Recv_desc) & 0x80000000) == 0x80000000)
         if((tmp_recv->tdes0 & DESC_OWN))
         {
+
+
+
+
             //tmp_recv = &(rx_desc_list[PNUM-1 - recv_num_now]);
             sys_move_cursor(1, print_location);
             //printf("> [MAC RECV TASK] waiting receive package.\n");
-            printf("[RECV TASK]still waiting recv %dth package.\n", recv_num_now);
+            //printf("[RECV TASK]still waiting recv %dth package.\n", recv_num_now);
+            //printf("[RECV TASK]still waiting recv %dth package.\n", index3);
             
             sys_wait_recv_package();
         }
