@@ -40,7 +40,7 @@ static void mac_send_desc_init(mac_t *mac)
         
         tx_desc_list[index1].tdes0 = 0;
         // let [24] = 1, [10:0] = sizeof(buffer1)
-        tx_desc_list[index1].tdes1 = TX_HAS_LINK | BUFFER_SIZE;
+        tx_desc_list[index1].tdes1 = TX_HAS_LINK | BUFFER_SIZE | TX_FS | TX_LS;
         // save addr of buffer1
         tx_desc_list[index1].tdes2 = ((uint32_t)&(send_package[index1])) & GET_UNMAPPED_PADDR;
         // save the addr of next link node
@@ -56,7 +56,7 @@ static void mac_send_desc_init(mac_t *mac)
 
     tx_desc_list[PNUM -1].tdes0 = 0;
     
-    tx_desc_list[PNUM -1].tdes1 = TX_HAS_LINK | BUFFER_SIZE | TX_LINK_END;
+    tx_desc_list[PNUM -1].tdes1 = TX_HAS_LINK | BUFFER_SIZE | TX_LINK_END | TX_FS | TX_LS;
     tx_desc_list[PNUM -1].tdes2 = ((uint32_t)&(send_package[PNUM-1])) & GET_UNMAPPED_PADDR;
     tx_desc_list[PNUM -1].tdes3 = ((uint32_t)&(tx_desc_list[0])) & GET_UNMAPPED_PADDR;
 
@@ -200,6 +200,8 @@ void mac_recv_task()
     uint32_t ret;
     uint32_t print_location = 1;
 
+    int index1, index2;
+
     recv_num_now = 0; // step2 
 
     test_mac.mac_addr = 0xbfe10000;
@@ -207,85 +209,76 @@ void mac_recv_task()
 
     test_mac.psize = PSIZE * 4; // 64bytes
     test_mac.pnum = PNUM;       // pnum
-    mac_recv_desc_init(&test_mac);
 
-    dma_control_init(&test_mac, DmaStoreAndForward | DmaTxSecondFrame | DmaRxThreshCtrl128);
     clear_interrupt(&test_mac);
-
-    mii_dul_force(&test_mac);
-
     queue_init(&recv_block_queue);
-    sys_move_cursor(1, print_location);
-    printf("[MAC RECV TASK] start recv:                    ");
-    ret = sys_net_recv(test_mac.rd, test_mac.rd_phy, test_mac.daddr);
-    if (ret == 0)
-    {
+
+    while (recv_num_now < PNUM)
+    {    
+        mac_recv_desc_init(&test_mac);
+
+        dma_control_init(&test_mac, DmaStoreAndForward | DmaTxSecondFrame | DmaRxThreshCtrl128);
+        //clear_interrupt(&test_mac);
+
+        mii_dul_force(&test_mac);
+
+        //queue_init(&recv_block_queue);
         sys_move_cursor(1, print_location);
-        printf("[MAC RECV TASK]     net recv is ok!                          ");
-    }
-    else
-    {
-        sys_move_cursor(1, print_location);
-        printf("[MAC RECV TASK]     net recv is fault!                       ");
-    }
-
-    ch_flag = 0;
-    for (i = 0; i < PNUM; i++)
-    {
-        recv_flag[i] = 0;
-    }
-
-    //uint32_t cnt = 0;
-    uint32_t *Recv_desc;
-    Recv_desc = (uint32_t *)(test_mac.rd + (PNUM - 1) * 16);
-    //printf("(test_mac.rd 0x%x ,Recv_desc=0x%x,REDS0 0X%x\n", test_mac.rd, Recv_desc, *(Recv_desc));
-    if (((*Recv_desc) & 0x80000000) == 0x80000000)
-    {
-        sys_move_cursor(1, print_location);
-        printf("> [MAC RECV TASK] waiting receive package.\n");
-        sys_wait_recv_package();
-    }
-
-    //init_screen();
-    /*
-    cnt += PNUM;
-    sys_move_cursor(1, print_location);
-    printf("> [MAC RECV TASK]print recv  buffer        \n");
-    uint32_t recv_buffer, snd_buffer;
-    desc_t *recv = NULL;
-    recv_buffer = test_mac.daddr;
-    snd_buffer = test_mac.saddr;
-    print_location = 3;
-
-    uint32_t valid_num = 0;
-    for (i = 0; i < PNUM; i++)
-    {
-        if (recv_flag[i] == 0)
+        printf("[MAC RECV TASK] start recv:                    ");
+        ret = sys_net_recv(test_mac.rd, test_mac.rd_phy, test_mac.daddr);
+        if (ret == 0)
         {
             sys_move_cursor(1, print_location);
-            printf("> [MAC RECV TASK]still waiting receive %dth package.             \n", i);
+            printf("[MAC RECV TASK]     net recv is ok!                          ");
+        }
+        else
+        {
+            sys_move_cursor(1, print_location);
+            printf("[MAC RECV TASK]     net recv is fault!                       ");
+        }
+
+        ch_flag = 0;
+        for (i = 0; i < PNUM; i++)
+        {
+            recv_flag[i] = 0;
+        }
+
+        //uint32_t cnt = 0;
+        uint32_t *Recv_desc;
+        //Recv_desc = (uint32_t *)(test_mac.rd + (PNUM - 1) * 16);
+        //printf("(test_mac.rd 0x%x ,Recv_desc=0x%x,REDS0 0X%x\n", test_mac.rd, Recv_desc, *(Recv_desc));
+        
+        tmp_recv = &(rx_desc_list[PNUM-1 - recv_num_now]);
+        //if (((*Recv_desc) & 0x80000000) == 0x80000000)
+        if((tmp_recv->tdes0 & DESC_OWN))
+        {
+            //tmp_recv = &(rx_desc_list[PNUM-1 - recv_num_now]);
+            sys_move_cursor(1, print_location);
+            //printf("> [MAC RECV TASK] waiting receive package.\n");
+            printf("[RECV TASK]still waiting recv %dth package.\n", recv_num_now);
+            
             sys_wait_recv_package();
         }
 
-        Recv_desc = (uint32_t *)(test_mac.rd + i * 16);
-        recv = (desc_t *)Recv_desc;
 
-        sys_move_cursor(1, print_location);
-        printf("\n%d recv buffer,r_desc( 0x%x) =0x%x:          \n", i, Recv_desc, *(Recv_desc));
 
-        recv_buffer = recv->tdes2;
-        valid_num += printf_recv_buffer((recv->tdes2 | 0xa0000000));
-        sys_sleep(1);
-        printf("\n");
+        mac_recv_handle(&test_mac);
     }
 
-    print_location = 3;
-    sys_move_cursor(1, print_location);
-    printf("\nrecv valid %d packages!:\n                ", valid_num);
-*/
+    
 
+    for(index1 = 0; index1 < PNUM; index1++)
+    {
+        sys_move_cursor(1, 3);
+        printf("%d recv buffer, r_desc = 0x%x:\n", index1, task2_rdes0[index1]);
 
-    mac_recv_handle(&test_mac);
+        sys_move_cursor(1, 4);
+        for(index2 = 0; index2 < PSIZE; index2++)
+        {
+            printf("%x ", task2_print_buffer[index1][index2]);
+        }
+    }
+
     sys_exit();
 }
 

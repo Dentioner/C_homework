@@ -41,7 +41,7 @@ static void mac_send_desc_init(mac_t *mac)
         
         tx_desc_list[index1].tdes0 = 0;
         // let [24] = 1, [10:0] = sizeof(buffer1)
-        tx_desc_list[index1].tdes1 = TX_HAS_LINK | BUFFER_SIZE;
+        tx_desc_list[index1].tdes1 = TX_HAS_LINK | BUFFER_SIZE | TX_FS | TX_LS;
         // save addr of buffer1
         tx_desc_list[index1].tdes2 = ((uint32_t)&(send_package[index1])) & GET_UNMAPPED_PADDR;
         // save the addr of next link node
@@ -57,15 +57,15 @@ static void mac_send_desc_init(mac_t *mac)
 
     tx_desc_list[PNUM -1].tdes0 = 0;
     
-    tx_desc_list[PNUM -1].tdes1 = TX_HAS_LINK | BUFFER_SIZE | TX_LINK_END;
+    tx_desc_list[PNUM -1].tdes1 = TX_HAS_LINK | BUFFER_SIZE | TX_LINK_END | TX_FS | TX_LS;
     tx_desc_list[PNUM -1].tdes2 = ((uint32_t)&(send_package[PNUM-1])) & GET_UNMAPPED_PADDR;
     tx_desc_list[PNUM -1].tdes3 = ((uint32_t)&(tx_desc_list[0])) & GET_UNMAPPED_PADDR;
 
 
 
 
-//    mac->psize = PSIZE;
-//    mac->pnum = PNUM;
+    //mac->psize = PSIZE;
+    //mac->pnum = PNUM;
 //    mac->mac_addr = 
 //    mac->dma_addr =
     mac->saddr = (uint32_t)&(send_package[0]);
@@ -120,8 +120,8 @@ static void mac_recv_desc_init(mac_t *mac)
     rx_desc_list[PNUM-1].tdes3 = ((uint32_t)&(rx_desc_list[0])) & GET_UNMAPPED_PADDR;
 
 
-//    mac->psize = PSIZE;
-//    mac->pnum = PNUM;
+    //mac->psize = PSIZE;
+    //mac->pnum = PNUM;
 //    mac->mac_addr = 
 //    mac->dma_addr =
 //    mac->saddr = 
@@ -158,6 +158,7 @@ void mac_send_task()
     mac_t test_mac;
     uint32_t i;
     uint32_t print_location = 2;
+    int index1;
 
     test_mac.mac_addr = 0xbfe10000;
     test_mac.dma_addr = 0xbfe11000;
@@ -188,6 +189,13 @@ void mac_send_task()
         printf("> [MAC SEND TASK] totally send package %d !        \n", cnt);
         i--;
     }
+
+    sys_move_cursor(1, 9);
+    for(index1 = 0; index1 < PNUM; index1++)
+    {
+        printf("%x ", tx_desc_list[index1].tdes0);
+    }
+
     sys_exit();
 }
 uint32_t ch_flag;
@@ -226,6 +234,7 @@ void mac_recv_task()
         printf("[MAC RECV TASK]     net recv is fault!                       ");
     }
 
+    //mac_recv_desc_init(&test_mac);
     sys_exit();
 }
 
@@ -239,3 +248,4 @@ void mac_init_task()
     printf("> [MAC INIT TASK] MAC initialization succeeded.           \n");
     sys_exit();
 }
+

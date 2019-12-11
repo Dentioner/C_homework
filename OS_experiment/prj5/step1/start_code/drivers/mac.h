@@ -29,6 +29,9 @@
 
 #define BUFFER_SIZE 0x400 // 4*256 = 1024 = 0x400,   4 = sizeof(uint32_t),  256 = length(buffer[])
 
+
+#define TX_LS 0x40000000
+#define TX_FS 0x20000000
 extern queue_t recv_block_queue;
 extern uint32_t recv_flag[PNUM];
 extern uint32_t ch_flag;

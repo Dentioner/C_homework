@@ -283,7 +283,7 @@ uint32_t do_net_recv(uint32_t rd, uint32_t rd_phy, uint32_t daddr)
 
     }
     vt100_move_cursor(1, 2);
-    printk("recv valid %d packages!:", index3);
+    //printk("recv valid %d packages!:", index3);
 
     return 0;
 }
