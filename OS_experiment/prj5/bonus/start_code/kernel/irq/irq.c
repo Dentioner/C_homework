@@ -26,8 +26,11 @@ do_scheduler();
 //	screen_clear();
 //    do_scheduler();
 //  	screen_reflush();  
-
-
+/*    if(((rx_desc_list[10].tdes0 & DESC_OWN) == 0) && ((rx_desc_list[11].tdes0 & DESC_OWN) != 0))
+    {
+        start_time = get_ticks();
+    }
+*/
 
 }
 

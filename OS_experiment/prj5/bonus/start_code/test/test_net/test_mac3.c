@@ -224,9 +224,6 @@ void mac_recv_task()
     if((tmp_recv->tdes0 & DESC_OWN))
     {
 
-
-
-
         //tmp_recv = &(rx_desc_list[PNUM-1 - recv_num_now]);
         //sys_move_cursor(1, print_location);
         //printf("> [MAC RECV TASK] waiting receive package.\n");

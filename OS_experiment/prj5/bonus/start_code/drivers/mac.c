@@ -1,6 +1,6 @@
 #include "mac.h"
 #include "irq.h"
-
+#include "time.h"
 
 
 #define NUM_DMA_DESC 48
@@ -105,8 +105,10 @@ void mac_irq_handle(void)
 
 
     pcb_t * pointer = NULL;
+
     if((!queue_is_empty(&recv_block_queue)))
     {
+        end_time = get_ticks();
         pointer = (pcb_t *)queue_dequeue(&recv_block_queue);
         pointer->status = TASK_READY;
         pointer->block_in_queue = NULL; //test
@@ -275,6 +277,9 @@ uint32_t do_net_recv(uint32_t rd, uint32_t rd_phy, uint32_t daddr)
     vt100_move_cursor(1, 1);
     printk("[MAC RECV TASK] start recv:                    ");
     
+    end_time = 0;
+    start_time = get_ticks();
+    
     return 0;
 }
 
@@ -364,9 +369,10 @@ void do_print_buffer()
     int index1, index2, index3;
     uint32_t * tmp_data;
     uint32_t daddr = (uint32_t)&(recv_package[0]);
-
+    
     vt100_move_cursor(1, 9);
-    printk("recv valid %d packages!:", PNUM);
+    printk("recv valid %d packages!\n", PNUM);
+    printk("start:%u, end:%u", start_time, end_time);
 
     
     for(index1 = 0; index1 < PNUM; index1++)

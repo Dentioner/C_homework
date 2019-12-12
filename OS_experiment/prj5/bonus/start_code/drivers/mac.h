@@ -133,4 +133,8 @@ int task2_print_buffer_index;
 extern int recv_num_now;
 extern desc_t * tmp_recv;
 
+
+uint32_t start_time;
+uint32_t end_time;
+
 #endif
