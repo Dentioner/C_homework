@@ -167,7 +167,7 @@ void mac_send_task()
 
     //register_irq_handler(LS1C_MAC_IRQ, mac_irq_handle);
 
-    irq_enable(LS1C_MAC_IRQ);
+    //irq_enable(LS1C_MAC_IRQ);
     sys_move_cursor(1, print_location);
     printf("> [MAC SEND TASK] start send package.               \n");
 
@@ -192,7 +192,7 @@ void mac_recv_task()
     uint32_t ret;
     uint32_t print_location = 1;
 
-    int index1, index2, index3;
+    int index1, index2, index3, index4;
 
     recv_num_now = 0; // step2 
 
@@ -204,6 +204,8 @@ void mac_recv_task()
 
     //clear_interrupt(&test_mac);
     clear_interrupt();
+
+    irq_enable(LS1C_MAC_IRQ);
 
     queue_init(&recv_block_queue);
 
@@ -217,11 +219,14 @@ void mac_recv_task()
         mii_dul_force(&test_mac);
 
         //queue_init(&recv_block_queue);
+        //irq_enable(LS1C_MAC_IRQ);
         sys_move_cursor(1, print_location);
         printf("[MAC RECV TASK] start recv:                    ");
         ret = sys_net_recv(test_mac.rd, test_mac.rd_phy, test_mac.daddr);
         if (ret == 0)
         {
+            sys_move_cursor(1, print_location);
+            printf("                                                             ");
             sys_move_cursor(1, print_location);
             printf("[MAC RECV TASK]     net recv is ok!                          ");
         }
@@ -262,10 +267,24 @@ void mac_recv_task()
 
 
         mac_recv_handle(&test_mac);
+/*******************************debug*****************************************/
+/*    sys_move_cursor(1, 3);
+    for (index4 = 0; index4 < PNUM; index4++)
+    {
+        printf("&rx[%d]=%x,tdes3=%x\n", index4, &rx_desc_list[index4], (rx_desc_list[index4].tdes3|GET_UNMAPPED_VADDR));
+    
+    }
+    while(1);*/
+/*******************************debug*****************************************/
+
+
     }
 
     
-
+/*******************************debug*****************************************/  
+    /*printf("debug:check point1.\n");
+    while(1);*/    
+/*******************************debug*****************************************/  
     sys_print_buffer();
 
     sys_exit();

@@ -135,6 +135,10 @@ void mac_recv_handle(mac_t *test_mac)
                 task2_rdes0[recv_num_now] = tmp_recv->tdes0;
                 
                 recv_num_now++;
+                if(recv_num_now >= PNUM)
+                {
+                    break;
+                }
             }
         }
 

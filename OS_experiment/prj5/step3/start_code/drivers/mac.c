@@ -98,8 +98,8 @@ void mac_irq_handle(void)
 
 
 /*******************************debug*****************************************/
-    printk("In mac_irq.");
-    while(1);
+    //printk("In mac_irq.");
+    //while(1);
 
 /*******************************debug*****************************************/
 
@@ -162,8 +162,8 @@ void mac_recv_handle(mac_t *test_mac)
 
 
 /*******************************debug*****************************************/
-    printf("debug:In recv handler.\n");
-    while(1);
+    //printf("debug:In recv handler.\n");
+    //while(1);
 
 /*******************************debug*****************************************/    
 
@@ -197,17 +197,51 @@ void mac_recv_handle(mac_t *test_mac)
                 task2_rdes0[recv_num_now] = tmp_recv->tdes0;
                 
                 recv_num_now++;
+                if(recv_num_now >= PNUM)
+                {
+                    break;
+                }
             }
         }
 
         
         tmp_recv = (desc_t *)((tmp_recv->tdes3) | GET_UNMAPPED_VADDR);
-                
+/*******************************debug*****************************************/
+/*******************************↓↓↓↓↓*****************************************/  
+        /*if(recv_num_now >= PNUM)
+        {
+            printf("debug:check point3.\n");
+            //while(1);
+            printf("index2=%d, valid num=%d\n", index2, recv_num_now);
+            //do_sleep(2);    
+        }*/
+/*******************************↑↑↑↑↑*****************************************/
+/*******************************debug*****************************************/          
         
     }
+/*******************************debug*****************************************/
+/*******************************↓↓↓↓↓*****************************************/
+        /*if(recv_num_now >= PNUM)
+        {
+            printf("debug:check point4.\n");
+            while(1);    
+        }*/
+/*******************************↑↑↑↑↑*****************************************/
+/*******************************debug*****************************************/
 
-    sys_move_cursor(1, 2);
+
+    sys_move_cursor(1, 9);
     printf("recv valid %d packages!:", recv_num_now);
+
+/*******************************debug*****************************************/
+/*******************************↓↓↓↓↓*****************************************/  
+    /*if(recv_num_now >= PNUM)
+    {
+        printf("debug:check point2.\n");
+        while(1);    
+    }*/
+/*******************************↑↑↑↑↑*****************************************/
+/*******************************debug*****************************************/  
 
 }
 
@@ -289,44 +323,7 @@ uint32_t do_net_recv(uint32_t rd, uint32_t rd_phy, uint32_t daddr)
     tmp_recv = (desc_t *)rd;
     index2 = 0;
     index3 = 0;
-    /*
-    while(1) //轮询
-    {
-        if(!(tmp_recv->tdes0 & DESC_OWN)) // OWN = 0, received a package
-        {
-            if(tmp_recv->tdes0 & RECV_ERROR)
-            {
-                printk("RECV ERROR.\n");
-                while(1);
-            }
-            
-            vt100_move_cursor(1, 3);
-            printk("%d recv buffer, r_desc = 0x%x:\n", index3, tmp_recv->tdes0);
-            
-            tmp_data = (uint32_t *)(daddr + index2*0x400);
-            for(index4 = 0; index4 < PSIZE; index4++)
-            {
-                printk("%x  ", tmp_data[index4]);
-            }
-
-            index3++;
-        }
-
-        if(index3 >= recv_num) // received all the packages
-        {
-            break;
-        }
-        else
-        {
-            tmp_recv = (desc_t *)((tmp_recv->tdes3) | GET_UNMAPPED_VADDR);
-            index2 = (index2 + 1)%PNUM;
-        }
-        
-    }
-
-    vt100_move_cursor(1, 2);
-    printk("recv valid %d packages!:", index3);
-    */
+    
     return 0;
 }
 
@@ -413,16 +410,28 @@ void do_wait_recv_package(void)
 
 void do_print_buffer()
 {
-    int index1, index2;
+    int index1, index2, index3;
+    
     for(index1 = 0; index1 < PNUM; index1++)
     {
+        index3 = 0;
         vt100_move_cursor(1, 3);
         printk("%d recv buffer, r_desc = 0x%x:\n", index1, task2_rdes0[index1]);
 
         vt100_move_cursor(1, 4);
         for(index2 = 0; index2 < PSIZE; index2++)
         {
-            printk("%x ", task2_print_buffer[index1][index2]);
+
+            if (task2_print_buffer[index1][index2])
+            {    
+                printk("%x ", task2_print_buffer[index1][index2]);
+                index3++;
+                
+            }
+            if(index3%16 == 15)
+            {
+                printk("\n");
+            }        
         }
     }
 }

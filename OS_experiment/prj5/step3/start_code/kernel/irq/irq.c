@@ -47,7 +47,7 @@ do_scheduler();
             
             
 /*******************************debug*****************************************/
-            printk("valid now: %d\n", recv_num_now);
+            /*printk("valid now: %d\n", recv_num_now);
 
 
             for(index1 = 0; index1 < PNUM; index1++)
@@ -59,7 +59,7 @@ do_scheduler();
                 }
             }
             
-            printk("\n%x\n", rx_desc_list[PNUM-1].tdes1);
+            printk("\n%x\n", rx_desc_list[PNUM-1].tdes1);*/
 /*******************************debug*****************************************/
         //}
     }
@@ -75,6 +75,11 @@ void interrupt_helper(uint32_t status, uint32_t cause)
     // read CP0 register to analyze the type of interrupt.
     uint32_t int_signal;
     int_signal = status & cause & 0x0000ff00;
+
+/*******************************debug*****************************************/
+    //vt100_move_cursor(1, 13);
+    //printk("status=%x,cause=%x,signal=%x\n", status, cause, int_signal);
+/*******************************debug*****************************************/
     if (int_signal == 0x8000)
         irq_timer();
     else if(int_signal == 0x0800 &&(reg_read_32(INT1_SR_ADDR)) & 0x8)
@@ -93,8 +98,8 @@ void other_exception_handler()
 {
     // TODO other exception handler
     uint32_t ehi, elo0, elo1;
-    int index1;
-    
+    int index1, index2;
+    vt100_move_cursor(1, 16);
     for (index1 = 0; index1 < 32; index1++)
     {    
         set_cp0_index(index1);
@@ -104,6 +109,25 @@ void other_exception_handler()
         elo1 = get_cp0_entrylo1();
         printk("i=%d, hi=%x,lo0=%x,lo1=%x\n", index1, ehi, elo0, elo1);
     }
-    printk("cause=%x\n", current_running->user_context.cp0_cause);
+
+    //vt100_move_cursor(1, 16);
+    printk("cause=%x\n", (current_running->user_context.cp0_cause)>>2);
+    printk("badvaddr=%x\n", get_cp0_badvaddr());
+    printk("epc=%x\n", current_running->user_context.cp0_epc);
+
+
+/*******************************debug*****************************************/
+    /*for(index2 = 0; index2 < PNUM; index2++)
+    {
+        if(tmp_recv == &rx_desc_list[index2])
+        break;
+    }
+    printk("index2=%d, tmp_recv=%x\n", index2, tmp_recv);*/
+
+    for (index2 = 0; index2<PNUM; index2++)
+    {
+        printk("&rx[%d]=%x,tdes3=%x\n", index2, &rx_desc_list[index2], (rx_desc_list[index2].tdes3|GET_UNMAPPED_VADDR));
+    }
+/*******************************debug*****************************************/
     while(1);
 }
