@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "irq.h": "c",
+        "time.h": "c",
+        "syscall.h": "c",
+        "sched.h": "c",
+        "mac.h": "c"
+    }
+}
