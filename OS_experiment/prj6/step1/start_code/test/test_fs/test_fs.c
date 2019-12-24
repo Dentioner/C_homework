@@ -1,13 +1,14 @@
 #include "test_fs.h"
 #include "stdio.h"
 #include "string.h"
-#include "test_fs.h"
+#include "fs.h"
 #include "syscall.h"
 
 static char buff[64];
 
 void test_fs(void)
 {
+    /*
     int i, j;
     int fd = sys_fopen("1.txt", O_RDWR);
 
@@ -26,5 +27,5 @@ void test_fs(void)
     }
 
     sys_close(fd);
-    sys_exit();
+    sys_exit();*/
 }

@@ -12,14 +12,14 @@
 void write_bootblock(FILE *image, FILE *bbfile, Elf32_Phdr *Phdr);
 Elf32_Phdr *read_exec_file(FILE *opfile, Elf32_Ehdr *ehdr);
 Elf32_Ehdr *read_elf_head(FILE *opfile);
-uint8_t count_kernel_sectors(Elf32_Phdr *Phdr);
-uint8_t count_kernel_sectors_SD(Elf32_Phdr *Phdr);
+uint32_t count_kernel_sectors(Elf32_Phdr *Phdr);
+uint32_t count_kernel_sectors_SD(Elf32_Phdr *Phdr);
 void extent_opt(Elf32_Phdr *Phdr_bb, Elf32_Phdr *Phdr_k, int kernelsz, int has_bootblock, int has_kernel, int sector_number);
-void create_image_padding(uint8_t kernel_sector_number);
+void create_image_padding(uint32_t kernel_sector_number);
 
 char temp[SECTOR_SIZE];
 
-void create_image_padding(uint8_t kernel_sector_number)
+void create_image_padding(uint32_t kernel_sector_number)
 {
 	long offset;
 	offset = (1 + (long)kernel_sector_number)*SECTOR_SIZE - 1 ;
@@ -49,22 +49,22 @@ Elf32_Phdr *read_exec_file(FILE *opfile, Elf32_Ehdr *ehdr)
 	return image_head;
 }
 
-uint8_t count_kernel_sectors(Elf32_Phdr *Phdr)
+uint32_t count_kernel_sectors(Elf32_Phdr *Phdr)
 {
 	//long int size =(long int) Phdr->p_filesz;
 	long int size =(long int) Phdr->p_memsz;
 	
-	uint8_t sector_number = (uint8_t)(size/SECTOR_SIZE + 1);
+	uint32_t sector_number = (uint32_t)(size/SECTOR_SIZE + 1);
 	//uint8_t sector_number = (uint8_t)((size + SECTOR_SIZE - 1)/SECTOR_SIZE);
 	return sector_number;	
 }
 
-uint8_t count_kernel_sectors_SD(Elf32_Phdr *Phdr)
+uint32_t count_kernel_sectors_SD(Elf32_Phdr *Phdr)
 {
 	long int size =(long int) Phdr->p_filesz;
 	
 	
-	uint8_t sector_number = (uint8_t)(size/SECTOR_SIZE + 1);
+	uint32_t sector_number = (uint32_t)(size/SECTOR_SIZE + 1);
 	//uint8_t sector_number = (uint8_t)((size + SECTOR_SIZE - 1)/SECTOR_SIZE);
 	return sector_number;	
 }
@@ -97,7 +97,7 @@ so we should padding the file from file_sz to mem_sz;
 	return;
 }
 
-void write_kernel(FILE *image, FILE *knfile, Elf32_Phdr *Phdr, int kernelsz, int kernelszSD)
+void write_kernel(FILE *image, FILE *knfile, Elf32_Phdr *Phdr, uint32_t kernelsz, uint32_t kernelszSD)
 {
 	int index;
 	
@@ -133,11 +133,11 @@ void write_kernel(FILE *image, FILE *knfile, Elf32_Phdr *Phdr, int kernelsz, int
 
 }
 
-void record_kernel_sectors(FILE *image, uint8_t kernelsz)
+void record_kernel_sectors(FILE *image, uint32_t kernelsz)
 {
 	long int size = (long int)kernelsz ;
 	long int offset_ker =(long int)( SECTOR_SIZE - 2 - sizeof(uint8_t));	
-	uint8_t *ptr_of_kersz = (uint8_t*)malloc(sizeof(uint8_t));
+	uint32_t *ptr_of_kersz = (uint32_t*)malloc(sizeof(uint32_t));
 	*ptr_of_kersz = kernelsz;
 
  	//fseek(image, offset_ker, SEEK_SET);
@@ -190,8 +190,8 @@ int main(int argc, char* argv[])
 	Elf32_Phdr * bootblock_head = NULL;
 	Elf32_Phdr * kernel_head = NULL;
 
-	uint8_t kernel_sector_number;
-	uint8_t kernel_sector_number_SD;
+	uint32_t kernel_sector_number;
+	uint32_t kernel_sector_number_SD;
 	int kernel_size_int;//int? or uint8_t?
 	//uint8_t kernel_size_u8t;	
 	const char c_bootblock[10] = "bootblock";
@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
 
 	write_bootblock(image, bootblock, bootblock_head);
 	write_kernel(image, kernel, kernel_head, kernel_sector_number, kernel_sector_number_SD);
-	record_kernel_sectors(image, (uint8_t)kernel_sector_number);
+	record_kernel_sectors(image, kernel_sector_number);
 	
 	if(argc > 1)
 	{

@@ -17,7 +17,7 @@ main:
 
 	# read the size of kernel from the first sector
 	lw	$t3, (kernel)
-	lb	$t4, -3($t3)
+	lbu	$t4, -3($t3)
 	li	$t5, 0x200
 
 	lw	$a0, (kernel)

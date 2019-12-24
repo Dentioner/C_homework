@@ -31,6 +31,10 @@
 #include "type.h"
 
 void memcpy(uint8_t *dest, uint8_t *src, uint32_t len);
+void os_memcpy(char *dest, char *src, uint32_t len);
+
+int my_strncmp(char a[], char b[], int length);
+
 
 void memset(void *dest, uint8_t val, uint32_t len);
 

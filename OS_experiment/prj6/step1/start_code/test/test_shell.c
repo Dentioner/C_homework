@@ -31,12 +31,14 @@
 #include "syscall.h"
 #include "sched.h"
 #include "string.h"
-#include "./test_fs/test_fs.h"
+#include "fs.h"
 
-#define command_prompt "> root@UCAS_OS: "
+#define command_prompt "> root@UCAS_OS"
+#define command_end "$ "
 #define blank "                                                                        "
 
 
+char path_display[MAX_LENGTH_OF_CMD];
 
 
 static void disable_interrupt()
@@ -155,38 +157,6 @@ int get_filename(int start_index)
 }
 
 
-int my_strncmp(char a[], char b[], int length)
-{
-    int i;
-    for(i = 0; i < length; i++)
-    {
-        if(a[i] == '\0' && b[i] != '\0')
-        {
-            /*printf("out of range. Error.\n");
-            while(1);*/
-            return -1;
-        }
-        else if(a[i] != '\0' && b[i] == '\0')
-        {
-            return 1;
-        }
-        else if(a[i] == '\0' && b[i] == '\0')
-        {
-            return 0;
-        }
-        
-        
-        
-        if(a[i] > b[i])
-            return 1;
-        else if(a[i] < b[i])
-            return -1;
-        
-        
-    }
-
-    return 0;
-}
 
 int my_ctoi(char *start)
 {
@@ -262,6 +232,21 @@ unsigned long my_ctoi_hex(const char* src, int *index)
 		}
 	}
 	return s;
+}
+
+
+char * os_strcpy(char *dest, char *src)
+{
+	char *tmp = dest;
+
+	while (*src)
+	{
+		*dest++ = *src++;
+	}
+
+	*dest = '\0';
+
+	return dest;
 }
 
 void do_cmd()
@@ -448,12 +433,48 @@ void do_cmd()
     }
 }
 
+uint32_t refill_print_path()
+{
+    uint32_t tmp_len = path_depth;
+    char * tmp_pointer = path_display;
+    int index1 = 0;
+    uint32_t index2, index3;
+    
+    while(index1 < tmp_len)
+    {
+        tmp_pointer = os_strcpy((char *)tmp_pointer, (char *)(&(current_path[index1])));
+        *tmp_pointer++ = '/';
+
+        index1++;
+    }
+
+    *tmp_pointer = '\0';
+
+    //index2 = 0;
+    for(index2 = 0;index2 <  MAX_LENGTH_OF_CMD; index2++)
+    {
+        if((path_display[index2] == '\0') || (path_display[index2] == '\r') || (path_display[index2] == '\n'))
+        {
+            break;
+        }
+    }
+
+
+    return index2;
+
+}
 
 void test_shell()
 {
     int index1, index2;
+    int print_path_len;
+    //os_strcpy(&(current_path[0]), "~");
+    path_depth = 0;
+    current_dir_ino = 0;
+    print_path_len = refill_print_path();
+
     current_line = SHELL_START;
-    current_start_point = sizeof(command_prompt); 
+    current_start_point = sizeof(command_prompt) + print_path_len + sizeof(command_end); 
 
 
     /*disable_interrupt();
@@ -472,6 +493,9 @@ void test_shell()
     
     sys_move_cursor(1, SHELL_START);
     printf(command_prompt);
+    printf(path_display);
+    printf(command_end);
+
     sys_move_cursor(current_start_point, current_line); 
     printf(blank);
     
@@ -577,7 +601,10 @@ void test_shell()
             
             enable_interrupt();*/
             sys_move_cursor(1, current_line);             
-            printf(command_prompt);            
+            printf(command_prompt);
+            printf(path_display);
+            printf(command_end);            
+
             sys_move_cursor(current_start_point, current_line); 
             printf(blank);
         }

@@ -17,6 +17,48 @@ void memcpy(uint8_t *dest, uint8_t *src, uint32_t len)
 	}
 }
 
+void os_memcpy(char *dest, char *src, uint32_t len)
+{
+	for (; len != 0; len--)
+	{
+		*dest++ = *src++;
+	}
+}
+
+int my_strncmp(char a[], char b[], int length)
+{
+    int i;
+    for(i = 0; i < length; i++)
+    {
+        if(a[i] == '\0' && b[i] != '\0')
+        {
+            /*printf("out of range. Error.\n");
+            while(1);*/
+            return -1;
+        }
+        else if(a[i] != '\0' && b[i] == '\0')
+        {
+            return 1;
+        }
+        else if(a[i] == '\0' && b[i] == '\0')
+        {
+            return 0;
+        }
+        
+        
+        
+        if(a[i] > b[i])
+            return 1;
+        else if(a[i] < b[i])
+            return -1;
+        
+        
+    }
+
+    return 0;
+}
+
+
 void memset(void *dest, uint8_t val, uint32_t len)
 {
 	uint8_t *dst = (uint8_t *)dest;

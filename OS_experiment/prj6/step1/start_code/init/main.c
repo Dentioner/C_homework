@@ -37,7 +37,8 @@
 //#include "mm.h"
 #include "mac.h"
 
-#include "../test/test_fs/test_fs.h"
+
+#include "fs.h"
 
 static void init_memory();
 
