@@ -66,6 +66,11 @@ enum{
     DIRECTORY_TYPE,
 };
 
+enum{
+    BITMAP_ADD,
+    BITMAP_DEL,
+};
+
 typedef struct directory_entry
 {
     char file_name[FILENAME_LENGTH];

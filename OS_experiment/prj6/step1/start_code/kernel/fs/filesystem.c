@@ -13,6 +13,32 @@ char read_block_buffer[BLOCK_SIZE];
 inode_t tmp_inode_array[INODEBLOCK_NUM][INODE_NUM_PER_BLOCK];
 dentry_t tmp_dentry_arr[DENTRY_NUM_PER_BLOCK];
 
+void load_inode_array(uint32_t inode_offset)
+{
+    uint32_t index1;
+    for (index1 = 0; index1 < INODEBLOCK_NUM; index1++)
+    {
+        sdread(read_block_buffer, (START_ADDRESS_SD +(inode_offset + index1)*BLOCK_SIZE), BLOCK_SIZE);
+        os_memcpy((void *)(&(tmp_inode_array[index1])), (void *)read_block_buffer, (INODE_NUM_PER_BLOCK*sizeof(inode_t)));
+    }
+}
+
+
+void init_inode(inode_t * p)
+{
+    int index3 = 0;
+    p->type = 0;
+    p->last_update_time = 0;
+    p->volumn = 0;
+    p->parent_ino = 0;
+    p->indirect_blocks = 0;
+    p->double_indirect_blocks = 0;
+    for (index3 = 0; index3 < DIRECT_LINK_NUM; index3 ++)    
+    {
+        p->direct_blocks[index3] = 0;
+    }
+}
+
 void write_bitmap(uint32_t* bitmap_array, uint32_t arr_len, uint32_t num)
 {
     uint32_t div, mod, tmp;
@@ -36,19 +62,28 @@ void write_bitmap(uint32_t* bitmap_array, uint32_t arr_len, uint32_t num)
     tmp = 0x0;
     for (index2 = 0; index2 < mod; index2++)
     {
-        tmp = tmp << 2;
+        tmp = tmp << 1;
         tmp += 0x1;
     }    
     bitmap_array[index1] = tmp;
 }
 
-void refresh_bitmap(uint32_t * bitmap_array, uint32_t bit_no)
+
+void refresh_bitmap(uint32_t * bitmap_array, uint32_t bit_no, int type)
 {
-    uint32_t index1, offset, t1;
+    uint32_t index1, offset, t1, t2;
     index1 = bit_no / 32;
     offset = bit_no % 32;
     t1 = 1<<offset;
-    bitmap_array[index1] |= t1;    
+    if (type == BITMAP_ADD)
+    {
+            bitmap_array[index1] |= t1;    
+    }
+    else
+    {
+        t2 = ~t1;
+        bitmap_array[index1] &= t2;
+    }
 }
 
 uint32_t get_new_no(uint32_t base, uint32_t bit)
@@ -298,7 +333,8 @@ void do_mkdir(uint32_t arg_filename)
 {
     //int index1;
     char *my_filename = (char *)arg_filename;
-    inode_t tmp_inode1, tmp_parent_inode;
+    inode_t tmp_inode1;
+    inode_t *tmp_parent_inode_p;
     inode_t * tmp_inode2_p;
     spblk_t tmp_spblk;
     uint32_t inode_num_all = INODE_NUM;
@@ -312,6 +348,7 @@ void do_mkdir(uint32_t arg_filename)
     void * tmp_block_bitmap_p;
     char parent_name[FILENAME_LENGTH];
     void * tmp_pointer1;
+    uint32_t index3;
 
 
     current_line+=2;
@@ -322,11 +359,13 @@ void do_mkdir(uint32_t arg_filename)
     os_memcpy((void *)&tmp_spblk, (void *)read_block_buffer, sizeof(spblk_t));
     if (tmp_spblk.magic_num != MAGIC_NUM)
     {
-        printk("Error! File Symtem doesn't exist.\n");current_line++;
+        printk("Error! File Symtem doesn't exist.\n");//current_line++;
         return;
     }
 
     // load inode array
+    load_inode_array(tmp_spblk.inode_offset);
+
     for (index1 = 0; index1 < INODEBLOCK_NUM; index1++)
     {
         sdread(read_block_buffer, (START_ADDRESS_SD +( tmp_spblk.inode_offset + index1)*BLOCK_SIZE), BLOCK_SIZE);
@@ -340,40 +379,27 @@ void do_mkdir(uint32_t arg_filename)
 
     //sdread(read_block_buffer, (tmp_spblk.inode_offset + inode_in_which_block)*BLOCK_SIZE, BLOCK_SIZE);
     //os_memcpy((void *)tmp_inode_array, (void *)read_block_buffer, (INODE_NUM_PER_BLOCK*sizeof(inode_t)));
-    tmp_inode1 = tmp_inode_array[inode_in_which_block][inode_in_block_index];
-    tmp_parent_ino = tmp_inode1.parent_ino;
-    if (tmp_inode1.type == FILE_TYPE)
-    {
-        printk("ERROR, type is file.");
-        while(1);
-    }
-
-    // get parent inode
-    inode_in_which_block = tmp_parent_ino / INODE_NUM_PER_BLOCK;
-    inode_in_block_index = tmp_parent_ino % INODE_NUM_PER_BLOCK;
-    
-    //sdread(read_block_buffer, (tmp_spblk.inode_offset + inode_in_which_block)*BLOCK_SIZE, BLOCK_SIZE);
-    //os_memcpy((void *)tmp_inode_array, (void *)read_block_buffer, (INODE_NUM_PER_BLOCK*sizeof(inode_t)));
-    tmp_parent_inode = tmp_inode_array[inode_in_which_block][inode_in_block_index];
-    if (tmp_parent_inode.type == FILE_TYPE)
+    tmp_parent_inode_p = &tmp_inode_array[inode_in_which_block][inode_in_block_index];
+    //tmp_parent_ino = tmp_inode1.parent_ino;
+    if (tmp_parent_inode_p->type == FILE_TYPE)
     {
         printk("ERROR, partent type is file.");
         while(1);
     }
 
     // check if the new filename exists
-    sdread(read_block_buffer, (START_ADDRESS_SD + (tmp_parent_inode.direct_blocks[0])*BLOCK_SIZE), BLOCK_SIZE);
+    sdread(read_block_buffer, (START_ADDRESS_SD + (tmp_parent_inode_p->direct_blocks[0])*BLOCK_SIZE), BLOCK_SIZE);
     os_memcpy((void *)tmp_dentry_arr, (void *)read_block_buffer, (DENTRY_NUM_PER_BLOCK*sizeof(dentry_t)));
     
     
-    if(tmp_parent_inode.volumn != 0)
+    if(tmp_parent_inode_p->volumn > 2)
     {
-        for (index2 = 0; index2 < tmp_parent_inode.volumn; index2 ++)
+        for (index2 = 0; index2 < tmp_parent_inode_p->volumn; index2 ++)
         {
             if((tmp_dentry_arr[index2].type == DIRECTORY_TYPE) && (!(my_strncmp(tmp_dentry_arr[index2].file_name, my_filename, FILENAME_LENGTH))))
             { // 两个条件：1.是目录；2.目录出现同名
                 // 如果仅仅是同名，但是是文件，此时还是可以创建同名的目录的
-                printk("directory has already established.\n");current_line++;
+                printk("directory has already established.\n");//current_line++;
                 return;
             }
         }
@@ -397,10 +423,15 @@ void do_mkdir(uint32_t arg_filename)
         while(1);
     }
 
-    new_ino = get_new_no((index2 - 1), inode_bitmap[index2]);
+    new_ino = get_new_no(index2, inode_bitmap[index2]);
     inode_in_which_block = new_ino / INODE_NUM_PER_BLOCK;
     inode_in_block_index = new_ino % INODE_NUM_PER_BLOCK;
     tmp_inode2_p = &tmp_inode_array[inode_in_which_block][inode_in_block_index];
+
+
+    tmp_parent_ino = tmp_dentry_arr[0].ino; // 记下父目录的ino，否则会丢失此信息
+    os_memcpy(parent_name, tmp_dentry_arr[0].file_name, sizeof(tmp_dentry_arr[0].file_name)); // 记录下父目录的名字
+
 
     // initialize new inode
     tmp_inode2_p->type = DIRECTORY_TYPE;
@@ -421,7 +452,7 @@ void do_mkdir(uint32_t arg_filename)
     tmp_block_bitmap_p = (void *)block_bitmap;
     for (index2 = 0; index2 < BLOCK_NUM_OF_BLOCK_BITMAP; index2++)
     {
-        sdread(read_block_buffer, (START_ADDRESS_SD + (tmp_spblk.map_offset * BLOCK_SIZE)), BLOCK_SIZE);
+        sdread(read_block_buffer, (START_ADDRESS_SD + (tmp_spblk.map_offset + index2) * BLOCK_SIZE), BLOCK_SIZE);
         os_memcpy((void *)tmp_block_bitmap_p, read_block_buffer, BLOCK_SIZE);
         tmp_block_bitmap_p += BLOCK_SIZE;
     }
@@ -439,15 +470,15 @@ void do_mkdir(uint32_t arg_filename)
         while(1);
     }
 
-    new_blk_num = get_new_no((index2 - 1), block_bitmap[index2]);
+    new_blk_num = get_new_no(index2, block_bitmap[index2]);
 
     tmp_inode2_p->direct_blocks[0] = new_blk_num;
 
 
 
     // update block bitmap/inode bitmap/inode array/superblock/parent dentry array/self dentry array ...
-    refresh_bitmap(block_bitmap, new_blk_num);
-    refresh_bitmap(inode_bitmap, new_ino);
+    refresh_bitmap(block_bitmap, new_blk_num, BITMAP_ADD);
+    refresh_bitmap(inode_bitmap, new_ino, BITMAP_ADD);
     
     tmp_pointer1 = (void *)block_bitmap;
     for(index2 = 0; index2 < BLOCK_NUM_OF_BLOCK_BITMAP; index2++)
@@ -463,6 +494,8 @@ void do_mkdir(uint32_t arg_filename)
 
 
     //inode array不必更新，因为之前的初始化新inode操作都是指针上进行的，直接指向的inode array对应的成员
+    tmp_parent_inode_p->volumn++;
+
     for (index2 = 0; index2 < INODEBLOCK_NUM; index2++)
     {
         os_memcpy((void *)read_block_buffer, (void *)(&(tmp_inode_array[index2])), (INODE_NUM_PER_BLOCK*sizeof(inode_t)));
@@ -476,7 +509,7 @@ void do_mkdir(uint32_t arg_filename)
     sdwrite(read_block_buffer, START_ADDRESS_SD, BLOCK_SIZE);
 
     // 更新父目录
-    sdread(read_block_buffer, (START_ADDRESS_SD + (tmp_parent_inode.direct_blocks[0])*BLOCK_SIZE), BLOCK_SIZE);
+    sdread(read_block_buffer, (START_ADDRESS_SD + (tmp_parent_inode_p->direct_blocks[0])*BLOCK_SIZE), BLOCK_SIZE);
     os_memcpy((void *)tmp_dentry_arr, (void *)read_block_buffer, (DENTRY_NUM_PER_BLOCK*sizeof(dentry_t)));
     
     for(index2 = 0; index2 < DENTRY_NUM_PER_BLOCK; index2++)
@@ -500,17 +533,19 @@ void do_mkdir(uint32_t arg_filename)
     tmp_dentry_arr[index2].type = DIRECTORY_TYPE;
     os_memcpy((char *)&(tmp_dentry_arr[index2].file_name), my_filename, sizeof(my_filename));
 
-    tmp_parent_ino = tmp_dentry_arr[0].ino; // 记下父目录的ino，否则会丢失此信息
-    os_memcpy(parent_name, tmp_dentry_arr[0].file_name, sizeof(tmp_dentry_arr[0].file_name)); // 记录下父目录的名字
-
+    
     os_memcpy((void *)read_block_buffer, (void *)tmp_dentry_arr, sizeof(tmp_dentry_arr));
-    sdwrite(read_block_buffer, (START_ADDRESS_SD + (BLOCK_SIZE * tmp_parent_inode.direct_blocks[0])), BLOCK_SIZE);
+    sdwrite(read_block_buffer, (START_ADDRESS_SD + (BLOCK_SIZE * tmp_parent_inode_p->direct_blocks[0])), BLOCK_SIZE);
 
     // 初始化新的目录
     for(index2 = 0; index2 < DENTRY_NUM_PER_BLOCK; index2++)
     {
         tmp_dentry_arr[index2].ino = 0;
         tmp_dentry_arr[index2].type = 0;
+        for (index3 = 0; index3< FILENAME_LENGTH; index3++)
+        {
+            tmp_dentry_arr[index2].file_name[index3] = '\0';
+        }
     }
     tmp_dentry_arr[0].ino = new_ino; // '.' ==> root
     tmp_dentry_arr[1].ino = tmp_parent_ino; // '..' ==> parent
@@ -523,34 +558,177 @@ void do_mkdir(uint32_t arg_filename)
     sdwrite(read_block_buffer, (START_ADDRESS_SD + (BLOCK_SIZE * (tmp_inode2_p->direct_blocks[0]))), BLOCK_SIZE);
     
 
-    printk("[FS] mkdir succeed!\n");current_line++;
+    printk("[FS] mkdir succeed!\n");//current_line++;
 
 }
 
 void do_rmdir(uint32_t arg_filename)
 {
-    int index1;
+    uint32_t index1, index2, index3;
     char *my_filename = (char *)arg_filename;
     current_line+=2;
     vt100_move_cursor(1, current_line);
+    spblk_t tmp_spblk;
+    uint32_t inode_in_which_block, inode_in_block_index;
+    inode_t *tmp_parent_inode_p, *tmp_inode1_p;
+    uint32_t delete_ino, delete_blk_num;
+    void * tmp_block_bitmap_p;
+    void * tmp_pointer1;
 
 
 
-
-
-    printk("in rmdir. filename:\n");current_line++;
-    for(index1 = 0; (index1 < FILENAME_LENGTH) && (my_filename[index1] != '\0'); index1++)
+    // check fs
+    sdread(read_block_buffer, START_ADDRESS_SD, BLOCK_SIZE);
+    os_memcpy((void *)&tmp_spblk, (void *)read_block_buffer, sizeof(spblk_t));
+    if (tmp_spblk.magic_num != MAGIC_NUM)
     {
-        printk("%c", my_filename[index1]);
+        printk("Error! File Symtem doesn't exist.\n");//current_line++;
+        return;
     }
+
+    // load inode array
+    for (index1 = 0; index1 < INODEBLOCK_NUM; index1++)
+    {
+        sdread(read_block_buffer, (START_ADDRESS_SD +( tmp_spblk.inode_offset + index1)*BLOCK_SIZE), BLOCK_SIZE);
+        os_memcpy((void *)(&(tmp_inode_array[index1])), (void *)read_block_buffer, (INODE_NUM_PER_BLOCK*sizeof(inode_t)));
+    }
+
+    // get current path inode    
+    inode_in_which_block = current_dir_ino / INODE_NUM_PER_BLOCK;
+    inode_in_block_index = current_dir_ino % INODE_NUM_PER_BLOCK;
+    
+    tmp_parent_inode_p = &tmp_inode_array[inode_in_which_block][inode_in_block_index];
+    //tmp_parent_ino = tmp_inode1.parent_ino;
+    if (tmp_parent_inode_p->type == FILE_TYPE)
+    {
+        printk("ERROR, partent type is file.");
+        while(1);
+    }
+
+    // check if the filename exists
+    sdread(read_block_buffer, (START_ADDRESS_SD + (tmp_parent_inode_p->direct_blocks[0])*BLOCK_SIZE), BLOCK_SIZE);
+    os_memcpy((void *)tmp_dentry_arr, (void *)read_block_buffer, (DENTRY_NUM_PER_BLOCK*sizeof(dentry_t)));
+    
+    
+    for (index2 = 0; index2 < tmp_parent_inode_p->volumn; index2 ++)
+    {
+        if((tmp_dentry_arr[index2].type == DIRECTORY_TYPE) && (!(my_strncmp(tmp_dentry_arr[index2].file_name, my_filename, FILENAME_LENGTH))))
+        { // 两个条件：1.是目录；2.目录出现同名
+            // 如果仅仅是同名，但是是文件，此时不应删除这个同名的文件
+            break;
+        }
+    }
+    
+    if (index2 == tmp_parent_inode_p->volumn)
+    {
+        printk("error. directory doesn't exist.\n");
+        return;
+    }
+
+        
+    // get the information of the deleted inode
+    // but do not init it here
+    delete_ino = tmp_dentry_arr[index2].ino;
+    inode_in_which_block = delete_ino / INODE_NUM_PER_BLOCK;
+    inode_in_block_index = delete_ino % INODE_NUM_PER_BLOCK;
+    tmp_inode1_p = &tmp_inode_array[inode_in_which_block][inode_in_block_index];
+    delete_blk_num = tmp_inode1_p->direct_blocks[0]; // 先记住，要不然等下就没了
+
+    // 在此直接更新该列表，后面就不用再重复做了
+    tmp_dentry_arr[index2].ino = 0;
+    tmp_dentry_arr[index2].type = 0;
+    for(index3 = 0; index3 < FILENAME_LENGTH; index3++)
+    {
+        tmp_dentry_arr[index2].file_name[index3] = '\0';
+    }
+    os_memcpy((void *)read_block_buffer, (void *)tmp_dentry_arr, sizeof(tmp_dentry_arr));
+    sdwrite(read_block_buffer, (START_ADDRESS_SD + (BLOCK_SIZE * tmp_parent_inode_p->direct_blocks[0])), BLOCK_SIZE);
+
+
+
+
+    
+    // load bitmap
+    tmp_block_bitmap_p = (void *)block_bitmap;
+    for (index2 = 0; index2 < BLOCK_NUM_OF_BLOCK_BITMAP; index2++)
+    {
+        sdread(read_block_buffer, (START_ADDRESS_SD + (tmp_spblk.map_offset + index2) * BLOCK_SIZE), BLOCK_SIZE);
+        os_memcpy((void *)tmp_block_bitmap_p, read_block_buffer, BLOCK_SIZE);
+        tmp_block_bitmap_p += BLOCK_SIZE;
+    }
+
+    sdread(read_block_buffer, (START_ADDRESS_SD + (tmp_spblk.inode_map_offset * BLOCK_SIZE)), BLOCK_SIZE);
+    os_memcpy((void *)inode_bitmap, read_block_buffer, sizeof(inode_bitmap));
+
+    // update block bitmap/inode bitmap/inode array/superblock/parent dentry array/self dentry array ...
+    refresh_bitmap(block_bitmap, tmp_inode1_p->direct_blocks[0], BITMAP_DEL);
+    refresh_bitmap(inode_bitmap, delete_ino, BITMAP_DEL);
+    tmp_pointer1 = (void *)block_bitmap;
+    for(index2 = 0; index2 < BLOCK_NUM_OF_BLOCK_BITMAP; index2++)
+    {
+        os_memcpy((void *)read_block_buffer, tmp_pointer1, BLOCK_SIZE);
+        sdwrite(read_block_buffer, (START_ADDRESS_SD + (tmp_spblk.map_offset + index2) * BLOCK_SIZE), BLOCK_SIZE);
+        tmp_pointer1 += BLOCK_SIZE;
+    }
+
+    os_memcpy(read_block_buffer, (char *)inode_bitmap, BLOCK_SIZE);
+    sdwrite(read_block_buffer, (START_ADDRESS_SD + tmp_spblk.inode_map_offset * BLOCK_SIZE), BLOCK_SIZE);        
+    
+    // 更新inode 数组
+    
+    tmp_parent_inode_p->volumn--;
+    init_inode(tmp_inode1_p);
+    for (index2 = 0; index2 < INODEBLOCK_NUM; index2++)
+    {
+        os_memcpy((void *)read_block_buffer, (void *)(&(tmp_inode_array[index2])), (INODE_NUM_PER_BLOCK*sizeof(inode_t)));
+        sdwrite(read_block_buffer, (START_ADDRESS_SD +( tmp_spblk.inode_offset + index2)*BLOCK_SIZE), BLOCK_SIZE);    
+    }
+
+    // 更新超级块
+    tmp_spblk.used_blk_num--;
+    tmp_spblk.used_inode_num--;
+    os_memcpy((void *)read_block_buffer, (void *)&tmp_spblk, sizeof(spblk_t));    
+    sdwrite(read_block_buffer, START_ADDRESS_SD, BLOCK_SIZE);
+
+    
+
+    // 删除（初始化）自己的目录
+
+    for(index2 = 0; index2 < DENTRY_NUM_PER_BLOCK; index2++)
+    {
+        tmp_dentry_arr[index2].ino = 0;
+        tmp_dentry_arr[index2].type = 0;
+        for (index3 = 0; index3< FILENAME_LENGTH; index3++)
+        {
+            tmp_dentry_arr[index2].file_name[index3] = '\0';
+        }
+    }
+    os_memcpy((void *)read_block_buffer, (void *)tmp_dentry_arr, sizeof(tmp_dentry_arr));
+    sdwrite(read_block_buffer, (START_ADDRESS_SD + (BLOCK_SIZE * delete_blk_num)), BLOCK_SIZE);
+
+
+    printk("[FS] rmdir succeed!\n");//current_line++;
 }
 
 void do_cd(uint32_t arg_filename)
 {
     int index1;
     char *my_filename = (char *)arg_filename;
+    spblk_t tmp_spblk;
+    
+    
     current_line+=2;
     vt100_move_cursor(1, current_line);
+    
+    // check fs
+    sdread(read_block_buffer, START_ADDRESS_SD, BLOCK_SIZE);
+    os_memcpy((void *)&tmp_spblk, (void *)read_block_buffer, sizeof(spblk_t));
+    if (tmp_spblk.magic_num != MAGIC_NUM)
+    {
+        printk("Error! File Symtem doesn't exist.\n");//current_line++;
+        return;
+    }
+
 
 
 
