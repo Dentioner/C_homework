@@ -12,6 +12,33 @@ char read_block_buffer[BLOCK_SIZE];
 
 inode_t tmp_inode_array[INODEBLOCK_NUM][INODE_NUM_PER_BLOCK];
 dentry_t tmp_dentry_arr[DENTRY_NUM_PER_BLOCK];
+char tmp_path[MAX_DIRECTORY_DEPTH][FILENAME_LENGTH];
+uint32_t tmp_path_depth;        // depth of tmp path
+char tmp_abs_path[MAX_DIRECTORY_DEPTH][FILENAME_LENGTH];
+uint32_t tmp_abs_path_depth;
+
+
+void load_dentry_arr(uint32_t block_num)
+{
+    // check if the new filename exists
+    sdread(read_block_buffer, (START_ADDRESS_SD + (block_num)*BLOCK_SIZE), BLOCK_SIZE);
+    os_memcpy((void *)tmp_dentry_arr, (void *)read_block_buffer, (DENTRY_NUM_PER_BLOCK*sizeof(dentry_t)));
+}
+
+
+inode_t * get_inode(uint32_t ino)
+{
+    inode_t *ret_inode;
+    uint32_t inode_in_which_block, inode_in_block_index;
+    inode_in_which_block = ino / INODE_NUM_PER_BLOCK;
+    inode_in_block_index = ino % INODE_NUM_PER_BLOCK;
+
+    //sdread(read_block_buffer, (tmp_spblk.inode_offset + inode_in_which_block)*BLOCK_SIZE, BLOCK_SIZE);
+    //os_memcpy((void *)tmp_inode_array, (void *)read_block_buffer, (INODE_NUM_PER_BLOCK*sizeof(inode_t)));
+    ret_inode = &tmp_inode_array[inode_in_which_block][inode_in_block_index];
+    return ret_inode;
+}
+
 
 void load_inode_array(uint32_t inode_offset)
 {
@@ -280,6 +307,10 @@ void do_mkfs()
         tmp_dentry_arr[1].ino = 0; // '..' ==> root, too
         os_memcpy(tmp_dentry_arr[0].file_name, "~", sizeof("~"));
         os_memcpy(tmp_dentry_arr[1].file_name, "~", sizeof("~"));
+        
+        //os_memcpy(tmp_dentry_arr[0].file_name, ".", sizeof("."));
+        //os_memcpy(tmp_dentry_arr[1].file_name, "..", sizeof(".."));
+        
         tmp_dentry_arr[0].type = DIRECTORY_TYPE;
         tmp_dentry_arr[1].type = DIRECTORY_TYPE;
 
@@ -290,9 +321,9 @@ void do_mkfs()
         
 
         // initial some global var
-        path_depth = 0;
+        path_depth = 1;
         current_dir_ino = 0;
-        
+        os_memcpy((&current_path[0]), "~", sizeof("~"));
     }
 
     
@@ -366,21 +397,9 @@ void do_mkdir(uint32_t arg_filename)
     // load inode array
     load_inode_array(tmp_spblk.inode_offset);
 
-    for (index1 = 0; index1 < INODEBLOCK_NUM; index1++)
-    {
-        sdread(read_block_buffer, (START_ADDRESS_SD +( tmp_spblk.inode_offset + index1)*BLOCK_SIZE), BLOCK_SIZE);
-        os_memcpy((void *)(&(tmp_inode_array[index1])), (void *)read_block_buffer, (INODE_NUM_PER_BLOCK*sizeof(inode_t)));
-    }
 
-
-    // get current path inode    
-    inode_in_which_block = current_dir_ino / INODE_NUM_PER_BLOCK;
-    inode_in_block_index = current_dir_ino % INODE_NUM_PER_BLOCK;
-
-    //sdread(read_block_buffer, (tmp_spblk.inode_offset + inode_in_which_block)*BLOCK_SIZE, BLOCK_SIZE);
-    //os_memcpy((void *)tmp_inode_array, (void *)read_block_buffer, (INODE_NUM_PER_BLOCK*sizeof(inode_t)));
-    tmp_parent_inode_p = &tmp_inode_array[inode_in_which_block][inode_in_block_index];
-    //tmp_parent_ino = tmp_inode1.parent_ino;
+    // get current path inode
+    tmp_parent_inode_p = get_inode(current_dir_ino);
     if (tmp_parent_inode_p->type == FILE_TYPE)
     {
         printk("ERROR, partent type is file.");
@@ -388,9 +407,7 @@ void do_mkdir(uint32_t arg_filename)
     }
 
     // check if the new filename exists
-    sdread(read_block_buffer, (START_ADDRESS_SD + (tmp_parent_inode_p->direct_blocks[0])*BLOCK_SIZE), BLOCK_SIZE);
-    os_memcpy((void *)tmp_dentry_arr, (void *)read_block_buffer, (DENTRY_NUM_PER_BLOCK*sizeof(dentry_t)));
-    
+    load_dentry_arr(tmp_parent_inode_p->direct_blocks[0]);
     
     if(tmp_parent_inode_p->volumn > 2)
     {
@@ -423,12 +440,8 @@ void do_mkdir(uint32_t arg_filename)
         while(1);
     }
 
-    new_ino = get_new_no(index2, inode_bitmap[index2]);
-    inode_in_which_block = new_ino / INODE_NUM_PER_BLOCK;
-    inode_in_block_index = new_ino % INODE_NUM_PER_BLOCK;
-    tmp_inode2_p = &tmp_inode_array[inode_in_which_block][inode_in_block_index];
-
-
+    new_ino = get_new_no(index2, inode_bitmap[index2]);    
+    tmp_inode2_p = get_inode(new_ino);
     tmp_parent_ino = tmp_dentry_arr[0].ino; // 记下父目录的ino，否则会丢失此信息
     os_memcpy(parent_name, tmp_dentry_arr[0].file_name, sizeof(tmp_dentry_arr[0].file_name)); // 记录下父目录的名字
 
@@ -509,8 +522,7 @@ void do_mkdir(uint32_t arg_filename)
     sdwrite(read_block_buffer, START_ADDRESS_SD, BLOCK_SIZE);
 
     // 更新父目录
-    sdread(read_block_buffer, (START_ADDRESS_SD + (tmp_parent_inode_p->direct_blocks[0])*BLOCK_SIZE), BLOCK_SIZE);
-    os_memcpy((void *)tmp_dentry_arr, (void *)read_block_buffer, (DENTRY_NUM_PER_BLOCK*sizeof(dentry_t)));
+    load_dentry_arr(tmp_parent_inode_p->direct_blocks[0]);
     
     for(index2 = 0; index2 < DENTRY_NUM_PER_BLOCK; index2++)
     {
@@ -587,18 +599,10 @@ void do_rmdir(uint32_t arg_filename)
     }
 
     // load inode array
-    for (index1 = 0; index1 < INODEBLOCK_NUM; index1++)
-    {
-        sdread(read_block_buffer, (START_ADDRESS_SD +( tmp_spblk.inode_offset + index1)*BLOCK_SIZE), BLOCK_SIZE);
-        os_memcpy((void *)(&(tmp_inode_array[index1])), (void *)read_block_buffer, (INODE_NUM_PER_BLOCK*sizeof(inode_t)));
-    }
+    load_inode_array(tmp_spblk.inode_offset);
 
-    // get current path inode    
-    inode_in_which_block = current_dir_ino / INODE_NUM_PER_BLOCK;
-    inode_in_block_index = current_dir_ino % INODE_NUM_PER_BLOCK;
-    
-    tmp_parent_inode_p = &tmp_inode_array[inode_in_which_block][inode_in_block_index];
-    //tmp_parent_ino = tmp_inode1.parent_ino;
+    // get current path inode
+    tmp_parent_inode_p = get_inode(current_dir_ino);    
     if (tmp_parent_inode_p->type == FILE_TYPE)
     {
         printk("ERROR, partent type is file.");
@@ -606,9 +610,7 @@ void do_rmdir(uint32_t arg_filename)
     }
 
     // check if the filename exists
-    sdread(read_block_buffer, (START_ADDRESS_SD + (tmp_parent_inode_p->direct_blocks[0])*BLOCK_SIZE), BLOCK_SIZE);
-    os_memcpy((void *)tmp_dentry_arr, (void *)read_block_buffer, (DENTRY_NUM_PER_BLOCK*sizeof(dentry_t)));
-    
+    load_dentry_arr(tmp_parent_inode_p->direct_blocks[0]);
     
     for (index2 = 0; index2 < tmp_parent_inode_p->volumn; index2 ++)
     {
@@ -629,9 +631,7 @@ void do_rmdir(uint32_t arg_filename)
     // get the information of the deleted inode
     // but do not init it here
     delete_ino = tmp_dentry_arr[index2].ino;
-    inode_in_which_block = delete_ino / INODE_NUM_PER_BLOCK;
-    inode_in_block_index = delete_ino % INODE_NUM_PER_BLOCK;
-    tmp_inode1_p = &tmp_inode_array[inode_in_which_block][inode_in_block_index];
+    tmp_inode1_p = get_inode(delete_ino);
     delete_blk_num = tmp_inode1_p->direct_blocks[0]; // 先记住，要不然等下就没了
 
     // 在此直接更新该列表，后面就不用再重复做了
@@ -712,10 +712,13 @@ void do_rmdir(uint32_t arg_filename)
 
 void do_cd(uint32_t arg_filename)
 {
-    int index1;
+    uint32_t index1, index2, index3;
     char *my_filename = (char *)arg_filename;
     spblk_t tmp_spblk;
-    
+    uint32_t inode_in_which_block, inode_in_block_index;
+    inode_t *tmp_parent_inode_p, *target_inode_p, *tmp_inode1_p, *tmp_inode2_p;
+    uint32_t target_ino, start_ino;
+    char * c_pointer1;
     
     current_line+=2;
     vt100_move_cursor(1, current_line);
@@ -729,16 +732,130 @@ void do_cd(uint32_t arg_filename)
         return;
     }
 
+    // load inode array
+    load_inode_array(tmp_spblk.inode_offset);
 
-
-
-
-
-    printk("in cd. filename:\n");current_line++;
-    for(index1 = 0; (index1 < FILENAME_LENGTH) && (my_filename[index1] != '\0'); index1++)
+    // get current path inode    
+    tmp_parent_inode_p = get_inode(current_dir_ino);
+    if (tmp_parent_inode_p->type == FILE_TYPE)
     {
-        printk("%c", my_filename[index1]);
+        printk("ERROR, partent type is file.");
+        while(1);
     }
+
+    // load directory array
+    load_dentry_arr(tmp_parent_inode_p->direct_blocks[0]);
+
+    // copy abs tmp path
+    for (index1 = 0; index1 < MAX_DIRECTORY_DEPTH; index1++)
+    {
+        for(index2 = 0; index2 < FILENAME_LENGTH; index2++)
+        {
+            tmp_abs_path[index1][index2] = current_path[index1][index2];
+        }
+    }
+    tmp_abs_path_depth = path_depth;
+
+
+    // split the filename
+    // but do not recognize '.' & '..' now
+    // just fill them in the tmp_path[MAX_DIRECTORY_DEPTH][FILENAME_LENGTH];
+    c_pointer1 = my_filename;
+    tmp_path_depth = 0;
+    index1 = 0;
+    while((*c_pointer1 != '\0') && (*c_pointer1 != '\r') && (*c_pointer1 != '\n'))
+    {
+        if(*c_pointer1 == '/')
+        {
+            tmp_path_depth++;
+            index1 = 0;
+        }
+        else
+        {
+            tmp_path[tmp_path_depth][index1] = *c_pointer1;
+            index1++;
+        }
+        c_pointer1++;        
+    }
+    tmp_path_depth++;
+
+    
+    
+    // recognize the path
+    tmp_inode2_p = tmp_parent_inode_p;
+
+    for(index1 = 0; index1 < tmp_path_depth; index1++)
+    {
+        if(!my_strncmp(&(tmp_path[index1]), "..", 2)) // 检测到含有上级相对寻址
+        { // 注意，由于上级相对寻址的pattern含有本级相对寻址，因此先检查上级比较合适
+            tmp_inode2_p = get_inode(tmp_dentry_arr[1].ino); // 目录数组的1号固定为上层
+            load_dentry_arr(tmp_inode2_p->direct_blocks[0]); // 将上层目录加载出来
+            // 更新绝对路径
+            tmp_abs_path_depth--;
+            for(index2 = 0; index2 < FILENAME_LENGTH; index2++)
+            {
+                tmp_abs_path[tmp_abs_path_depth][index2] = '\0';
+            }
+        }
+        else if (!my_strncmp(&(tmp_path[index1]), ".", 1)) // 检测到含有本级相对寻址
+        {
+            ; // 啥都不用做，因为最开始加载了本级目录，这里也不需要变动目录
+        }
+        else // 绝对寻址
+        {
+            for(index2 = 0; index2 < tmp_inode2_p->volumn; index2++)
+            {
+                if ((index2 == 0) || (index2 == 1))
+                    continue;
+                
+                if((tmp_dentry_arr[index2].type == DIRECTORY_TYPE) && (!(my_strncmp(tmp_dentry_arr[index2].file_name, &(tmp_path[index1]), FILENAME_LENGTH))))
+                { // 两个条件：1.是目录；2.目录出现同名
+                    // 如果仅仅是同名，但是是文件，此时不应该误判
+                    break;
+                }                
+            }
+            if (index2 == tmp_inode2_p->volumn)
+            {
+                printk("error. directory doesn't exist.\n");
+                return;
+            }
+
+            tmp_inode2_p = get_inode(tmp_dentry_arr[index2].ino); 
+            load_dentry_arr(tmp_inode2_p->direct_blocks[0]); // 将下一层目录加载出来
+            
+            // 更新绝对路径
+            for (index3 = 0; index3 < FILENAME_LENGTH; index3++)
+            {
+                tmp_abs_path[tmp_abs_path_depth][index3] = tmp_path[index1][index3];
+            }
+            tmp_abs_path_depth++;        
+        }
+
+
+        if (tmp_abs_path_depth <= 0)
+        {
+            printk("error, invalid path.\n");
+            return;
+        }
+        
+    }
+
+    // 到此为止，执行完了全部的查询地址的工作，目前的tmp_dentry_arr就是最下级的目录了
+    // 这时候tmp_abs_path就可以作为current_path了
+    
+    for (index1 = 0; index1 < MAX_DIRECTORY_DEPTH; index1++)
+    {
+        for(index2 = 0; index2 < FILENAME_LENGTH; index2++)
+        {
+            current_path[index1][index2] = tmp_abs_path[index1][index2];
+        }
+    }
+
+    // update global var
+    path_depth = tmp_abs_path_depth;
+    current_dir_ino = tmp_dentry_arr[0].ino;
+    
+    //printk("[FS] cd succeed!\n");//current_line++;
 }
 
 void do_ls()

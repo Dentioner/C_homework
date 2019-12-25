@@ -476,8 +476,11 @@ void test_shell()
     int index1, index2;
     int print_path_len;
     //os_strcpy(&(current_path[0]), "~");
-    path_depth = 0;
+    // initial some global var
+    path_depth = 1;
     current_dir_ino = 0;
+    os_memcpy((&current_path[0]), "~", sizeof("~"));
+
     print_path_len = refill_print_path();
 
     current_line = SHELL_START;
@@ -499,6 +502,9 @@ void test_shell()
     
     
     sys_move_cursor(1, SHELL_START);
+
+    print_path_len = refill_print_path();
+    current_start_point = sizeof(command_prompt) + print_path_len + sizeof(command_end);
     printf(command_prompt);
     printf(path_display);
     printf(command_end);
@@ -608,6 +614,9 @@ void test_shell()
             
             enable_interrupt();*/
             sys_move_cursor(1, current_line);             
+            print_path_len = refill_print_path();
+            current_start_point = sizeof(command_prompt) + print_path_len + sizeof(command_end);
+    
             printf(command_prompt);
             printf(path_display);
             printf(command_end);            

@@ -94,6 +94,11 @@ uint32_t block_bitmap[BITMAP_ARRAY_LENGTH]; // need padding
 uint32_t inode_bitmap[INODE_BITMAP_ARRAY_LENGTH]; // need padding
 
 char current_path[MAX_DIRECTORY_DEPTH][FILENAME_LENGTH];
+
+
+
+
+
 uint32_t path_depth;        // depth of current path
 uint32_t current_dir_ino; // inode number of current directory
 
