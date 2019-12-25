@@ -33,7 +33,7 @@
 #include "string.h"
 #include "fs.h"
 
-#define command_prompt "> root@UCAS_OS"
+#define command_prompt "> root@UCAS_OS:"
 #define command_end "$ "
 #define blank "                                                                        "
 
@@ -440,25 +440,32 @@ uint32_t refill_print_path()
     int index1 = 0;
     uint32_t index2, index3;
     
-    while(index1 < tmp_len)
+    if (tmp_len > 0)
     {
-        tmp_pointer = os_strcpy((char *)tmp_pointer, (char *)(&(current_path[index1])));
-        *tmp_pointer++ = '/';
-
-        index1++;
-    }
-
-    *tmp_pointer = '\0';
-
-    //index2 = 0;
-    for(index2 = 0;index2 <  MAX_LENGTH_OF_CMD; index2++)
-    {
-        if((path_display[index2] == '\0') || (path_display[index2] == '\r') || (path_display[index2] == '\n'))
+        while(index1 < tmp_len)
         {
-            break;
+            tmp_pointer = os_strcpy((char *)tmp_pointer, (char *)(&(current_path[index1])));
+            *tmp_pointer++ = '/';
+
+            index1++;
+        }
+
+        *tmp_pointer = '\0';
+
+        //index2 = 0;
+        for(index2 = 0;index2 <  MAX_LENGTH_OF_CMD; index2++)
+        {
+            if((path_display[index2] == '\0') || (path_display[index2] == '\r') || (path_display[index2] == '\n'))
+            {
+                break;
+            }
         }
     }
-
+    else
+    {
+        os_strcpy(path_display, "~");
+    }
+    
 
     return index2;
 

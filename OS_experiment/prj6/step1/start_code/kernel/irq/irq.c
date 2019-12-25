@@ -100,7 +100,7 @@ void other_exception_handler()
     uint32_t ehi, elo0, elo1;
     int index1, index2;
     vt100_move_cursor(1, 16);
-    for (index1 = 0; index1 < 32; index1++)
+    /*for (index1 = 0; index1 < 32; index1++)
     {    
         set_cp0_index(index1);
         asm volatile("tlbr");
@@ -108,10 +108,11 @@ void other_exception_handler()
         elo0 = get_cp0_entrylo0();
         elo1 = get_cp0_entrylo1();
         printk("i=%d, hi=%x,lo0=%x,lo1=%x\n", index1, ehi, elo0, elo1);
-    }
+    }*/
 
     //vt100_move_cursor(1, 16);
-    printk("cause=%x\n", (current_running->user_context.cp0_cause)>>2);
+    printk("cause=%x\n", (current_running->user_context.cp0_cause));
+    printk("exccode=%x\n", (current_running->user_context.cp0_cause)>>2);
     printk("badvaddr=%x\n", get_cp0_badvaddr());
     printk("epc=%x\n", current_running->user_context.cp0_epc);
 
@@ -124,10 +125,10 @@ void other_exception_handler()
     }
     printk("index2=%d, tmp_recv=%x\n", index2, tmp_recv);*/
 
-    for (index2 = 0; index2<PNUM; index2++)
+    /*for (index2 = 0; index2<PNUM; index2++)
     {
         printk("&rx[%d]=%x,tdes3=%x\n", index2, &rx_desc_list[index2], (rx_desc_list[index2].tdes3|GET_UNMAPPED_VADDR));
-    }
+    }*/
 /*******************************debug*****************************************/
     while(1);
 }

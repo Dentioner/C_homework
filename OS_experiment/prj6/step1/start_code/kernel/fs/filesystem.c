@@ -226,7 +226,7 @@ void do_mkfs()
             root_inode.direct_blocks[index1] = 0;
         }
 
-        root_inode.direct_blocks[0] = new_spblk.used_blk_num; // 第一个data块就是用给根目录的目录项
+        root_inode.direct_blocks[0] = new_spblk.used_blk_num - 1; // 第一个data块就是用给根目录的目录项
 
         root_inode.indirect_blocks = 0;
         root_inode.double_indirect_blocks = 0;
@@ -296,7 +296,7 @@ void do_statfs()
 
 void do_mkdir(uint32_t arg_filename)
 {
-    int index1;
+    //int index1;
     char *my_filename = (char *)arg_filename;
     inode_t tmp_inode1, tmp_parent_inode;
     inode_t * tmp_inode2_p;
@@ -311,7 +311,7 @@ void do_mkdir(uint32_t arg_filename)
     uint32_t new_ino, new_blk_num;
     void * tmp_block_bitmap_p;
     char parent_name[FILENAME_LENGTH];
-    uint32_t tmp_pointer1;
+    void * tmp_pointer1;
 
 
     current_line+=2;
@@ -373,7 +373,7 @@ void do_mkdir(uint32_t arg_filename)
             if((tmp_dentry_arr[index2].type == DIRECTORY_TYPE) && (!(my_strncmp(tmp_dentry_arr[index2].file_name, my_filename, FILENAME_LENGTH))))
             { // 两个条件：1.是目录；2.目录出现同名
                 // 如果仅仅是同名，但是是文件，此时还是可以创建同名的目录的
-                prink("directory has already established.\n");current_line++;
+                printk("directory has already established.\n");current_line++;
                 return;
             }
         }
@@ -457,7 +457,7 @@ void do_mkdir(uint32_t arg_filename)
         tmp_pointer1 += BLOCK_SIZE;
     }
 
-    os_memcpy((void *)read_block_buffer, inode_bitmap, BLOCK_SIZE);
+    os_memcpy(read_block_buffer, (char *)inode_bitmap, BLOCK_SIZE);
     sdwrite(read_block_buffer, (START_ADDRESS_SD + tmp_spblk.inode_map_offset * BLOCK_SIZE), BLOCK_SIZE);        
     
 
@@ -498,7 +498,7 @@ void do_mkdir(uint32_t arg_filename)
 
     tmp_dentry_arr[index2].ino = new_ino;
     tmp_dentry_arr[index2].type = DIRECTORY_TYPE;
-    os_memcpy(&(tmp_dentry_arr[index2].file_name), my_filename, sizeof(my_filename));
+    os_memcpy((char *)&(tmp_dentry_arr[index2].file_name), my_filename, sizeof(my_filename));
 
     tmp_parent_ino = tmp_dentry_arr[0].ino; // 记下父目录的ino，否则会丢失此信息
     os_memcpy(parent_name, tmp_dentry_arr[0].file_name, sizeof(tmp_dentry_arr[0].file_name)); // 记录下父目录的名字
