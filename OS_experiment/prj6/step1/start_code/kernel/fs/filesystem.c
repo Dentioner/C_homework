@@ -17,6 +17,13 @@ uint32_t tmp_path_depth;        // depth of tmp path
 char tmp_abs_path[MAX_DIRECTORY_DEPTH][FILENAME_LENGTH];
 uint32_t tmp_abs_path_depth;
 
+void init_tmp_path()
+{
+    uint32_t index1, index2;
+    for(index1 = 0; index1 < MAX_DIRECTORY_DEPTH; index1++)
+        for (index2 = 0; index2 < FILENAME_LENGTH; index2++)
+            tmp_path[index1][index2] = '\0';
+}
 
 void load_dentry_arr(uint32_t block_num)
 {
@@ -323,7 +330,7 @@ void do_mkfs()
         // initial some global var
         path_depth = 1;
         current_dir_ino = 0;
-        os_memcpy((&current_path[0]), "~", sizeof("~"));
+        os_memcpy((char *)(&current_path[0]), "~", sizeof("~"));
     }
 
     
@@ -763,6 +770,8 @@ void do_cd(uint32_t arg_filename)
     c_pointer1 = my_filename;
     tmp_path_depth = 0;
     index1 = 0;
+    init_tmp_path();
+
     while((*c_pointer1 != '\0') && (*c_pointer1 != '\r') && (*c_pointer1 != '\n'))
     {
         if(*c_pointer1 == '/')
@@ -786,7 +795,7 @@ void do_cd(uint32_t arg_filename)
 
     for(index1 = 0; index1 < tmp_path_depth; index1++)
     {
-        if(!my_strncmp(&(tmp_path[index1]), "..", 2)) // 检测到含有上级相对寻址
+        if(!my_strncmp((char *)&(tmp_path[index1]), "..", 2)) // 检测到含有上级相对寻址
         { // 注意，由于上级相对寻址的pattern含有本级相对寻址，因此先检查上级比较合适
             tmp_inode2_p = get_inode(tmp_dentry_arr[1].ino); // 目录数组的1号固定为上层
             load_dentry_arr(tmp_inode2_p->direct_blocks[0]); // 将上层目录加载出来
@@ -797,9 +806,23 @@ void do_cd(uint32_t arg_filename)
                 tmp_abs_path[tmp_abs_path_depth][index2] = '\0';
             }
         }
-        else if (!my_strncmp(&(tmp_path[index1]), ".", 1)) // 检测到含有本级相对寻址
+        else if (!my_strncmp((char *)&(tmp_path[index1]), ".", 1)) // 检测到含有本级相对寻址
         {
             ; // 啥都不用做，因为最开始加载了本级目录，这里也不需要变动目录
+        }
+
+        else if ((!my_strncmp((char *)&(tmp_path[index1]), "~", 1)) && (index1 == 0))// 绝对寻址
+        {
+            tmp_inode2_p = get_inode(0); // 出现绝对寻址，获得根目录inode
+            load_dentry_arr(tmp_inode2_p->direct_blocks[0]); // 加载根目录
+            // 更新绝对路径
+            tmp_abs_path_depth = 1;
+            os_memcpy((char *)(&tmp_abs_path[0]), "~", sizeof("~"));
+        }
+        else if (index1 == 0) // 如果第一个路径不满足上述情况，那么路径不合法
+        {
+            printk("error, invalid path.\n");
+            return;
         }
         else // 绝对寻址
         {
@@ -808,7 +831,7 @@ void do_cd(uint32_t arg_filename)
                 if ((index2 == 0) || (index2 == 1))
                     continue;
                 
-                if((tmp_dentry_arr[index2].type == DIRECTORY_TYPE) && (!(my_strncmp(tmp_dentry_arr[index2].file_name, &(tmp_path[index1]), FILENAME_LENGTH))))
+                if((tmp_dentry_arr[index2].type == DIRECTORY_TYPE) && (!(my_strncmp(tmp_dentry_arr[index2].file_name, (char *)&(tmp_path[index1]), FILENAME_LENGTH))))
                 { // 两个条件：1.是目录；2.目录出现同名
                     // 如果仅仅是同名，但是是文件，此时不应该误判
                     break;

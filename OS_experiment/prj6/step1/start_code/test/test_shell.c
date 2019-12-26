@@ -30,7 +30,7 @@
 #include "screen.h"
 #include "syscall.h"
 #include "sched.h"
-#include "string.h"
+#include "../include/os/string.h"
 #include "fs.h"
 
 #define command_prompt "> root@UCAS_OS:"
@@ -479,7 +479,7 @@ void test_shell()
     // initial some global var
     path_depth = 1;
     current_dir_ino = 0;
-    os_memcpy((&current_path[0]), "~", sizeof("~"));
+    os_memcpy((char *)(&current_path[0]), "~", sizeof("~"));
 
     print_path_len = refill_print_path();
 
