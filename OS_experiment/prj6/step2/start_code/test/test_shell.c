@@ -283,7 +283,6 @@ void do_cmd()
         {
             int index3 = 0;
             int index4 = 0;
-            //uint32_t tmp_y;
             exec_id = my_ctoi(&cmd_buffer[5]);
             if (exec_id < 10)
             {
@@ -316,9 +315,8 @@ void do_cmd()
             printf("\n");
             while(1);
             */
-            //tmp_y = current_line;
+
             sys_spawn(test_tasks[exec_id], argv);
-            //current_line = tmp_y;
             current_line++;
             sys_move_cursor(1, current_line);
             printf("exec process[%d]", exec_id);

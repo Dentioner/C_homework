@@ -14,7 +14,7 @@ void test_fs(void)
     int i, j;
     int fd = sys_fopen("1.txt", O_RDWR);
     uint32_t print_y = 2;
-    //uint32_t outer_y = current_line;
+    uint32_t outer_y = current_line;
 
     if (fd == 123456) // debug
     {
@@ -30,7 +30,7 @@ void test_fs(void)
     {
         sys_fread(fd, buff, 13);
         sys_move_cursor(1, print_y + i);
-        //current_line = outer_y;
+        current_line = outer_y;
         for (j = 0; j < 13; j++)
         {
             
@@ -40,6 +40,6 @@ void test_fs(void)
     }
 
     sys_fclose(fd);
-    //current_line = outer_y;
+    current_line = outer_y;
     sys_exit();
 }

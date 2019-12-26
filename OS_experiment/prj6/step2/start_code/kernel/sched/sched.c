@@ -147,10 +147,10 @@ void switch_pcb()
 	check_sleeping();
 
     // prj6 added
-/*    if(current_running->pid == 1) // shell
+    if(current_running->pid == 1) // shell
     {
         backup_shell_y = current_line;
-    }*/
+    }
 
     if(current_running != NULL && current_running->status == TASK_RUNNING)
     {
@@ -220,12 +220,12 @@ vt100_move_cursor(1, 14);
 		for(asdfg = 0; asdfg < 10000000; asdfg ++);
 	}*/
 
-/*
+
     if (current_running->pid == 1) // shell
     {
         current_line = backup_shell_y;
     }
-*/
+
     return;
 }
 
@@ -750,3 +750,4 @@ pid_t do_getpid()
 {
     return current_running->pid;
 }
+
