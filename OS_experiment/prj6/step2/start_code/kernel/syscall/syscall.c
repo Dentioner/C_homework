@@ -224,18 +224,18 @@ void sys_cat(uint32_t arg_filename)
     invoke_syscall(SYSCALL_CAT, arg_filename, IGNORE, IGNORE);
 }
 
-void sys_fopen(char *name, int access)
+uint32_t sys_fopen(char *name, int access)
 {
     invoke_syscall(SYSCALL_OPEN_FILE, (uint32_t)name, (uint32_t)access, IGNORE);
 }
 
 
-void sys_fread(int fd, char * buff, int size)
+uint32_t sys_fread(int fd, char * buff, int size)
 {
     invoke_syscall(SYSCALL_READ_FILE, (uint32_t)fd, (uint32_t)buff, (uint32_t)size);
 }
 
-void sys_fwrite(int fd, char *buff, int size)
+uint32_t sys_fwrite(int fd, char *buff, int size)
 {
     invoke_syscall(SYSCALL_WRITE_FILE, (uint32_t)fd, (uint32_t)buff, (uint32_t)size);
 }

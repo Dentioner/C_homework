@@ -283,6 +283,7 @@ void do_cmd()
         {
             int index3 = 0;
             int index4 = 0;
+            //uint32_t tmp_y;
             exec_id = my_ctoi(&cmd_buffer[5]);
             if (exec_id < 10)
             {
@@ -315,8 +316,9 @@ void do_cmd()
             printf("\n");
             while(1);
             */
-
+            //tmp_y = current_line;
             sys_spawn(test_tasks[exec_id], argv);
+            //current_line = tmp_y;
             current_line++;
             sys_move_cursor(1, current_line);
             printf("exec process[%d]", exec_id);
@@ -411,11 +413,46 @@ void do_cmd()
             sys_cd((uint32_t)arg_filename);
         }
     }
+    
     else if(my_strncmp(cmd_buffer, "ls", 2) == 0)
     {
         printf("\n");
         sys_ls();
     }
+
+    else if(my_strncmp(cmd_buffer, "touch", 5) == 0)
+    {
+        // touch [filename]
+        //memset(arg_filename, 0, FILENAME_LENGTH);
+        reset_filename();
+        if(get_filename(6))
+        {// ret = -1
+            current_line++;
+            sys_move_cursor(1, current_line);
+            printf("Please input filename.");
+        }
+        else
+        {
+            sys_touch((uint32_t)arg_filename);
+        }
+    }
+    else if (my_strncmp(cmd_buffer, "cat", 3) == 0)
+    {
+        // cat [filename]
+        //memset(arg_filename, 0, FILENAME_LENGTH);
+        reset_filename();
+        if(get_filename(4))
+        {// ret = -1
+            current_line++;
+            sys_move_cursor(1, current_line);
+            printf("Please input filename.");
+        }
+        else
+        {
+            sys_cat((uint32_t)arg_filename);
+        }
+    }
+
 
     else
     {
@@ -482,6 +519,8 @@ void test_shell()
     os_memcpy((char *)(&current_path[0]), "~", sizeof("~"));
 
     print_path_len = refill_print_path();
+
+    init_fd_array(); // prj6: file system added
 
     current_line = SHELL_START;
     current_start_point = sizeof(command_prompt) + print_path_len + sizeof(command_end); 

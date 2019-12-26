@@ -9,6 +9,15 @@ int strlen(char *src)
 	return i;
 }
 
+int os_strlen(char *src)
+{
+	int i;
+	for (i = 0; src[i] != '\0'; i++)
+	{
+	}
+	return i;
+}
+
 void memcpy(uint8_t *dest, uint8_t *src, uint32_t len)
 {
 	for (; len != 0; len--)

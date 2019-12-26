@@ -47,5 +47,6 @@ char *strcpy(char *dest, char *src);
 char *strcat(char *dest, char *src);
 
 int strlen(char *src);
+int os_strlen(char *src);
 
 #endif

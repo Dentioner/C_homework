@@ -5,67 +5,27 @@
 #include "queue.h"
 #include "../drivers/mac.h"
 
+extern uint32_t current_line;
+uint32_t backup_y;
+
 static void irq_timer()
 {
     // TODO clock interrupt handler.
     // scheduler, time counter in here to do, emmmmmm maybe.
+    if (current_running->pid == 1)
+        backup_y = current_line;
+
 do_scheduler();
 	time_elapsed += 100000; // I donot know what is a good value for time_elapsed
 
-    
-    // reset cp0_count & cp0_compare
-    /*
-    asm volatile(
-		"mtc0	$0, CP0_COUNT\n\t"
-		"li		k0, TIMER_INTERVAL\n\t"
-		"mtc0	k0, CP0_COMPARE\n\t"		
-	);
-    */ 
     reset_timer();
     screen_reflush(); 
 //	screen_clear();
 //    do_scheduler();
 //  	screen_reflush();  
 
-
-    if((!queue_is_empty(&recv_block_queue)))
-    {
-        /*if(!(tmp_recv->tdes0 & DESC_OWN))
-        {
-            do_unblock_one(&recv_block_queue);
-        }*/
-        //else
-        //{
-            int index1;
-            vt100_move_cursor(1, 2);
-            for(index1 = 0; index1< PNUM; index1++)
-            {
-                if(rx_desc_list[index1].tdes0 & DESC_OWN)
-                    break;
-            }
-            printk("[RECV TASK]still waiting recv %dth package.\n", index1);
-            
-            
-/*******************************debug*****************************************/
-            /*printk("valid now: %d\n", recv_num_now);
-
-
-            for(index1 = 0; index1 < PNUM; index1++)
-            {
-                printk("%x+%x ", rx_desc_list[index1].tdes0, (rx_desc_list[index1].tdes1)>>31);
-                if(index1%10 == 9)
-                {
-                    printk("\n");
-                }
-            }
-            
-            printk("\n%x\n", rx_desc_list[PNUM-1].tdes1);*/
-/*******************************debug*****************************************/
-        //}
-    }
-
-
-
+    if(current_running->pid == 1)
+        current_line = backup_y;
 }
 
 void interrupt_helper(uint32_t status, uint32_t cause)

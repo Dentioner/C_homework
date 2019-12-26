@@ -14,7 +14,8 @@ extern mutex_lock_t lock_array[NUM_MAX_LOCK];
 pcb_t *current_running;
 //unsigned int pcb_array_length = 0;
 
-
+uint32_t backup_shell_y;
+extern uint32_t current_line;
 /* global process id */
 pid_t process_id = 1;
 uint32_t lock_num = 0;
@@ -144,6 +145,13 @@ void switch_pcb()
     // the following is part2
     
 	check_sleeping();
+
+    // prj6 added
+/*    if(current_running->pid == 1) // shell
+    {
+        backup_shell_y = current_line;
+    }*/
+
     if(current_running != NULL && current_running->status == TASK_RUNNING)
     {
         current_running->status = TASK_READY;
@@ -212,6 +220,12 @@ vt100_move_cursor(1, 14);
 		for(asdfg = 0; asdfg < 10000000; asdfg ++);
 	}*/
 
+/*
+    if (current_running->pid == 1) // shell
+    {
+        current_line = backup_shell_y;
+    }
+*/
     return;
 }
 

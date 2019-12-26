@@ -19,6 +19,12 @@
 
 #define MAX_DIRECTORY_DEPTH 4 
 
+#define FILE_DESCRIPTOR_NUM 64
+#define EOF (-1)
+
+
+#define FILE_SIZE_LIMIT (BLOCK_SIZE * DIRECT_LINK_NUM)
+
 #define INODE_NUM_PER_BLOCK (BLOCK_SIZE/sizeof(inode_t))
 #define INODEBLOCK_NUM ((INODE_NUM * sizeof(inode_t))/BLOCK_SIZE)
 
@@ -30,6 +36,8 @@
 |superblock|sector/block map|inode map|inode|data|
 
 */
+
+
 
 typedef struct superblock
 {
@@ -71,6 +79,13 @@ enum{
     BITMAP_DEL,
 };
 
+enum{
+    O_INVALID,
+    O_RD,
+    O_WR,
+    O_RDWR,
+};
+
 typedef struct directory_entry
 {
     char file_name[FILENAME_LENGTH];
@@ -83,7 +98,7 @@ typedef struct file_descriptor
 {
     //uint32_t self_index;    // index in file descrpitor array
     uint32_t ino;           // inode num
-    uint32_t avail;         // information about user authority
+    uint32_t access;         // information about user authority
     uint32_t read_offset;
     uint32_t write_offset;
 }fd_t;
@@ -96,7 +111,7 @@ uint32_t inode_bitmap[INODE_BITMAP_ARRAY_LENGTH]; // need padding
 
 char current_path[MAX_DIRECTORY_DEPTH][FILENAME_LENGTH];
 
-
+fd_t fd_array[FILE_DESCRIPTOR_NUM];
 
 
 
@@ -114,10 +129,12 @@ void do_ls();
 
 void do_touch(uint32_t arg_filename);
 void do_cat(uint32_t arg_filename);
-void do_fopen(char *name, int access);
-void do_fread(int fd, char * buff, int size);
-void do_fwrite(int fd, char *buff, int size);
+uint32_t do_fopen(char *name, int access);
+uint32_t do_fread(int fd, char * buff, int size);
+uint32_t do_fwrite(int fd, char *buff, int size);
 void do_fclose(int fd);
+
+void init_fd_array();
 
 
 #endif

@@ -154,9 +154,9 @@ void sys_print_buffer(void);
 
 void sys_touch(uint32_t arg_filename);
 void sys_cat(uint32_t arg_filename);
-void sys_fopen(char *name, int access);
-void sys_fread(int fd, char * buff, int size);
-void sys_fwrite(int fd, char *buff, int size);
+uint32_t sys_fopen(char *name, int access);
+uint32_t sys_fread(int fd, char * buff, int size);
+uint32_t sys_fwrite(int fd, char *buff, int size);
 void sys_fclose(int fd);
 
 
