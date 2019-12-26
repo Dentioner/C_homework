@@ -886,11 +886,48 @@ void do_ls()
     current_line+=2;
     vt100_move_cursor(1, current_line);
 
+    inode_t * tmp_inode_p;
+    uint32_t index1, index2;
+    spblk_t tmp_spblk;
 
 
+    // check fs
+    sdread(read_block_buffer, START_ADDRESS_SD, BLOCK_SIZE);
+    os_memcpy((void *)&tmp_spblk, (void *)read_block_buffer, sizeof(spblk_t));
+    if (tmp_spblk.magic_num != MAGIC_NUM)
+    {
+        printk("Error! File Symtem doesn't exist.\n");//current_line++;
+        return;
+    }
+    
+    // load inode array
+    load_inode_array(tmp_spblk.inode_offset);
+
+    tmp_inode_p = get_inode(current_dir_ino);
+    load_dentry_arr(tmp_inode_p->direct_blocks[0]);
+
+    for(index1 = 0; index1 < tmp_inode_p->volumn - 1; index1++)
+    {
+        printk("%d  ", tmp_dentry_arr[index1].ino);
+        if (index1 == 0)
+            printk(".");
+        else if(index1 == 1)
+            printk("..");
+        else
+            printk(tmp_dentry_arr[index1].file_name);
+        
+        printk("\n");current_line++;
+    }
+    printk("%d  ", tmp_dentry_arr[index1].ino);
+    if (index1 == 0)
+        printk(".");
+    else if(index1 == 1)
+        printk("..");
+    else
+        printk(tmp_dentry_arr[index1].file_name);
 
 
     
-    printk("in do_ls().\n");
+    //printk("in do_ls().\n");
 
 }
