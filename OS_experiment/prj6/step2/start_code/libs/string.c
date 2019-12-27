@@ -82,7 +82,7 @@ void bzero(void *dest, uint32_t len)
 {
 	memset(dest, 0, len);
 }
-
+/*
 int strcmp(char *str1, char *str2)
 {
 	while (*str1 && *str2 && (*str1++ == *str2++))
@@ -100,6 +100,16 @@ int strcmp(char *str1, char *str2)
 	}
 
 	return 1;
+}*/
+
+int strcmp(char* str1, char* str2)
+{
+    while (*str1 && *str2 && (*str1 == *str2)) {
+        str1++;
+        str2++;
+    };
+
+    return (*str1) - (*str2);
 }
 
 char *strcpy(char *dest, char *src)

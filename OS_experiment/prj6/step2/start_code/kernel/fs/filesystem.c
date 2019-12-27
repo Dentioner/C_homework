@@ -354,15 +354,27 @@ void do_statfs()
 {
     spblk_t tmp_spblk;
 
-
+    //debug
+    uint32_t index9;
+    uint32_t *debug_u_p;
 
     current_line+=2;
     vt100_move_cursor(1, current_line);
+    // debug
+    printk("para1:%x, 2:%x, 3:%x\n", read_block_buffer, START_ADDRESS_SD, BLOCK_SIZE);current_line++;
+
 
     sdread(read_block_buffer, START_ADDRESS_SD, BLOCK_SIZE);
+
+    //debug
+    debug_u_p = (uint32_t *)read_block_buffer;
+    for (index9 = 0; index9 < 10; index9++)
+        printk("%u,", debug_u_p[index9]);
+
+
     os_memcpy((void *)&tmp_spblk, (void *)read_block_buffer, sizeof(spblk_t));
 
-
+/*
     printk("magic: %x\n", tmp_spblk.magic_num);current_line++;
     printk("used blocks: %d/%d, start sector: %d(%x)\n", tmp_spblk.used_blk_num, BLOCK_NUM, (START_ADDRESS_SD/512), START_ADDRESS_SD);current_line++;
     printk("inode map offset: %d, occupied block: %d, used: %d/%d\n", tmp_spblk.inode_map_offset, (tmp_spblk.inode_offset - tmp_spblk.inode_map_offset), tmp_spblk.used_inode_num, INODE_NUM);current_line++;
@@ -370,11 +382,16 @@ void do_statfs()
     printk("inode offset: %d, occupied block: %d\n", tmp_spblk.inode_offset, (tmp_spblk.data_offset - tmp_spblk.inode_offset));current_line++;
     printk("data offset: %d, occupied block: %d\n", tmp_spblk.data_offset, (BLOCK_NUM - tmp_spblk.data_offset));current_line++;
     printk("inode entry size: %d, dir entry size: %d\n", sizeof(inode_t), sizeof(dentry_t));current_line++;
-    
+ */
+
     if(tmp_spblk.magic_num != MAGIC_NUM)
     {
         printk("file system has not been established yet.\n");current_line++;
+        
     }
+
+
+
 }
 
 void do_mkdir(uint32_t arg_filename)
@@ -916,8 +933,14 @@ void do_ls()
     tmp_inode_p = get_inode(current_dir_ino);
     load_dentry_arr(tmp_inode_p->direct_blocks[0]);
 
-    for(index1 = 0; index1 < tmp_inode_p->volumn - 1; index1++)
+    for(index1 = 0; index1 < DENTRY_NUM_PER_BLOCK; index1++)
     {
+        if ((index1 > 1) && (tmp_dentry_arr[index1].ino == 0))
+        {
+            continue;
+        }
+
+
         printk("%d  ", tmp_dentry_arr[index1].ino);
         
         if(tmp_dentry_arr[index1].type == FILE_TYPE)
@@ -932,20 +955,10 @@ void do_ls()
         else
             printk(tmp_dentry_arr[index1].file_name);
         
-        printk("\n");current_line++;
+        if (index1 < DENTRY_NUM_PER_BLOCK - 1)
+            printk("\n");current_line++;
     }
-    printk("%d  ", tmp_dentry_arr[index1].ino);
-    if(tmp_dentry_arr[index1].type == FILE_TYPE)
-        printk("file  ");
-    else
-        printk("dir   ");
 
-    if (index1 == 0)
-        printk(".");
-    else if(index1 == 1)
-        printk("..");
-    else
-        printk(tmp_dentry_arr[index1].file_name);
 
 
     
