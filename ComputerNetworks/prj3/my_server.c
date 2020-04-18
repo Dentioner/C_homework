@@ -1,0 +1,172 @@
+#include <stdio.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <stdlib.h>
+
+const char server_head_simple[] = "HTTP/1.1 200 OK\r\n\r\n";
+const char server_head_error[] = "HTTP/1.1 404 Not Found\r\n\r\n";
+
+int main()
+{
+    int server_socket_fd, client_socket_fd;
+    struct sockaddr_in server, client;
+    char msg[2000];
+    int index1, index2;
+    char filename[100];
+    //char path[2000];
+    //DIR * directory;
+    FILE *directory = NULL;
+    FILE *big_file_p = NULL;
+    char dir_array[1000];
+    int find = 0;
+    char big_file[1000];
+    char packet[2000];
+    char * p1 = NULL;
+
+
+    // create socket
+    if ((server_socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
+    {
+        perror("create socket failed\n");
+		return -1;
+    }
+    printf("socket created\n");
+
+    // prepare the sockaddr_in structure
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = INADDR_ANY;
+    server.sin_port = htons(80);
+
+    // bind
+    if (bind(server_socket_fd,(struct sockaddr *)&server, sizeof(server)) < 0) 
+    {
+        perror("bind failed\n");
+        return -1;
+    }
+    printf("bind done\n");
+    
+    // listen
+    listen(server_socket_fd, 3);
+    printf("waiting for incoming connections...\n");
+
+    // accept connection from an incoming client
+    int c = sizeof(struct sockaddr_in);
+    if ((client_socket_fd = accept(server_socket_fd, (struct sockaddr *)&client, (socklen_t *)&c)) < 0) 
+    {
+        perror("accept failed\n");
+        return -1;
+    }
+    printf("connection accepted\n");
+
+
+    int msg_len = 0;
+    // receive a message from client
+    while ((msg_len = recv(client_socket_fd, msg, sizeof(msg), 0)) > 4) 
+    {// 条件为大于4是因为为了识别\r\n\r\n
+
+        find = 0;
+        
+        for(index1 = 3; index1 < msg_len; index1++)
+        {
+            if (msg[index1 - 3] == '\r' && msg[index1 - 2] == '\n' && msg[index1 - 1] == '\r' && msg[index1] == '\n')
+            {
+                break;
+            }
+        }
+
+        if(index1 >= msg_len)
+        {
+            perror("recv failed\n");
+            return -1;
+        }
+
+        // index1 现在的位置是“ HTTP/1.1\r\n\r\n”的最后一个\n上，需要跳过这些字符，
+        index2 = index1 - 12; // index2 现在在"HTTP"前面的那个空格的位置
+        
+        for (index1 = index2; index1 > 0 ; index1 --)
+        {// index1往前找，直到找到/为止，表示位于http://10.0.0.2/filename 的最后一个/处
+            if (msg[index1] == '/')
+                break;
+        }
+
+        index1++; // index1 现在是文件名的第一个字母了，也就是说msg[index1:index2]就是文件名
+
+        memset(filename, 0, sizeof(filename));
+        strncpy(filename, &msg[index1], index2 - index1); // 将index1~index2范围内的文字复制到filename中
+        
+
+        // get directory
+        system("ls > server_dir");
+        directory = fopen("server_dir", "r");
+
+        memset(dir_array, 0, sizeof(dir_array));
+        fread(dir_array, sizeof(dir_array), 1, directory);
+
+        // find filename
+        p1 = strtok(dir_array, "\n");
+        if (!strcmp(p1, filename))
+        {
+            find = 1;
+        }
+        else
+        {
+            while( p1 != NULL)
+            {
+                p1 = strtok(NULL, "\n");
+                if ((p1 != NULL) && (!strcmp(p1, filename)))
+                {
+                    find = 1;
+                    break;
+                }
+            }
+        }
+        
+
+
+        if(find)
+        {
+
+            
+            //read file
+            big_file_p = fopen(filename, "r");
+            memset(big_file, 0, sizeof(big_file));
+            fread(big_file, sizeof(big_file), 1, big_file_p);
+
+            // combining a http packet
+            memset(packet, 0, sizeof(packet));
+            strcpy(packet, server_head_simple);
+
+            strncat(packet, big_file, strlen(big_file));
+
+            //send data
+            write(client_socket_fd, packet, strlen(packet));
+
+        }
+        else // NOT FOUND
+        {
+            write(client_socket_fd, server_head_error, sizeof(server_head_error));
+        }
+        
+        
+        fcloseall();
+
+    }
+    
+
+
+    
+    if (msg_len == 0) 
+    {
+        printf("client disconnected\n");
+    }
+    else 
+    { // msg_len < 0 or 0 < msg_len < 4
+        perror("recv failed\n");
+		return -1;
+    }
+    
+    return 0;
+}
