@@ -4,9 +4,10 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-const char client_head_part1[] = "GET http://10.0.0.2/";
-const char client_head_part2[] = " HTTP/1.1\r\n\r\n";
-
+//const char client_head_part1[] = "GET http://10.0.0.1/";
+const char client_head_part1[] = "GET /";
+const char client_head_part2[] = " HTTP/1.1\r\n";
+const char client_head_part3[] = "Connection: Keep-Alive\r\n\r\n";
 
 int main()
 {
@@ -37,18 +38,22 @@ int main()
     printf("connected\n");
 
 
-    //while(1)
+    while(1)
     {
+        memset(packet, 0, sizeof(packet));
+        memset(filename, 0, sizeof(filename));
+        memset(server_reply, 0, sizeof(server_reply));
+
         //get filename
         printf("get : ");
         scanf("%s", filename);
 
         // combining a http packet
-        memset(packet, 0, 1000);
+        
         strcpy(packet, client_head_part1);
         strncat(packet, filename, strlen(filename));
         strncat(packet, client_head_part2, strlen(client_head_part2));
-
+        strncat(packet, client_head_part3, strlen(client_head_part3));
 
         
 

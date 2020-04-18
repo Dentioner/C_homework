@@ -6,8 +6,10 @@
 #include <dirent.h>
 #include <stdlib.h>
 
-const char server_head_simple[] = "HTTP/1.1 200 OK\r\n\r\n";
+const char server_head_simple[] = "HTTP/1.1 200 OK\r\n";
 const char server_head_error[] = "HTTP/1.1 404 Not Found\r\n\r\n";
+
+
 
 int main()
 {
@@ -25,6 +27,7 @@ int main()
     char big_file[1000];
     char packet[2000];
     char * p1 = NULL;
+    char filesz_str[1000];
 
 
     // create socket
@@ -68,7 +71,7 @@ int main()
     {// 条件为大于4是因为为了识别\r\n\r\n
 
         find = 0;
-        
+
         for(index1 = 3; index1 < msg_len; index1++)
         {
             if (msg[index1 - 3] == '\r' && msg[index1 - 2] == '\n' && msg[index1 - 1] == '\r' && msg[index1] == '\n')
@@ -83,8 +86,18 @@ int main()
             return -1;
         }
 
-        // index1 现在的位置是“ HTTP/1.1\r\n\r\n”的最后一个\n上，需要跳过这些字符，
-        index2 = index1 - 12; // index2 现在在"HTTP"前面的那个空格的位置
+
+        //识别 "HTTP"四个字
+        for(index1 = 3; index1 < msg_len; index1++)
+        {
+            if (msg[index1 - 3] == 'H' && msg[index1 - 2] == 'T' && msg[index1 - 1] == 'T' && msg[index1] == 'P')
+            {
+                break;
+            }
+        }
+
+
+        index2 = index1 - 4; // index2 现在在"HTTP"前面的那个空格的位置
         
         for (index1 = index2; index1 > 0 ; index1 --)
         {// index1往前找，直到找到/为止，表示位于http://10.0.0.2/filename 的最后一个/处
@@ -137,7 +150,16 @@ int main()
 
             // combining a http packet
             memset(packet, 0, sizeof(packet));
-            strcpy(packet, server_head_simple);
+            strcpy(packet, server_head_simple);//首先装上最开始的状态行
+            strncat(packet, "Content-Length: ", 17); //然后装上首部行的大小字段Content-Length
+            
+            memset(filesz_str, 0, sizeof(filesz_str));
+            //_itoa(strlen(big_file), filesz_str, 10);
+            sprintf(filesz_str, "%u", (unsigned)strlen(big_file));
+            
+            strncat(packet, filesz_str, strlen(filesz_str));//将文件长度放在Content_Length后面
+
+            strncat(packet, "\r\n\r\n", sizeof("\r\n\r\n"));//空行
 
             strncat(packet, big_file, strlen(big_file));
 
