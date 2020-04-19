@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <time.h>
+#include <stdlib.h>
 
 //const char client_head_part1[] = "GET http://10.0.0.1/";
 const char client_head_part1[] = "GET /";
@@ -100,13 +101,31 @@ int main()
             index1++;
 
             //write data
+            char * p1 = strstr(server_reply, "Content-Length: ");
+            char a1[20];
+            memset(a1, 0, sizeof(a1));
+            p1 += 16;
+
+            int index5 = 0;
+            while(*p1 != '\r')
+            {
+                a1[index5] = *p1;
+                index5++;
+                p1++;
+            }            
+
+            int truelen = atoi(a1);
+
             time_tmp = time(NULL);
             sprintf(file_name_get, "%ld", ((long)time_tmp % sizeof(file_name_get)));
             f_get = fopen(file_name_get, "w");
-            fwrite((server_reply + index1), (strlen(server_reply) - index1), 1, f_get);
+            fwrite((server_reply + index1), truelen, 1, f_get);
             fclose(f_get);
 
             printf("recv succeeded\n");
+
+            //debug
+            printf("len=%d, true_len = %d\n",len, truelen);
 
         }
 
