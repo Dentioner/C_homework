@@ -5,69 +5,64 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <stdlib.h>
+#include <pthread.h>
+
+#define THREAD_NUM 5
+
+typedef enum {
+    IDLE,
+    WORKING,
+    //BLOCKED,
+} status_t;
 
 const char server_head_simple[] = "HTTP/1.1 200 OK\r\n";
 const char server_head_error[] = "HTTP/1.1 404 Not Found\r\n\r\n";
+const char server_head_busy[] = "HTTP/1.1 500.13 Web Server Busy\r\n\r\n";
 
+pthread_t thread_array[THREAD_NUM];
+status_t thread_status[THREAD_NUM];
+//int server_socket_fd_arr[THREAD_NUM];
+int client_socket_fd_arr[THREAD_NUM];
 
+struct sockaddr_in server, client;
 
-int main()
+void* handle_request(void * tmp_socket_p)
 {
-    int server_socket_fd, client_socket_fd;
-    struct sockaddr_in server, client;
-    char msg[2000];
+    int find = 0;
+    int msg_len = 0;
     int index1, index2;
+    char msg[2000];
     char filename[100];
-    //char path[2000];
-    //DIR * directory;
     FILE *directory = NULL;
     FILE *big_file_p = NULL;
     char dir_array[1000];
-    int find = 0;
     char big_file[1000];
     char packet[2000];
     char * p1 = NULL;
     char filesz_str[1000];
+    int thread_index;
+    int socket_fd;
 
-
-    // create socket
-    if ((server_socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
+    //search socket
+    for(thread_index = 0; thread_index < THREAD_NUM; thread_index++)
     {
-        perror("create socket failed\n");
-		return -1;
+        if(tmp_socket_p == &(client_socket_fd_arr[thread_index]))
+            break;
     }
-    printf("socket created\n");
 
-    // prepare the sockaddr_in structure
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(80);
-
-    // bind
-    if (bind(server_socket_fd,(struct sockaddr *)&server, sizeof(server)) < 0) 
+    if(thread_index >= THREAD_NUM)
     {
-        perror("bind failed\n");
-        return -1;
+        printf("thread pointer error.\n");
+        return NULL;
     }
-    printf("bind done\n");
+    else
+    {
+        socket_fd = client_socket_fd_arr[thread_index];
+    }
     
-    // listen
-    listen(server_socket_fd, 3);
-    printf("waiting for incoming connections...\n");
 
-    // accept connection from an incoming client
-    int c = sizeof(struct sockaddr_in);
-    if ((client_socket_fd = accept(server_socket_fd, (struct sockaddr *)&client, (socklen_t *)&c)) < 0) 
-    {
-        perror("accept failed\n");
-        return -1;
-    }
-    printf("connection accepted\n");
-
-
-    int msg_len = 0;
     // receive a message from client
-    while ((msg_len = recv(client_socket_fd, msg, sizeof(msg), 0)) > 4) 
+    while ((msg_len = recv(socket_fd, msg, sizeof(msg), 0)) > 4) 
     {// 条件为大于4是因为为了识别\r\n\r\n
 
         find = 0;
@@ -83,7 +78,8 @@ int main()
         if(index1 >= msg_len)
         {
             perror("recv failed\n");
-            return -1;
+            thread_status[thread_index] = IDLE;
+            return NULL;
         }
 
 
@@ -137,12 +133,8 @@ int main()
             }
         }
         
-
-
         if(find)
-        {
-
-            
+        {  
             //read file
             big_file_p = fopen(filename, "r");
             memset(big_file, 0, sizeof(big_file));
@@ -164,12 +156,12 @@ int main()
             strncat(packet, big_file, strlen(big_file));
 
             //send data
-            write(client_socket_fd, packet, strlen(packet));
+            write(socket_fd, packet, strlen(packet));
 
         }
         else // NOT FOUND
         {
-            write(client_socket_fd, server_head_error, sizeof(server_head_error));
+            write(socket_fd, server_head_error, sizeof(server_head_error));
         }
         
         
@@ -187,8 +179,103 @@ int main()
     else 
     { // msg_len < 0 or 0 < msg_len < 4
         perror("recv failed\n");
+        thread_status[thread_index] = IDLE;
+		return NULL;
+    }
+
+    thread_status[thread_index] = IDLE;
+    return NULL;
+}
+
+int search_thread()
+{
+    int i;
+    for (i = 0; i < THREAD_NUM; i++)
+    {
+        if(thread_status[i] == IDLE)
+            break;
+    }
+    if(i < THREAD_NUM)
+        return i;
+    else
+        return -1;
+
+}
+
+int main()
+{
+    int server_socket_fd, client_socket_fd;
+    
+    
+    int index3;
+
+    //char path[2000];
+    //DIR * directory;
+    
+    int thread_index;
+
+    // init threads status
+    for(index3 = 0; index3 < THREAD_NUM; index3++)
+    {
+        thread_status[index3] = IDLE;
+        client_socket_fd_arr[index3] = 0;
+    }
+
+
+    // create socket
+    if ((server_socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
+    {
+        perror("create socket failed\n");
 		return -1;
     }
+    printf("socket created\n");
+
+    // prepare the sockaddr_in structure
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = INADDR_ANY;
+    server.sin_port = htons(80);
+
+    // bind
+    if (bind(server_socket_fd,(struct sockaddr *)&server, sizeof(server)) < 0) 
+    {
+        perror("bind failed\n");
+        return -1;
+    }
+    printf("bind done\n");
+    
+    // listen
+    listen(server_socket_fd, THREAD_NUM);
+    printf("waiting for incoming connections...\n");
+
+
+
+    while(1)
+    {
+        int c = sizeof(struct sockaddr_in);
+        if ((client_socket_fd = accept(server_socket_fd, (struct sockaddr *)&client, (socklen_t *)&c)) < 0) 
+        {
+            perror("accept failed\n");
+            return -1;
+        }
+        printf("connection accepted\n");
+
+        thread_index = search_thread();
+        if(thread_index == -1) //所有线程都忙
+        {
+            write(client_socket_fd, server_head_busy, sizeof(server_head_busy));//500.13
+        }
+        else
+        {
+            client_socket_fd_arr[thread_index] = client_socket_fd;
+            thread_status[thread_index] = WORKING;
+
+            pthread_create(&(thread_array[thread_index]), NULL, handle_request, (void *)&(client_socket_fd_arr[thread_index]));
+        }
+    }
+    
+
+
+    
     
     return 0;
 }

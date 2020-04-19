@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <time.h>
 
 //const char client_head_part1[] = "GET http://10.0.0.1/";
 const char client_head_part1[] = "GET /";
@@ -15,6 +16,10 @@ int main()
     struct sockaddr_in server;
     char filename[100], server_reply[2000];
     char packet[1000];
+    FILE * f_get = NULL;
+    int index1;
+    time_t time_tmp;
+    char file_name_get[20];
 
     // create socket
     sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -38,7 +43,7 @@ int main()
     printf("connected\n");
 
 
-    while(1)
+    //while(1)
     {
         memset(packet, 0, sizeof(packet));
         memset(filename, 0, sizeof(filename));
@@ -75,8 +80,34 @@ int main()
         
             server_reply[len] = 0;
             
-            printf("server reply : ");
-            printf("%s\n", server_reply);
+            //printf("server reply : ");
+            //printf("%s\n", server_reply);
+
+            for(index1 = 3; index1 < len; index1++)
+            {
+                if (server_reply[index1 - 3] == '\r' && server_reply[index1 - 2] == '\n' && server_reply[index1 - 1] == '\r' && server_reply[index1] == '\n')
+                {
+                    break;
+                }
+            }
+
+            if(index1 >= len)
+            {
+                perror("recv failed\n");
+                return -1;
+            }
+
+            index1++;
+
+            //write data
+            time_tmp = time(NULL);
+            sprintf(file_name_get, "%ld", ((long)time_tmp % sizeof(file_name_get)));
+            f_get = fopen(file_name_get, "w");
+            fwrite((server_reply + index1), (strlen(server_reply) - index1), 1, f_get);
+            fclose(f_get);
+
+            printf("recv succeeded\n");
+
         }
 
     }
