@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <sys/stat.h>
 
 #define THREAD_NUM 5
 
@@ -36,8 +37,8 @@ void* handle_request(void * tmp_socket_p)
     FILE *directory = NULL;
     FILE *big_file_p = NULL;
     char dir_array[1000];
-    char big_file[1000];
-    char packet[2000];
+    char big_file[524288];
+    char packet[1048576];
     char * p1 = NULL;
     char filesz_str[1000];
     int thread_index;
@@ -147,16 +148,23 @@ void* handle_request(void * tmp_socket_p)
             
             memset(filesz_str, 0, sizeof(filesz_str));
             //_itoa(strlen(big_file), filesz_str, 10);
-            sprintf(filesz_str, "%u", (unsigned)strlen(big_file));
-            
+            //sprintf(filesz_str, "%u", (unsigned)strlen(big_file));
+            struct stat statbuf;
+            stat(filename, &statbuf);
+            sprintf(filesz_str, "%u", (unsigned)(statbuf.st_size));
+
+
             strncat(packet, filesz_str, strlen(filesz_str));//将文件长度放在Content_Length后面
 
             strncat(packet, "\r\n\r\n", sizeof("\r\n\r\n"));//空行
 
-            strncat(packet, big_file, strlen(big_file));
+            //strncat(packet, big_file, strlen(big_file));
+            strncat(packet, big_file, (size_t)(statbuf.st_size));
+
 
             //send data
-            write(socket_fd, packet, strlen(packet));
+            size_t total_length = sizeof(server_head_simple) + sizeof("Content-Length: ") + strlen(filesz_str) + sizeof("\r\n\r\n") + (size_t)(statbuf.st_size);
+            write(socket_fd, packet, total_length);
 
         }
         else // NOT FOUND

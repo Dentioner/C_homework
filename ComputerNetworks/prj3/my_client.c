@@ -14,7 +14,7 @@ int main()
 {
 	int sock;
     struct sockaddr_in server;
-    char filename[100], server_reply[2000];
+    char filename[100], server_reply[1048576];
     char packet[1000];
     FILE * f_get = NULL;
     int index1;
@@ -70,7 +70,7 @@ int main()
         }
 
         // receive a reply from the server
-        int len = recv(sock, server_reply, 2000, 0);
+        int len = recv(sock, server_reply, sizeof(server_reply), 0);
         if (len < 0) {
             printf("recv failed\n");
             //break;
