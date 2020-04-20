@@ -8,7 +8,7 @@
 #include <pthread.h>
 #include <sys/stat.h>
 
-#define THREAD_NUM 5
+
 
 typedef enum {
     IDLE,
@@ -20,17 +20,13 @@ const char server_head_simple[] = "HTTP/1.1 200 OK\r\n";
 const char server_head_error[] = "HTTP/1.1 404 Not Found\r\n\r\n";
 const char server_head_busy[] = "HTTP/1.1 500.13 Web Server Busy\r\n\r\n";
 
-pthread_t thread_array[THREAD_NUM];
-status_t thread_status[THREAD_NUM];
-//int server_socket_fd_arr[THREAD_NUM];
-int client_socket_fd_arr[THREAD_NUM];
 
 struct sockaddr_in server, client;
 
-int server_socket_fd;
+//int server_socket_fd;
 
 
-void* little_process(void * nothing)
+void* little_process(void * client_socket_fd_p)
 {
     int find = 0;
     int msg_len = 0;
@@ -46,16 +42,11 @@ void* little_process(void * nothing)
     char filesz_str[1000];
     //int thread_index;
     int socket_fd;
+    socket_fd = *((int *)client_socket_fd_p);
 
     while(1)
     {
-        int c = sizeof(struct sockaddr_in);
-        if ((socket_fd = accept(server_socket_fd, (struct sockaddr *)&client, (socklen_t *)&c)) < 0) 
-        {
-            perror("accept failed\n");
-            return NULL;
-        }
-        printf("connection accepted\n");
+        
 
         
 
@@ -195,27 +186,16 @@ void* little_process(void * nothing)
 }
 
 
-int search_thread()
-{
-    int i;
-    for (i = 0; i < THREAD_NUM; i++)
-    {
-        if(thread_status[i] == IDLE)
-            break;
-    }
-    if(i < THREAD_NUM)
-        return i;
-    else
-        return -1;
 
-}
+
 
 int main()
 {
-    //int server_socket_fd, client_socket_fd;
+    int server_socket_fd;
+    int client_socket_fd;
     
     
-    int index3, index4;
+    //int index3, index4;
 
     //char path[2000];
     //DIR * directory;
@@ -223,11 +203,7 @@ int main()
     //int thread_index;
 
     // init threads status
-    for(index3 = 0; index3 < THREAD_NUM; index3++)
-    {
-        thread_status[index3] = IDLE;
-        client_socket_fd_arr[index3] = 0;
-    }
+
 
 
     // create socket
@@ -256,7 +232,7 @@ int main()
     printf("waiting for incoming connections...\n");
 
 
-/*
+
     while(1)
     {
         int c = sizeof(struct sockaddr_in);
@@ -267,29 +243,19 @@ int main()
         }
         printf("connection accepted\n");
 
-        thread_index = search_thread();
-        if(thread_index == -1) //所有线程都忙
-        {
-            write(client_socket_fd, server_head_busy, sizeof(server_head_busy));//500.13
-        }
-        else
-        {
-            client_socket_fd_arr[thread_index] = client_socket_fd;
-            thread_status[thread_index] = WORKING;
+        
 
-            pthread_create(&(thread_array[thread_index]), NULL, handle_request, (void *)&(client_socket_fd_arr[thread_index]));
-        }
+        pthread_t new_process;
+        pthread_create(&(new_process), NULL, little_process, (void *)&(client_socket_fd));
+
+
+
 
     }
-*/
 
 
-    for(index4 = 0; index4 < THREAD_NUM; index4++)
-    {
-        pthread_create(&(thread_array[index4]), NULL, little_process, (void *)NULL);
-    }    
 
-    while(1);
+
 
     
     return 0;
