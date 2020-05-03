@@ -49,18 +49,32 @@ void handle_packet(iface_info_t *iface, char *packet, int len)
 	//fprintf(stdout, "TODO: implement the packet forwarding process here.\n");
 
 	iface_info_t *dst_iface_p = NULL;
-	dst_iface_p = lookup_port((u8 *)(eh->ether_dhost));
 
-	if(dst_iface_p != NULL)
+	u8 broadcast_dhost[ETH_ALEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+
+	// debug: check packet is broadcast or not
+	if(memcmp((void *)(eh->ether_dhost), (void *)broadcast_dhost, ETH_ALEN) == 0)
 	{
-		// found dst, forward the packet
-		iface_send_packet(dst_iface_p, packet, len);
+		//dst mac is FF:FF:FF:FF:FF:FF, the packet is broadcasting
+		broadcast_packet(iface, packet, len);
 	}
 	else
 	{
-		// dst not found, broadcast the packet
-		broadcast_packet(iface, packet, len);
+		dst_iface_p = lookup_port((u8 *)(eh->ether_dhost));
+
+		if(dst_iface_p != NULL)
+		{
+			// found dst, forward the packet
+			iface_send_packet(dst_iface_p, packet, len);
+		}
+		else
+		{
+			// dst not found, broadcast the packet
+			broadcast_packet(iface, packet, len);
+		}
 	}
+	
+	
 
 	// update the src entry
 	if(lookup_port((u8 *)(eh->ether_shost)) == NULL)
