@@ -4,6 +4,7 @@
 #include "types.h"
 #include "checksum.h"
 
+
 #include <arpa/inet.h>
 
 #define MOSPF_VERSION 			2	// MOSPF Version
@@ -66,6 +67,6 @@ void mospf_init_hdr(struct mospf_hdr *mospf, u8 type, u16 len, u32 rid, u32 aid)
 void mospf_init_hello(struct mospf_hello *hello, u32 mask);
 void mospf_init_lsu(struct mospf_lsu *lsu, u32 nadv);
 
-u8 mospf_mac_addr_allrouters[ETH_ALEN] = {0x01, 0x00, 0x5e, 0x00, 0x00, 0x05};
+
 
 #endif
