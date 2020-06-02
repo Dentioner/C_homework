@@ -80,7 +80,7 @@ int main()
     verify_ptrie(ip_db);
     gettimeofday(&tv2, NULL);
     
-    printf("poptrie mem cost: %lu Bytes\n", (sizeof(poptrie_node_t)*p_node_num + sizeof(u32)*p_leaf_num));
+    printf("poptrie mem cost: %lu Bytes\n", (sizeof(poptrie_node_t)*p_node_num + sizeof(u64)*p_leaf_num));
     printf("poptrie time cost: %.2lf ns.\n", (1000.0*(tv2.tv_sec*1000000+tv2.tv_usec-tv1.tv_sec*1000000-tv1.tv_usec))/IP_ENTRY_NUM);
 
     free(ip_db);

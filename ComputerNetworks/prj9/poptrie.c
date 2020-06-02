@@ -167,8 +167,6 @@ void verify_ptrie(ip_entry_t *ip_db)
         }
         else if (ret_ip != &(ip_db[index1])) // 不完全一致
         {
-            //printf("input :ip=%x, prefix=%u, port=%u\n", ip_db[index1].ip, ip_db[index1].prefix, ip_db[index1].port);
-            //printf("output:ip=%x, prefix=%u, port=%u\n", ret_ip->ip, ret_ip->prefix, ret_ip->port);
             counter++;
             if (ret_ip->prefix < ip_db[index1].prefix) //debug
             {

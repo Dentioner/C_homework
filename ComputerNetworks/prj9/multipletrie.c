@@ -176,8 +176,6 @@ void verify_mtrie(ip_entry_t *ip_db)
         }
         else if (ret_ip != &(ip_db[index1])) // 不完全一致
         {
-            //printf("input :ip=%x, prefix=%u, port=%u\n", ip_db[index1].ip, ip_db[index1].prefix, ip_db[index1].port);
-            //printf("output:ip=%x, prefix=%u, port=%u\n", ret_ip->ip, ret_ip->prefix, ret_ip->port);
             counter++;
             if (ret_ip->prefix < ip_db[index1].prefix) //debug
             {
@@ -266,5 +264,6 @@ void leaf_pushing(multitrie_node_t * m_node)
         // else // 子节点是叶子节点
     }
 
+    m_node->val_p = NULL;
     return;
 }
