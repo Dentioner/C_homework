@@ -195,6 +195,12 @@ void verify_ptrie(ip_entry_t* ip_db)
                 printf("output:ip=%x, prefix=%u, port=%u\n", ret_ip->ip, ret_ip->prefix, ret_ip->port);
             }
         }
+
+        if (index1 == 106)
+        {
+            printf("input :ip=%x, prefix=%u, port=%u\n", ip_db[index1].ip, ip_db[index1].prefix, ip_db[index1].port);
+            printf("output:ip=%x, prefix=%u, port=%u\n", ret_ip->ip, ret_ip->prefix, ret_ip->port);
+        }
     }
 
     printf("ptrie total:%d cases are changed.\n", counter);

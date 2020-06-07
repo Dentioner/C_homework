@@ -1,13 +1,6 @@
 ﻿  binary.c
-  main.c
-D:\coding\C_homework\ComputerNetworks\prj9_test_on_vs\prj9\main.c(61,12): warning C4477: “printf”: 格式字符串“%ld”需要类型“long”的参数，但可变参数 3 拥有了类型“u64”
-D:\coding\C_homework\ComputerNetworks\prj9_test_on_vs\prj9\main.c(61,12): message : 请考虑在格式字符串中使用“%lld”
-D:\coding\C_homework\ComputerNetworks\prj9_test_on_vs\prj9\main.c(61,12): message : 请考虑在格式字符串中使用“%I64d”
-D:\coding\C_homework\ComputerNetworks\prj9_test_on_vs\prj9\main.c(75,12): warning C4477: “printf”: 格式字符串“%ld”需要类型“long”的参数，但可变参数 3 拥有了类型“u64”
-D:\coding\C_homework\ComputerNetworks\prj9_test_on_vs\prj9\main.c(75,12): message : 请考虑在格式字符串中使用“%lld”
-D:\coding\C_homework\ComputerNetworks\prj9_test_on_vs\prj9\main.c(75,12): message : 请考虑在格式字符串中使用“%I64d”
   multipletrie.c
-D:\coding\C_homework\ComputerNetworks\prj9_test_on_vs\prj9\multipletrie.c(242,17): warning C4101: “index2”: 未引用的局部变量
+D:\coding\C_homework\ComputerNetworks\prj9_test_on_vs\prj9\multipletrie.c(248,17): warning C4101: “index2”: 未引用的局部变量
   poptrie.c
   正在生成代码...
   prj9.vcxproj -> D:\coding\C_homework\ComputerNetworks\prj9_test_on_vs\prj9\Debug\prj9.exe
