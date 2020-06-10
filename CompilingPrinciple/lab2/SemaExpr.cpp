@@ -6249,6 +6249,156 @@ Sema::CheckTransparentUnionArgumentConstraints(QualType ArgType,
 Sema::AssignConvertType
 Sema::CheckSingleAssignmentConstraints(QualType LHSType, ExprResult &RHS,
                                        bool Diagnose) {
+  
+  if (getLangOpts().CPlusPlus) {
+    if (!LHSType->isRecordType() && !LHSType->isAtomicType()) {
+      // C++ 5.17p3: If the left operand is not of class type, the
+      // expression is implicitly converted (C++ 4) to the
+      // cv-unqualified type of the left operand.
+      ExprResult Res;
+      if (Diagnose) {
+        Res = PerformImplicitConversion(RHS.get(), LHSType.getUnqualifiedType(),
+                                        AA_Assigning);
+      } else {
+        ImplicitConversionSequence ICS =
+            TryImplicitConversion(RHS.get(), LHSType.getUnqualifiedType(),
+                                  /*SuppressUserConversions=*/false,
+                                  /*AllowExplicit=*/false,
+                                  /*InOverloadResolution=*/false,
+                                  /*CStyle=*/false,
+                                  /*AllowObjCWritebackConversion=*/false);
+        if (ICS.isFailure())
+          return Incompatible;
+        Res = PerformImplicitConversion(RHS.get(), LHSType.getUnqualifiedType(),
+                                        ICS, AA_Assigning);
+      }
+      if (Res.isInvalid())
+        return Incompatible;
+      Sema::AssignConvertType result = Compatible;
+      if (getLangOpts().ObjCAutoRefCount &&
+          !CheckObjCARCUnavailableWeakConversion(LHSType,
+                                                 RHS.get()->getType()))
+        result = IncompatibleObjCWeakRef;
+      RHS = Res;
+      return result;
+    }
+
+    // FIXME: Currently, we fall through and treat C++ classes like C
+    // structures.
+    // FIXME: We also fall through for atomics; not sure what should
+    // happen there, though.
+  }
+
+  // C99 6.5.16.1p1: the left operand is a pointer and the right is
+  // a null pointer constant.
+  if ((LHSType->isPointerType() ||
+       LHSType->isObjCObjectPointerType() ||
+       LHSType->isBlockPointerType())
+      && RHS.get()->isNullPointerConstant(Context,
+                                          Expr::NPC_ValueDependentIsNull)) {
+    RHS = ImpCastExprToType(RHS.take(), LHSType, CK_NullToPointer);
+    return Compatible;
+  }
+
+  // This check seems unnatural, however it is necessary to ensure the proper
+  // conversion of functions/arrays. If the conversion were done for all
+  // DeclExpr's (created by ActOnIdExpression), it would mess up the unary
+  // expressions that suppress this implicit conversion (&, sizeof).
+  //
+  // Suppress this for references: C++ 8.5.3p5.
+  if (!LHSType->isReferenceType()) {
+    RHS = DefaultFunctionArrayLvalueConversion(RHS.take());
+    if (RHS.isInvalid())
+      return Incompatible;
+  }
+
+  CastKind Kind = CK_Invalid;
+  Sema::AssignConvertType result =
+    CheckAssignmentConstraints(LHSType, RHS, Kind);
+
+  // C99 6.5.16.1p2: The value of the right operand is converted to the
+  // type of the assignment expression.
+  // CheckAssignmentConstraints allows the left-hand side to be a reference,
+  // so that we can use references in built-in functions even in C.
+  // The getNonReferenceType() call makes sure that the resulting expression
+  // does not have reference type.
+  if (result != Incompatible && RHS.get()->getType() != LHSType)
+    RHS = ImpCastExprToType(RHS.take(),
+                            LHSType.getNonLValueExprType(Context), Kind);
+  return result;
+}
+
+Sema::AssignConvertType
+Sema::CheckSingleAssignmentConstraints_lab2_version(QualType LHSType, ExprResult &RHS, SourceLocation Loc, bool Diagnose)
+{
+  // lab2
+  if(elementWiseON) // check #pragma elementWise is written
+  {
+    //Expr *LHS_expr = LHS.get();
+    Expr *RHS_expr = RHS.get();
+    //Type *LHS_type = LHS.get()->getType().getTypePtr();
+    const Type *LHS_type = LHSType.getTypePtr();
+    
+    const Type *RHS_type = RHS.get()->getType().getTypePtr();
+
+    if(ConstantArrayType::classof(LHS_type) && ConstantArrayType::classof(RHS_type))
+    // check LHS & RHS both are ConstantArrayType
+    {
+      // cast down forcely
+      const ConstantArrayType *LHS_arr = dyn_cast<ConstantArrayType>(LHS_type);
+      const ConstantArrayType *RHS_arr = dyn_cast<ConstantArrayType>(RHS_type);
+      
+      // get element type
+      QualType LHS_elemType = LHS_arr->getElementType().getUnqualifiedType();
+      QualType RHS_elemType = RHS_arr->getElementType().getUnqualifiedType();
+      
+      if((LHS_elemType == RHS_elemType) && (LHS_elemType->isIntType_lab2()))
+      {
+        // get the size of arr
+        llvm::APInt LHS_elem_num = LHS_arr->getSize();
+        llvm::APInt RHS_elem_num = RHS_arr->getSize();
+        
+        if(LHS_elem_num == RHS_elem_num)
+        { 
+          //return LHS.get()->getType();
+          return Compatible;
+        }
+        else 
+        {
+          // if elem num is not equal
+          Diag(Loc, diag::err_elementwise_arr_size_not_equal);
+          //return QualType();
+          return Incompatible;
+        }
+      } 
+      // end if(LHS_elemType == RHS_elemType) && (LHS_elementType->isIntType)
+      else 
+      {
+        // if elemType is not equal or is not Int
+        if(!LHS_elemType->isIntType_lab2())
+        {
+          Diag(Loc, diag::err_elementwise_left_arr_elemtype_not_int);
+          //return QualType();
+          return Incompatible;
+        }
+
+        if(!RHS_elemType->isIntType_lab2())
+        {
+          Diag(Loc, diag::err_elementwise_right_arr_elemtype_not_int);
+          //return QualType();
+          return Incompatible;
+        }
+
+      }
+
+    } 
+    // end if(ConstantArrayType ...)
+    // do not have else branch to Diag(err_xxx)
+    // because under #pragma elementWise we can still use normal "add"
+
+  } // end if elementWise
+
+
   if (getLangOpts().CPlusPlus) {
     if (!LHSType->isRecordType() && !LHSType->isAtomicType()) {
       // C++ 5.17p3: If the left operand is not of class type, the
@@ -6476,15 +6626,15 @@ QualType Sema::CheckMultiplyDivideOperands(ExprResult &LHS, ExprResult &RHS,
   {
     Expr *LHS_expr = LHS.get();
     Expr *RHS_expr = RHS.get();
-    Type *LHS_type = LHS.get()->getType().getTypePtr();
-    Type *RHS_type = RHS.get()->getType().getTypePtr();
+    const Type *LHS_type = LHS.get()->getType().getTypePtr();
+    const Type *RHS_type = RHS.get()->getType().getTypePtr();
 
     if(ConstantArrayType::classof(LHS_type) && ConstantArrayType::classof(RHS_type))
     // check LHS & RHS both are ConstantArrayType
     {
       // cast down forcely
-      ConstantArrayType *LHS_arr = dyn_cast<ConstantArrayType>(LHS_type);
-      ConstantArrayType *RHS_arr = dyn_cast<ConstantArrayType>(RHS_type);
+      const ConstantArrayType *LHS_arr = dyn_cast<ConstantArrayType>(LHS_type);
+      const ConstantArrayType *RHS_arr = dyn_cast<ConstantArrayType>(RHS_type);
       
       // get element type
       QualType LHS_elemType = LHS_arr->getElementType().getUnqualifiedType();
@@ -6798,15 +6948,15 @@ QualType Sema::CheckAdditionOperands( // C99 6.5.6
   {
     Expr *LHS_expr = LHS.get();
     Expr *RHS_expr = RHS.get();
-    Type *LHS_type = LHS.get()->getType().getTypePtr();
-    Type *RHS_type = RHS.get()->getType().getTypePtr();
+    const Type *LHS_type = LHS.get()->getType().getTypePtr();
+    const Type *RHS_type = RHS.get()->getType().getTypePtr();
 
     if(ConstantArrayType::classof(LHS_type) && ConstantArrayType::classof(RHS_type))
     // check LHS & RHS both are ConstantArrayType
     {
       // cast down forcely
-      ConstantArrayType *LHS_arr = dyn_cast<ConstantArrayType>(LHS_type);
-      ConstantArrayType *RHS_arr = dyn_cast<ConstantArrayType>(RHS_type);
+      const ConstantArrayType *LHS_arr = dyn_cast<ConstantArrayType>(LHS_type);
+      const ConstantArrayType *RHS_arr = dyn_cast<ConstantArrayType>(RHS_type);
       
       // get element type
       QualType LHS_elemType = LHS_arr->getElementType().getUnqualifiedType();
@@ -8086,6 +8236,11 @@ static bool CheckForModifiableLvalue(Expr *E, SourceLocation Loc, Sema &S) {
     break;
   case Expr::MLV_ArrayType:
   case Expr::MLV_ArrayTemporary:
+    if(S.elementWiseON)
+    {
+      // lab2
+      return false;
+    }
     Diag = diag::err_typecheck_array_not_modifiable_lvalue;
     NeedType = true;
     break;
@@ -8173,7 +8328,9 @@ QualType Sema::CheckAssignmentOperands(Expr *LHSExpr, ExprResult &RHS,
     CheckIdentityFieldAssignment(LHSExpr, RHSCheck, Loc, *this);
 
     QualType LHSTy(LHSType);
-    ConvTy = CheckSingleAssignmentConstraints(LHSTy, RHS);
+    //ConvTy = CheckSingleAssignmentConstraints(LHSTy, RHS);
+    ConvTy = CheckSingleAssignmentConstraints_lab2_version(LHSTy, RHS, Loc);
+    
     if (RHS.isInvalid())
       return QualType();
     // Special case of NSObject attributes on c-style pointer types.
