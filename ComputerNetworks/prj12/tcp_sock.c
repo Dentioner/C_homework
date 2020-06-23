@@ -197,7 +197,7 @@ static int tcp_port_in_use(u16 sport)
 	int value = tcp_hash_function(0, 0, sport, 0);
 	struct list_head *list = &tcp_bind_sock_table[value];
 	struct tcp_sock *tsk;
-	list_for_each_entry(tsk, list, hash_list) {
+	list_for_each_entry(tsk, list, bind_hash_list) {
 		if (tsk->sk_sport == sport)
 			return 1;
 	}
@@ -490,27 +490,18 @@ int tcp_sock_read(struct tcp_sock *tsk, char *buf, int len)
 
 
 	int ret = 0;
-
 	pthread_mutex_lock(&(tsk->rcv_buf->lock));
-
 	// printf("debug: in the front of tcp_sock_read.\n");	
-
-
 	while(ring_buffer_empty(tsk->rcv_buf)) // 等待rbuf不为空的时候
 	{
 		pthread_mutex_unlock(&(tsk->rcv_buf->lock));
-
 		// printf("debug: before sleep in tcp_sock_read.\n");	
-
 		sleep_on(tsk->wait_recv);
-
 		if(tsk->state == TCP_CLOSE_WAIT)
 		{
 			return 0;
 		}
-
 		// printf("debug: after  sleep in tcp_sock_read.\n");	
-
 		pthread_mutex_lock(&(tsk->rcv_buf->lock));
 	}
 
@@ -522,11 +513,8 @@ int tcp_sock_read(struct tcp_sock *tsk, char *buf, int len)
 	}
 
 	ret = read_ring_buffer(tsk->rcv_buf, buf, len); // 第一个参数不要加&，tsk的rcv_buf属性就是指针
-
 	tsk->rcv_wnd += ret;
-
 	// printf("debug: in the last of tcp_sock_read.\n");	
-
 	pthread_mutex_unlock(&(tsk->rcv_buf->lock));
 
 	return ret;
@@ -572,8 +560,6 @@ int tcp_sock_write(struct tcp_sock *tsk, char *buf, int len)
 		tcp_send_packet(tsk, packet, pac_len);
 		len_sent += tcp_data_len;
 	}
-
-
 	// printf("debug: in the last of tcp_sock_write.\n");
 
 	return len;
